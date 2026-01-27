@@ -30,8 +30,25 @@
 ```bash
 cd wp-content/plugins/optstack/frontend
 npm install
-npm run dev
+npm run build    # Production build
 ```
+
+### Development Mode (Hot Reload)
+
+For live reloading during frontend development:
+
+1. Add to `wp-config.php`:
+   ```php
+   define('OPTSTACK_DEV_MODE', true);
+   ```
+
+2. Start the dev server:
+   ```bash
+   cd wp-content/plugins/optstack/frontend
+   npm run dev
+   ```
+
+3. Open your WordPress admin page - CSS and component changes update instantly!
 
 ## Quick Start
 
@@ -173,7 +190,11 @@ optstack/
 │   ├── WordPress/      # WP integration
 │   ├── Schema/         # Schema export
 │   └── OptStack.php    # Main facade
-├── frontend/           # React admin UI
+├── frontend/
+│   ├── src/            # React/TypeScript source
+│   ├── dist/           # Built assets
+│   └── vite.config.ts  # Build configuration
+├── examples/           # Usage examples
 ├── tests/              # PHPUnit tests
 └── optstack.php        # Plugin bootstrap
 ```
@@ -188,9 +209,35 @@ composer test
 # Frontend
 cd frontend
 npm install
-npm run dev      # Development server
 npm run build    # Production build
+npm run dev      # Development server (requires OPTSTACK_DEV_MODE)
 ```
+
+### Frontend Dev Mode
+
+OptStack supports hot module replacement (HMR) for rapid frontend development.
+
+**Setup:**
+
+1. Enable dev mode in `wp-config.php`:
+   ```php
+   define('OPTSTACK_DEV_MODE', true);
+   // Optional: custom port
+   // define('OPTSTACK_DEV_SERVER', 'http://localhost:3000');
+   ```
+
+2. Start Vite dev server:
+   ```bash
+   cd frontend && npm run dev
+   ```
+
+3. Refresh your WordPress admin page - changes will update live!
+
+**How it works:**
+- In dev mode, WordPress loads assets from Vite's dev server (`localhost:5173`)
+- CSS changes apply instantly via HMR
+- JS/TSX changes trigger a page refresh
+- In production mode (default), built assets from `frontend/dist/` are used
 
 ## License
 

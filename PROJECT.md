@@ -67,7 +67,7 @@ optstack/
 ├── frontend/               # 5️⃣ React Admin UI
 │   ├── package.json
 │   ├── tsconfig.json
-│   ├── tailwind.config.js
+│   ├── vite.config.ts
 │   ├── src/
 │   │   ├── components/
 │   │   │   ├── fields/
@@ -79,9 +79,14 @@ optstack/
 │   │   ├── hooks/
 │   │   ├── schema/
 │   │   │   └── types.ts
+│   │   ├── styles/
+│   │   │   └── main.css
+│   │   ├── wp-externals/   # Dev mode shims for WP globals
+│   │   │   ├── react.ts
+│   │   │   └── react-dom-client.ts
 │   │   │
-│   │   └── app.tsx
-│   └── build/
+│   │   └── main.tsx
+│   └── dist/               # Built assets
 │
 ├── tests/                  # 6️⃣ Tests
 │   ├── Core/
@@ -477,11 +482,69 @@ Backend handles:
 * **React** – UI rendering
 * **TypeScript** – schema safety
 * **TailwindCSS** – fast, consistent styling
+* **Vite** – build tooling with HMR support
 * **Zod** *(optional)* – runtime validation
 
 ---
 
-## 11.8 UI Design Rules
+## 11.8 Development Workflow
+
+OptStack supports two frontend development modes:
+
+### Production Mode (Default)
+
+```bash
+cd frontend
+npm run build
+```
+
+Assets are built to `frontend/dist/` and loaded by WordPress.
+
+### Development Mode (Hot Reload)
+
+For live reloading during development:
+
+1. Enable in `wp-config.php`:
+   ```php
+   define('OPTSTACK_DEV_MODE', true);
+   ```
+
+2. Start Vite dev server:
+   ```bash
+   cd frontend
+   npm run dev
+   ```
+
+3. WordPress loads assets from `http://localhost:5173`
+
+**How it works:**
+
+```text
+┌─────────────────────┐     ┌─────────────────────┐
+│   WordPress Admin   │ ←── │   Vite Dev Server   │
+│                     │     │   localhost:5173    │
+│  OPTSTACK_DEV_MODE  │     │                     │
+│       = true        │     │  - HMR for CSS      │
+└─────────────────────┘     │  - Page reload JS   │
+                            └─────────────────────┘
+```
+
+**Configuration:**
+
+| Constant | Default | Description |
+|----------|---------|-------------|
+| `OPTSTACK_DEV_MODE` | `false` | Enable dev server loading |
+| `OPTSTACK_DEV_SERVER` | `http://localhost:5173` | Vite server URL |
+
+**Notes:**
+- React is provided by WordPress globally (not bundled)
+- Fast Refresh is disabled (uses WordPress's React)
+- CSS changes apply instantly via HMR
+- JS/TSX changes trigger full page reload
+
+---
+
+## 11.9 UI Design Rules
 
 * No hard-coded field logic
 * No WordPress-specific UI assumptions
