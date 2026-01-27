@@ -1,0 +1,41 @@
+{
+    "name": "optstack/optstack",
+    "description": "WordPress Data Stack Framework - A PHP framework for defining, storing, and managing structured data in WordPress",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "OptStack Team"
+        }
+    ],
+    "require": {
+        "php": ">=8.1"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^10.0",
+        "phpstan/phpstan": "^1.10",
+        "squizlabs/php_codesniffer": "^3.7"
+    },
+    "autoload": {
+        "psr-4": {
+            "OptStack\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "OptStack\\Tests\\": "tests/"
+        }
+    },
+    "scripts": {
+        "test": "phpunit",
+        "test:unit": "phpunit --testsuite=unit",
+        "phpcs": "phpcs --standard=PSR12 src/",
+        "phpstan": "phpstan analyse src/"
+    },
+    "config": {
+        "sort-packages": true,
+        "optimize-autoloader": true
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true
+}

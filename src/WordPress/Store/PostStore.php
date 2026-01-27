@@ -1,0 +1,201 @@
+<?php
+
+declare(strict_types=1);
+
+namespace OptStack\WordPress\Store;
+
+use OptStack\Core\Contract\StoreInterface;
+
+/**
+ * Post Store
+ *
+ * Store adapter for WordPress post meta (wp_postmeta table).
+ * Data is stored as a single serialized array under the stack ID as meta key.
+ */
+class PostStore implements StoreInterface
+{
+    /**
+     * The post ID.
+     */
+    protected int $postId;
+
+    /**
+     * The meta key (stack ID).
+     */
+    protected string $metaKey;
+
+    /**
+     * Cached data.
+     *
+     * @var array<string, mixed>|null
+     */
+    protected ?array $cache = null;
+
+    /**
+     * Create a new PostStore instance.
+     */
+    public function __construct(int $postId, string $metaKey)
+    {
+        $this->postId = $postId;
+        $this->metaKey = $metaKey;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function get(string $key, mixed $default = null): mixed
+    {
+        $data = $this->loadData();
+
+        return $data[$key] ?? $default;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function set(string $key, mixed $value): bool
+    {
+        $data = $this->loadData();
+        $data[$key] = $value;
+
+        return $this->saveData($data);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function delete(string $key): bool
+    {
+        $data = $this->loadData();
+
+        if (!isset($data[$key])) {
+            return false;
+        }
+
+        unset($data[$key]);
+
+        return $this->saveData($data);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function all(): array
+    {
+        return $this->loadData();
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function has(string $key): bool
+    {
+        $data = $this->loadData();
+
+        return isset($data[$key]);
+    }
+
+    /**
+     * Get the post ID.
+     */
+    public function getPostId(): int
+    {
+        return $this->postId;
+    }
+
+    /**
+     * Set the post ID.
+     */
+    public function setPostId(int $postId): self
+    {
+        if ($this->postId !== $postId) {
+            $this->postId = $postId;
+            $this->cache = null;
+        }
+
+        return $this;
+    }
+
+    /**
+     * Get the meta key.
+     */
+    public function getMetaKey(): string
+    {
+        return $this->metaKey;
+    }
+
+    /**
+     * Set multiple values at once.
+     *
+     * @param array<string, mixed> $values
+     */
+    public function setMany(array $values): bool
+    {
+        $data = $this->loadData();
+        $data = array_merge($data, $values);
+
+        return $this->saveData($data);
+    }
+
+    /**
+     * Replace all data.
+     *
+     * @param array<string, mixed> $data
+     */
+    public function replace(array $data): bool
+    {
+        return $this->saveData($data);
+    }
+
+    /**
+     * Delete the entire meta key.
+     */
+    public function deleteAll(): bool
+    {
+        $this->cache = null;
+
+        return delete_post_meta($this->postId, $this->metaKey);
+    }
+
+    /**
+     * Clear the cache.
+     */
+    public function clearCache(): void
+    {
+        $this->cache = null;
+    }
+
+    /**
+     * Load data from WordPress post meta.
+     *
+     * @return array<string, mixed>
+     */
+    protected function loadData(): array
+    {
+        if ($this->cache !== null) {
+            return $this->cache;
+        }
+
+        $data = get_post_meta($this->postId, $this->metaKey, true);
+
+        if (!is_array($data)) {
+            $data = [];
+        }
+
+        $this->cache = $data;
+
+        return $data;
+    }
+
+    /**
+     * Save data to WordPress post meta.
+     *
+     * @param array<string, mixed> $data
+     */
+    protected function saveData(array $data): bool
+    {
+        $this->cache = $data;
+
+        return (bool) update_post_meta($this->postId, $this->metaKey, $data);
+    }
+}
