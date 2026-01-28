@@ -9,15 +9,32 @@ export const {
   useMemo,
   useRef,
   useContext,
+  useReducer,
+  useLayoutEffect,
+  useId,
+  useSyncExternalStore,
+  useInsertionEffect,
+  useDebugValue,
+  useDeferredValue,
+  useTransition,
+  useImperativeHandle,
   createContext,
   createElement,
+  createRef,
+  forwardRef,
   Fragment,
   StrictMode,
   Suspense,
   lazy,
   memo,
-  forwardRef,
   Children,
   cloneElement,
   isValidElement,
+  Component,
+  PureComponent,
+  version,
 } = React
+
+// Additional exports for compatibility
+export const startTransition = React.startTransition
+export const act = React.act

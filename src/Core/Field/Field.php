@@ -71,6 +71,33 @@ class Field
     protected array $attributes = [];
 
     /**
+     * Whether the field is searchable/indexed.
+     * When true, the field value is stored as a separate meta key for efficient querying.
+     */
+    protected bool $searchable = false;
+
+    /**
+     * Allowed searchable field types.
+     * Only scalar types can be searchable.
+     */
+    protected const SEARCHABLE_TYPES = [
+        'text',
+        'textarea',
+        'number',
+        'select',
+        'radio',
+        'checkbox',
+        'toggle',
+        'boolean',
+        'email',
+        'url',
+        'color',
+        'date',
+        'datetime',
+        'time',
+    ];
+
+    /**
      * Create a new Field instance.
      *
      * @param string $key Field key
@@ -87,6 +114,11 @@ class Field
         $this->label = $config['label'] ?? $this->generateLabel($key);
         $this->options = $config['options'] ?? [];
         $this->attributes = $config['attributes'] ?? [];
+        
+        // Set searchable flag (with type validation)
+        if (isset($config['searchable']) && $config['searchable'] === true) {
+            $this->setSearchable(true);
+        }
 
         if (isset($config['conditions'])) {
             $this->setConditions($config['conditions']);
@@ -188,6 +220,45 @@ class Field
     }
 
     /**
+     * Check if field is searchable.
+     */
+    public function isSearchable(): bool
+    {
+        return $this->searchable;
+    }
+
+    /**
+     * Set searchable flag.
+     * Validates that the field type is allowed to be searchable.
+     *
+     * @throws \InvalidArgumentException If field type is not searchable
+     */
+    public function setSearchable(bool $searchable): self
+    {
+        if ($searchable && !in_array($this->type, self::SEARCHABLE_TYPES, true)) {
+            throw new \InvalidArgumentException(
+                sprintf(
+                    'Field type "%s" cannot be searchable. Allowed types: %s',
+                    $this->type,
+                    implode(', ', self::SEARCHABLE_TYPES)
+                )
+            );
+        }
+
+        $this->searchable = $searchable;
+
+        return $this;
+    }
+
+    /**
+     * Check if a field type can be searchable.
+     */
+    public static function isTypeSearchable(string $type): bool
+    {
+        return in_array($type, self::SEARCHABLE_TYPES, true);
+    }
+
+    /**
      * Set conditions.
      *
      * @param array<array<string, mixed>|Condition> $conditions
@@ -241,6 +312,10 @@ class Field
                 fn(Condition $c) => $c->toArray(),
                 $this->conditions
             );
+        }
+
+        if ($this->searchable) {
+            $data['searchable'] = true;
         }
 
         return $data;

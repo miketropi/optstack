@@ -1,45 +1,132 @@
-import { useState, useRef, useEffect, useCallback } from 'react'
+import { useMemo } from 'react'
+import Select, { StylesConfig, SingleValue } from 'react-select'
 import type { FieldRendererProps } from '../../schema/types'
 
+interface SelectOption {
+  value: string
+  label: string
+}
+
 export function SelectField({ field, value, onChange, disabled, error }: FieldRendererProps) {
-  const [isOpen, setIsOpen] = useState(false)
-  const [search, setSearch] = useState('')
-  const wrapperRef = useRef<HTMLDivElement>(null)
-  const searchInputRef = useRef<HTMLInputElement>(null)
-  
   const selectedValue = value ?? field.default ?? ''
   const placeholder = (field.attributes?.placeholder as string) || 'Select...'
-  const searchable = field.attributes?.searchable === true
-  const options = field.options || []
+  const searchable = field.attributes?.searchable !== false
+  const clearable = field.attributes?.clearable === true
   
-  const selectedOption = options.find(opt => String(opt.value) === String(selectedValue))
+  // Convert field options to react-select format
+  const options: SelectOption[] = useMemo(() => {
+    return (field.options || []).map(opt => ({
+      value: String(opt.value),
+      label: opt.label
+    }))
+  }, [field.options])
   
-  const filteredOptions = searchable && search
-    ? options.filter(opt => opt.label.toLowerCase().includes(search.toLowerCase()))
-    : options
+  // Find selected option
+  const selectedOption = useMemo(() => {
+    return options.find(opt => opt.value === String(selectedValue)) || null
+  }, [options, selectedValue])
 
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (wrapperRef.current && !wrapperRef.current.contains(event.target as Node)) {
-        setIsOpen(false)
-        setSearch('')
+  const handleChange = (newValue: SingleValue<SelectOption>) => {
+    onChange(newValue ? newValue.value : '')
+  }
+
+  // Custom styles to match the design
+  const customStyles: StylesConfig<SelectOption, false> = {
+    control: (base, state) => ({
+      ...base,
+      minHeight: '38px',
+      borderColor: error ? '#f44336' : state.isFocused ? '#2196f3' : '#e0e0e0',
+      borderRadius: '4px',
+      boxShadow: state.isFocused ? '0 0 0 1px #2196f3' : 'none',
+      '&:hover': {
+        borderColor: state.isFocused ? '#2196f3' : '#bdbdbd'
+      },
+      backgroundColor: disabled ? '#f5f5f5' : '#ffffff',
+      cursor: disabled ? 'not-allowed' : 'pointer'
+    }),
+    valueContainer: (base) => ({
+      ...base,
+      padding: '0 12px'
+    }),
+    placeholder: (base) => ({
+      ...base,
+      color: '#9e9e9e',
+      fontSize: '14px'
+    }),
+    singleValue: (base) => ({
+      ...base,
+      color: '#212121',
+      fontSize: '14px'
+    }),
+    input: (base) => ({
+      ...base,
+      color: '#212121',
+      fontSize: '14px',
+      margin: 0,
+      padding: 0
+    }),
+    indicatorSeparator: () => ({
+      display: 'none'
+    }),
+    dropdownIndicator: (base, state) => ({
+      ...base,
+      color: '#757575',
+      padding: '0 10px',
+      transition: 'transform 150ms ease',
+      transform: state.selectProps.menuIsOpen ? 'rotate(180deg)' : 'rotate(0deg)',
+      '&:hover': {
+        color: '#424242'
       }
-    }
-    document.addEventListener('mousedown', handleClickOutside)
-    return () => document.removeEventListener('mousedown', handleClickOutside)
-  }, [])
-
-  useEffect(() => {
-    if (isOpen && searchable && searchInputRef.current) {
-      searchInputRef.current.focus()
-    }
-  }, [isOpen, searchable])
-
-  const handleSelect = useCallback((optionValue: string | number | boolean) => {
-    onChange(optionValue)
-    setIsOpen(false)
-    setSearch('')
-  }, [onChange])
+    }),
+    clearIndicator: (base) => ({
+      ...base,
+      color: '#9e9e9e',
+      padding: '0 8px',
+      '&:hover': {
+        color: '#f44336'
+      }
+    }),
+    menu: (base) => ({
+      ...base,
+      marginTop: '4px',
+      borderRadius: '4px',
+      boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+      border: '1px solid #e0e0e0',
+      overflow: 'hidden',
+      zIndex: 100
+    }),
+    menuList: (base) => ({
+      ...base,
+      padding: '4px'
+    }),
+    option: (base, state) => ({
+      ...base,
+      backgroundColor: state.isSelected 
+        ? '#e3f2fd' 
+        : state.isFocused 
+          ? '#f5f5f5' 
+          : 'transparent',
+      color: state.isSelected ? '#2196f3' : '#616161',
+      fontSize: '14px',
+      padding: '8px 12px',
+      borderRadius: '4px',
+      cursor: 'pointer',
+      '&:active': {
+        backgroundColor: '#e3f2fd'
+      }
+    }),
+    noOptionsMessage: (base) => ({
+      ...base,
+      color: '#9e9e9e',
+      fontSize: '14px',
+      padding: '24px'
+    }),
+    loadingMessage: (base) => ({
+      ...base,
+      color: '#9e9e9e',
+      fontSize: '14px'
+    })
+  }
 
   return (
     <div className={`os-field os-field-select ${error ? 'os-field-error' : ''}`}>
@@ -49,66 +136,20 @@ export function SelectField({ field, value, onChange, disabled, error }: FieldRe
       </label>
       
       <div className="os-field-body">
-        <div ref={wrapperRef} className={`os-select-wrapper ${isOpen ? 'os-open' : ''}`}>
-          <button
-            type="button"
-            id={field.key}
-            onClick={() => !disabled && setIsOpen(!isOpen)}
-            disabled={disabled}
-            className={`os-select-trigger ${!selectedOption ? 'os-placeholder' : ''}`}
-            aria-haspopup="listbox"
-            aria-expanded={isOpen}
-          >
-            <span className="os-select-value">
-              {selectedOption ? selectedOption.label : placeholder}
-            </span>
-            <svg className={`os-select-arrow ${isOpen ? 'os-rotated' : ''}`} viewBox="0 0 20 20" fill="currentColor">
-              <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
-            </svg>
-          </button>
-          
-          {isOpen && (
-            <div className="os-select-dropdown">
-              {searchable && (
-                <div className="os-select-search">
-                  <svg className="os-search-icon" viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clipRule="evenodd" />
-                  </svg>
-                  <input
-                    ref={searchInputRef}
-                    type="text"
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                    placeholder="Search..."
-                    className="os-select-search-input"
-                  />
-                </div>
-              )}
-              
-              <ul className="os-select-options" role="listbox">
-                {filteredOptions.length === 0 ? (
-                  <li className="os-select-empty">No options</li>
-                ) : (
-                  filteredOptions.map((option) => (
-                    <li
-                      key={String(option.value)}
-                      role="option"
-                      aria-selected={String(option.value) === String(selectedValue)}
-                      className={`os-select-option ${String(option.value) === String(selectedValue) ? 'os-selected' : ''}`}
-                      onClick={() => handleSelect(option.value)}
-                    >
-                      <span>{option.label}</span>
-                      {String(option.value) === String(selectedValue) && (
-                        <svg className="os-check-icon" viewBox="0 0 20 20" fill="currentColor">
-                          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                        </svg>
-                      )}
-                    </li>
-                  ))
-                )}
-              </ul>
-            </div>
-          )}
+        <div className="os-select-wrapper">
+          <Select<SelectOption, false>
+            inputId={field.key}
+            value={selectedOption}
+            onChange={handleChange}
+            options={options}
+            placeholder={placeholder}
+            isDisabled={disabled}
+            isSearchable={searchable}
+            isClearable={clearable}
+            styles={customStyles}
+            noOptionsMessage={() => 'No options'}
+            classNamePrefix="os-react-select"
+          />
         </div>
 
         {field.description && <p className="os-description">{field.description}</p>}

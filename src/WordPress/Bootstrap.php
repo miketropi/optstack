@@ -10,6 +10,7 @@ use OptStack\WordPress\Store\OptionsStore;
 use OptStack\WordPress\Store\PostStore;
 use OptStack\WordPress\Store\TermStore;
 use OptStack\WordPress\Store\UserStore;
+use OptStack\WordPress\Index\IndexedMetaManager;
 
 /**
  * WordPress Bootstrap
@@ -35,10 +36,16 @@ class Bootstrap
     private string $restNamespace = 'optstack/v1';
 
     /**
+     * Indexed meta manager for searchable fields.
+     */
+    private IndexedMetaManager $indexedMetaManager;
+
+    /**
      * Private constructor for singleton.
      */
     private function __construct()
     {
+        $this->indexedMetaManager = new IndexedMetaManager();
     }
 
     /**
@@ -51,6 +58,14 @@ class Bootstrap
         }
 
         return self::$instance;
+    }
+
+    /**
+     * Get the indexed meta manager.
+     */
+    public function getIndexedMetaManager(): IndexedMetaManager
+    {
+        return $this->indexedMetaManager;
     }
 
     /**
@@ -324,6 +339,21 @@ class Bootstrap
 
         if (!$success) {
             return new \WP_Error('save_failed', 'Failed to save data', ['status' => 500]);
+        }
+
+        // Sync indexed meta for searchable fields
+        $objectId = $request->get_param('object_id');
+        if ($objectId !== null) {
+            $this->indexedMetaManager->syncIndexedMeta($stack, $data, (int) $objectId);
+            
+            /**
+             * Fires after indexed meta has been synced for a stack.
+             *
+             * @param Stack $stack The stack that was saved
+             * @param array $data The saved data
+             * @param int $objectId The object ID (post/term/user)
+             */
+            do_action('optstack_indexed_meta_synced', $stack, $data, (int) $objectId);
         }
 
         return new \WP_REST_Response([

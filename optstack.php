@@ -137,3 +137,8 @@ function optstack(): string
 
 // Load example usage (for testing - remove in production).
 require_once OPTSTACK_DIR . 'examples/basic-usage.php';
+
+// Debug listener for searchable fields (remove in production)
+add_action('optstack_indexed_meta_debug', function($debugInfo) {
+    error_log('OptStack Indexed Meta Debug: ' . print_r($debugInfo, true));
+});

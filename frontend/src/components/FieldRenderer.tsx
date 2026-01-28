@@ -12,6 +12,7 @@ import { RangeField } from './fields/RangeField'
 import { MediaField } from './fields/MediaField'
 import { WysiwygField } from './fields/WysiwygField'
 import { CodeField } from './fields/CodeField'
+import { TypographyField } from './fields/TypographyField'
 
 /**
  * Map of field types to components.
@@ -65,6 +66,9 @@ const fieldComponents: Record<string, React.ComponentType<FieldRendererProps>> =
   // Code types
   code: CodeField,
   'code-editor': CodeField,
+  
+  // Composite types
+  typography: TypographyField,
 }
 
 interface Props {

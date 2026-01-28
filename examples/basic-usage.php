@@ -139,6 +139,33 @@ add_action('optstack_init', function () {
                     'default' => '© {year} Your Company. All rights reserved.',
                     'description' => 'Use {year} for dynamic year.',
                 ]);
+
+                // Group: Social Links
+                $tab->group('social_links', function ($group) {
+                    $group->field('twitter', [
+                        'type' => 'url',
+                        'label' => 'Twitter/X',
+                        'attributes' => ['placeholder' => 'https://x.com/...'],
+                    ]);
+
+                    $group->field('facebook', [
+                        'type' => 'url',
+                        'label' => 'Facebook',
+                        'attributes' => ['placeholder' => 'https://facebook.com/...'],
+                    ]);
+
+                    $group->field('instagram', [
+                        'type' => 'url',
+                        'label' => 'Instagram',
+                        'attributes' => ['placeholder' => 'https://instagram.com/...'],
+                    ]);
+
+                    $group->field('linkedin', [
+                        'type' => 'url',
+                        'label' => 'LinkedIn',
+                        'attributes' => ['placeholder' => 'https://linkedin.com/...'],
+                    ]);
+                }, ['label' => 'Social Links', 'description' => 'Connect your social media profiles.']);
             });
 
             // -----------------------------------------------------------------
@@ -154,6 +181,9 @@ add_action('optstack_init', function () {
                     'label' => 'Primary Color',
                     'default' => '#2271b1',
                     'description' => 'Main brand color for buttons, links, and accents.',
+                    'attributes' => [
+                        'alpha' => true,
+                    ]
                 ]);
 
                 $tab->field('secondary_color', [
@@ -193,56 +223,97 @@ add_action('optstack_init', function () {
             $stack->tab('typography', function ($tab) {
                 $tab->label('Typography')
                     // ->icon('dashicons-editor-textcolor')
-                    ->priority(30);
+                    ->priority(30)
+                    ->description('Customize fonts and text styles for your theme.');
 
-                $tab->field('heading_font', [
-                    'type' => 'select',
-                    'label' => 'Heading Font',
-                    'default' => 'system',
-                    'options' => [
-                        ['value' => 'system', 'label' => 'System Default'],
-                        ['value' => 'inter', 'label' => 'Inter'],
-                        ['value' => 'roboto', 'label' => 'Roboto'],
-                        ['value' => 'open-sans', 'label' => 'Open Sans'],
-                        ['value' => 'playfair', 'label' => 'Playfair Display'],
-                        ['value' => 'montserrat', 'label' => 'Montserrat'],
+                // Typography field with full controls (includes Google Fonts)
+                $tab->field('heading_typography', [
+                    'type' => 'typography',
+                    'label' => 'Heading Typography',
+                    'description' => 'Typography settings for headings (H1-H6).',
+                    'default' => [
+                        'fontFamily' => '"Montserrat", sans-serif',
+                        'fontSize' => 32,
+                        'fontSizeUnit' => 'px',
+                        'fontWeight' => '700',
+                        'fontStyle' => 'normal',
+                        'lineHeight' => 1.3,
+                        'lineHeightUnit' => '',
+                        'letterSpacing' => -0.5,
+                        'letterSpacingUnit' => 'px',
+                        'textTransform' => 'none',
+                        'textDecoration' => 'none',
+                        'color' => '#111827',
                     ],
                 ]);
 
-                $tab->field('body_font', [
-                    'type' => 'select',
-                    'label' => 'Body Font',
-                    'default' => 'system',
-                    'options' => [
-                        ['value' => 'system', 'label' => 'System Default'],
-                        ['value' => 'inter', 'label' => 'Inter'],
-                        ['value' => 'roboto', 'label' => 'Roboto'],
-                        ['value' => 'open-sans', 'label' => 'Open Sans'],
-                        ['value' => 'lato', 'label' => 'Lato'],
-                        ['value' => 'source-sans', 'label' => 'Source Sans Pro'],
+                $tab->field('body_typography', [
+                    'type' => 'typography',
+                    'label' => 'Body Typography',
+                    'description' => 'Typography settings for body text and paragraphs.',
+                    'default' => [
+                        'fontFamily' => '"Inter", sans-serif',
+                        'fontSize' => 16,
+                        'fontSizeUnit' => 'px',
+                        'fontWeight' => '400',
+                        'fontStyle' => 'normal',
+                        'lineHeight' => 1.6,
+                        'lineHeightUnit' => '',
+                        'letterSpacing' => 0,
+                        'letterSpacingUnit' => 'px',
+                        'textTransform' => 'none',
+                        'textDecoration' => 'none',
+                        'color' => '#374151',
                     ],
                 ]);
 
-                $tab->field('base_font_size', [
-                    'type' => 'range',
-                    'label' => 'Base Font Size',
-                    'default' => 16,
+                // Typography field with system fonts only (no Google Fonts)
+                $tab->field('button_typography', [
+                    'type' => 'typography',
+                    'label' => 'Button Typography',
+                    'description' => 'Typography settings for buttons.',
+                    'default' => [
+                        'fontFamily' => 'inherit',
+                        'fontSize' => 14,
+                        'fontSizeUnit' => 'px',
+                        'fontWeight' => '600',
+                        'fontStyle' => 'normal',
+                        'lineHeight' => 1.5,
+                        'lineHeightUnit' => '',
+                        'letterSpacing' => 0.5,
+                        'letterSpacingUnit' => 'px',
+                        'textTransform' => 'uppercase',
+                        'textDecoration' => 'none',
+                        'color' => '#FFFFFF',
+                    ],
                     'attributes' => [
-                        'min' => 14,
-                        'max' => 20,
-                        'step' => 1,
-                        'unit' => 'px',
+                        'disableGoogleFonts' => true, // Only show system fonts
                     ],
                 ]);
 
-                $tab->field('line_height', [
-                    'type' => 'range',
-                    'label' => 'Line Height',
-                    'default' => 1.6,
+                // Typography field with custom font list
+                $tab->field('nav_typography', [
+                    'type' => 'typography',
+                    'label' => 'Navigation Typography',
+                    'description' => 'Typography for navigation menu items.',
+                    'default' => [
+                        'fontFamily' => '"Poppins", sans-serif',
+                        'fontSize' => 14,
+                        'fontSizeUnit' => 'px',
+                        'fontWeight' => '500',
+                        'textTransform' => 'none',
+                        'color' => '#1F2937',
+                    ],
                     'attributes' => [
-                        'min' => 1.2,
-                        'max' => 2.0,
-                        'step' => 0.1,
+                        // Custom font list - only these fonts will be shown
+                        'fonts' => [
+                            ['value' => 'inherit', 'label' => 'Default (Inherit)', 'category' => 'system'],
+                            ['value' => 'system-ui, sans-serif', 'label' => 'System UI', 'category' => 'system'],
+                            ['value' => 'Inter', 'label' => 'Inter', 'category' => 'google', 'variants' => ['400', '500', '600', '700']],
+                            ['value' => 'Poppins', 'label' => 'Poppins', 'category' => 'google', 'variants' => ['400', '500', '600', '700']],
+                            ['value' => 'Montserrat', 'label' => 'Montserrat', 'category' => 'google', 'variants' => ['400', '500', '600', '700']],
+                            ['value' => 'Roboto', 'label' => 'Roboto', 'category' => 'google', 'variants' => ['400', '500', '700']],
+                        ],
                     ],
                 ]);
             });
@@ -468,8 +539,12 @@ add_action('optstack_init', function () {
                     'type' => 'media',
                     'label' => 'Image',
                     'attributes' => [
+                        // 'allowedTypes' => ['image'],
+                        // 'buttonText' => 'Add Image',
+                        'multiple' => true,      // Enable multi-select
+                        'maxFiles' => 10,        // Optional: limit to 10 images
                         'allowedTypes' => ['image'],
-                        'buttonText' => 'Add Image',
+                        'previewSize' => 'thumbnail',
                     ],
                 ]);
 
@@ -666,6 +741,486 @@ add_action('optstack_init', function () {
             }, ['label' => 'Preferences']);
         })
         ->build();
+
+    // =========================================================================
+    // EXAMPLE 6: Group Layouts Demo
+    // =========================================================================
+    // This example demonstrates different group layout options:
+    // - Inline layout (2-col: label | fields) - default
+    // - Box layout (card style with header)
+    // - Collapsible groups
+    // - Nested groups
+    // =========================================================================
+    OptStack::make('group_layouts_demo')
+        ->forOptions()
+        ->menuParent('optstack')
+        ->label('Group Layouts Demo')
+        ->description('Demonstrates different group layout options')
+        ->define(function ($stack) {
+            // -----------------------------------------------------------------
+            // Tab: Inline Groups (Default 2-Column Layout)
+            // -----------------------------------------------------------------
+            $stack->tab('inline_groups', function ($tab) {
+                $tab->label('Inline Groups')
+                    ->priority(10)
+                    ->description('Groups with 2-column layout: Label | Fields');
+
+                // Inline Group (default) - looks like a field row
+                // Label on left, fields stacked on right
+                $tab->group('contact_info', function ($group) {
+                    $group->field('name', [
+                        'type' => 'text',
+                        'label' => 'Full Name',
+                        'attributes' => ['placeholder' => 'John Doe'],
+                    ]);
+
+                    $group->field('email', [
+                        'type' => 'email',
+                        'label' => 'Email Address',
+                        'attributes' => ['placeholder' => 'john@example.com'],
+                    ]);
+
+                    $group->field('phone', [
+                        'type' => 'text',
+                        'label' => 'Phone Number',
+                        'attributes' => ['placeholder' => '+1 (555) 123-4567'],
+                    ]);
+                }, [
+                    'label' => 'Contact Information',
+                    'description' => 'Basic contact details displayed in 2-column layout.',
+                    // 'layout' => 'inline' // This is the default, no need to specify
+                ]);
+
+                // Another inline group
+                $tab->group('address', function ($group) {
+                    $group->field('street', [
+                        'type' => 'text',
+                        'label' => 'Street Address',
+                    ]);
+
+                    $group->field('city', [
+                        'type' => 'text',
+                        'label' => 'City',
+                    ]);
+
+                    $group->field('state', [
+                        'type' => 'text',
+                        'label' => 'State/Province',
+                    ]);
+
+                    $group->field('zip', [
+                        'type' => 'text',
+                        'label' => 'ZIP/Postal Code',
+                    ]);
+
+                    $group->field('country', [
+                        'type' => 'select',
+                        'label' => 'Country',
+                        'default' => 'US',
+                        'options' => [
+                            ['value' => 'US', 'label' => 'United States'],
+                            ['value' => 'CA', 'label' => 'Canada'],
+                            ['value' => 'UK', 'label' => 'United Kingdom'],
+                            ['value' => 'AU', 'label' => 'Australia'],
+                            ['value' => 'DE', 'label' => 'Germany'],
+                            ['value' => 'FR', 'label' => 'France'],
+                        ],
+                    ]);
+                }, [
+                    'label' => 'Mailing Address',
+                    'description' => 'Physical address for shipping or correspondence.',
+                ]);
+
+                // Inline group with collapsible option
+                $tab->group('billing', function ($group) {
+                    $group->field('card_holder', [
+                        'type' => 'text',
+                        'label' => 'Card Holder Name',
+                    ]);
+
+                    $group->field('card_type', [
+                        'type' => 'select',
+                        'label' => 'Card Type',
+                        'options' => [
+                            ['value' => 'visa', 'label' => 'Visa'],
+                            ['value' => 'mastercard', 'label' => 'MasterCard'],
+                            ['value' => 'amex', 'label' => 'American Express'],
+                        ],
+                    ]);
+
+                    $group->field('notes', [
+                        'type' => 'textarea',
+                        'label' => 'Billing Notes',
+                        'attributes' => ['rows' => 3],
+                    ]);
+                }, [
+                    'label' => 'Billing Information',
+                    'description' => 'Payment and billing details. Click chevron to collapse.',
+                    'collapsible' => true,
+                ]);
+            });
+
+            // -----------------------------------------------------------------
+            // Tab: Box Groups (Card Style Layout)
+            // -----------------------------------------------------------------
+            $stack->tab('box_groups', function ($tab) {
+                $tab->label('Box Groups')
+                    ->priority(20)
+                    ->description('Groups with card-style box layout');
+
+                // Box layout group - card style with header
+                $tab->group('company_info', function ($group) {
+                    $group->field('company_name', [
+                        'type' => 'text',
+                        'label' => 'Company Name',
+                        'attributes' => ['placeholder' => 'Acme Inc.'],
+                    ]);
+
+                    $group->field('company_logo', [
+                        'type' => 'media',
+                        'label' => 'Company Logo',
+                        'attributes' => [
+                            'allowedTypes' => ['image'],
+                            'buttonText' => 'Select Logo',
+                        ],
+                    ]);
+
+                    $group->field('industry', [
+                        'type' => 'select',
+                        'label' => 'Industry',
+                        'options' => [
+                            ['value' => 'tech', 'label' => 'Technology'],
+                            ['value' => 'finance', 'label' => 'Finance'],
+                            ['value' => 'healthcare', 'label' => 'Healthcare'],
+                            ['value' => 'retail', 'label' => 'Retail'],
+                            ['value' => 'other', 'label' => 'Other'],
+                        ],
+                    ]);
+
+                    $group->field('description', [
+                        'type' => 'wysiwyg',
+                        'label' => 'Company Description',
+                        'attributes' => ['rows' => 4, 'simple' => true],
+                    ]);
+                }, [
+                    'label' => 'Company Information',
+                    'description' => 'Basic details about your company.',
+                    'layout' => 'box', // Use box/card style layout
+                ]);
+
+                // Box layout with collapsible
+                $tab->group('advanced_settings', function ($group) {
+                    $group->field('api_key', [
+                        'type' => 'text',
+                        'label' => 'API Key',
+                        'description' => 'Your secret API key for integrations.',
+                    ]);
+
+                    $group->field('webhook_url', [
+                        'type' => 'url',
+                        'label' => 'Webhook URL',
+                        'attributes' => ['placeholder' => 'https://example.com/webhook'],
+                    ]);
+
+                    $group->field('debug_mode', [
+                        'type' => 'toggle',
+                        'label' => 'Debug Mode',
+                        'default' => false,
+                        'description' => 'Enable verbose logging for troubleshooting.',
+                    ]);
+
+                    $group->field('custom_css', [
+                        'type' => 'code',
+                        'label' => 'Custom CSS',
+                        'attributes' => [
+                            'language' => 'text/css',
+                            'rows' => 8,
+                        ],
+                    ]);
+                }, [
+                    'label' => 'Advanced Settings',
+                    'description' => 'Technical configuration options.',
+                    'layout' => 'box',
+                    'collapsible' => true,
+                ]);
+            });
+
+            // -----------------------------------------------------------------
+            // Tab: Nested Groups
+            // -----------------------------------------------------------------
+            $stack->tab('nested_groups', function ($tab) {
+                $tab->label('Nested Groups')
+                    ->priority(30)
+                    ->description('Groups containing other groups');
+
+                // Parent group with nested groups inside
+                $tab->group('organization', function ($group) {
+                    $group->field('org_name', [
+                        'type' => 'text',
+                        'label' => 'Organization Name',
+                    ]);
+
+                    // Nested group: Headquarters
+                    $group->group('headquarters', function ($nested) {
+                        $nested->field('hq_address', [
+                            'type' => 'text',
+                            'label' => 'Address',
+                        ]);
+
+                        $nested->field('hq_city', [
+                            'type' => 'text',
+                            'label' => 'City',
+                        ]);
+
+                        $nested->field('hq_country', [
+                            'type' => 'select',
+                            'label' => 'Country',
+                            'options' => [
+                                ['value' => 'US', 'label' => 'United States'],
+                                ['value' => 'UK', 'label' => 'United Kingdom'],
+                                ['value' => 'DE', 'label' => 'Germany'],
+                            ],
+                        ]);
+                    }, [
+                        'label' => 'Headquarters',
+                        'description' => 'Main office location.',
+                    ]);
+
+                    // Nested group: Primary Contact
+                    $group->group('primary_contact', function ($nested) {
+                        $nested->field('contact_name', [
+                            'type' => 'text',
+                            'label' => 'Contact Name',
+                        ]);
+
+                        $nested->field('contact_email', [
+                            'type' => 'email',
+                            'label' => 'Email',
+                        ]);
+
+                        $nested->field('contact_phone', [
+                            'type' => 'text',
+                            'label' => 'Phone',
+                        ]);
+                    }, [
+                        'label' => 'Primary Contact',
+                        'description' => 'Main point of contact.',
+                    ]);
+                }, [
+                    'label' => 'Organization Details',
+                    'description' => 'Company structure with nested information groups.',
+                    'layout' => 'box',
+                ]);
+            });
+
+            // -----------------------------------------------------------------
+            // Tab: Repeatable Groups
+            // -----------------------------------------------------------------
+            $stack->tab('repeatable_groups', function ($tab) {
+                $tab->label('Repeatable Groups')
+                    ->priority(40)
+                    ->description('Groups that can have multiple entries');
+
+                // Inline repeatable group
+                $tab->group('team_members', function ($group) {
+                    $group->repeatable(0, 10); // Min 0, Max 10 items
+
+                    $group->field('member_name', [
+                        'type' => 'text',
+                        'label' => 'Name',
+                    ]);
+
+                    $group->field('member_role', [
+                        'type' => 'text',
+                        'label' => 'Role/Title',
+                    ]);
+
+                    $group->field('member_email', [
+                        'type' => 'email',
+                        'label' => 'Email',
+                    ]);
+
+                    $group->field('member_photo', [
+                        'type' => 'media',
+                        'label' => 'Photo',
+                        'attributes' => [
+                            'allowedTypes' => ['image'],
+                            'buttonText' => 'Select Photo',
+                        ],
+                    ]);
+                }, [
+                    'label' => 'Team Members',
+                    'description' => 'Add team members (up to 10). Displays in inline layout.',
+                    // 'layout' => 'inline' // default
+                ]);
+
+                // Box layout repeatable group
+                $tab->group('locations', function ($group) {
+                    $group->repeatable(1, 5); // Min 1, Max 5 items
+
+                    $group->field('location_name', [
+                        'type' => 'text',
+                        'label' => 'Location Name',
+                        'attributes' => ['placeholder' => 'e.g., Main Office'],
+                    ]);
+
+                    $group->field('location_address', [
+                        'type' => 'textarea',
+                        'label' => 'Address',
+                        'attributes' => ['rows' => 2],
+                    ]);
+
+                    $group->field('location_phone', [
+                        'type' => 'text',
+                        'label' => 'Phone',
+                    ]);
+
+                    $group->field('location_hours', [
+                        'type' => 'text',
+                        'label' => 'Business Hours',
+                        'attributes' => ['placeholder' => 'Mon-Fri 9am-5pm'],
+                    ]);
+
+                    $group->field('location_map', [
+                        'type' => 'url',
+                        'label' => 'Google Maps URL',
+                    ]);
+                }, [
+                    'label' => 'Office Locations',
+                    'description' => 'Add office locations (1-5 required). Uses box layout.',
+                    'layout' => 'box',
+                    'collapsible' => true,
+                ]);
+            });
+        })
+        ->build();
+
+    // =========================================================================
+    // EXAMPLE 7: Searchable Fields Demo
+    // =========================================================================
+    // This example demonstrates searchable/indexed fields.
+    // Searchable fields are stored as separate meta keys for efficient WP_Query.
+    //
+    // Meta key format: _optstack_idx_{context}_{field_path}
+    // Example: _optstack_idx_post_price, _optstack_idx_post_seo_title
+    // =========================================================================
+    $__stack = OptStack::make('searchable_demo')
+        ->forPostType('post') // Works with any post type
+        ->label('Searchable Fields Demo')
+        ->description('Demonstrates searchable/indexed fields for efficient querying')
+        ->define(function ($stack) {
+            // Simple searchable field (stored as separate meta)
+            $stack->field('price', [
+                'type' => 'number',
+                'label' => 'Price',
+                'description' => 'Product price (searchable - can be queried with WP_Query)',
+                'searchable' => true, // Enable indexing
+                'attributes' => ['min' => 0, 'step' => 0.01],
+            ]);
+
+            $stack->field('sku', [
+                'type' => 'text',
+                'label' => 'SKU',
+                'description' => 'Stock keeping unit (searchable)',
+                'searchable' => true,
+            ]);
+
+            $stack->field('status', [
+                'type' => 'select',
+                'label' => 'Status',
+                'description' => 'Product status (searchable)',
+                'searchable' => true,
+                'default' => 'draft',
+                'options' => [
+                    ['value' => 'draft', 'label' => 'Draft'],
+                    ['value' => 'active', 'label' => 'Active'],
+                    ['value' => 'archived', 'label' => 'Archived'],
+                ],
+            ]);
+
+            $stack->field('featured', [
+                'type' => 'toggle',
+                'label' => 'Featured',
+                'description' => 'Mark as featured (searchable)',
+                'searchable' => true,
+                'default' => false,
+            ]);
+
+            // Searchable fields inside groups
+            $stack->group('seo', function ($group) {
+                $group->field('title', [
+                    'type' => 'text',
+                    'label' => 'SEO Title',
+                    'description' => 'Searchable field inside a group',
+                    'searchable' => true, // Indexed as: _optstack_idx_post_seo_title
+                ]);
+
+                $group->field('keywords', [
+                    'type' => 'text',
+                    'label' => 'Keywords',
+                    'description' => 'Searchable keywords',
+                    'searchable' => true, // Indexed as: _optstack_idx_post_seo_keywords
+                ]);
+
+                // Non-searchable field in the same group
+                $group->field('description', [
+                    'type' => 'textarea',
+                    'label' => 'Meta Description',
+                    'description' => 'This field is NOT searchable (stored in main data only)',
+                    // 'searchable' => false (default)
+                ]);
+            }, ['label' => 'SEO Settings']);
+
+            // Nested group with searchable fields
+            $stack->group('inventory', function ($group) {
+                $group->field('quantity', [
+                    'type' => 'number',
+                    'label' => 'Stock Quantity',
+                    'description' => 'Searchable nested field',
+                    'searchable' => true, // Indexed as: _optstack_idx_post_inventory_quantity
+                    'attributes' => ['min' => 0],
+                ]);
+
+                $group->field('warehouse', [
+                    'type' => 'select',
+                    'label' => 'Warehouse',
+                    'searchable' => true, // Indexed as: _optstack_idx_post_inventory_warehouse
+                    'options' => [
+                        ['value' => 'main', 'label' => 'Main Warehouse'],
+                        ['value' => 'secondary', 'label' => 'Secondary'],
+                        ['value' => 'dropship', 'label' => 'Dropship'],
+                    ],
+                ]);
+            }, ['label' => 'Inventory']);
+
+            // Note: Repeatable groups CANNOT have searchable fields
+            // because their values are arrays, not scalar values
+            $stack->group('variants', function ($group) {
+                $group->repeatable(0, 10);
+
+                $group->field('name', [
+                    'type' => 'text',
+                    'label' => 'Variant Name',
+                    // 'searchable' => true, // Would NOT work - repeater fields excluded
+                ]);
+
+                $group->field('price', [
+                    'type' => 'number',
+                    'label' => 'Variant Price',
+                    // Searchable is ignored for fields in repeatable groups
+                ]);
+            }, ['label' => 'Product Variants', 'description' => 'Variants cannot have searchable fields']);
+        })
+        ->build();
+
+  
+    // $bootstrap = \OptStack\WordPress\Bootstrap::getInstance();
+    // $manager = $bootstrap->getIndexedMetaManager();
+    // $keys = $manager->getIndexedMetaKeys($__stack);
+    // echo '<pre>';
+    // print_r($keys);
+    // echo get_post_meta(1, '_optstack_idx_post_price', true);
+    // echo '</pre>';
 });
 
 // =============================================================================
@@ -751,6 +1306,9 @@ function optstack_get_product_data(int $post_id): array
 {
     return get_post_meta($post_id, 'product_data', true) ?: [];
 }
+// echo '<pre>';
+// print_r(optstack_get_product_data(1));
+// echo '</pre>';
 
 /**
  * Get category settings for a term.
@@ -773,6 +1331,100 @@ function optstack_get_user_profile(?int $user_id = null): array
 {
     $user_id = $user_id ?? get_current_user_id();
     return get_user_meta($user_id, 'user_profile', true) ?: [];
+}
+
+/**
+ * Generate CSS string from typography value.
+ *
+ * @param array $typography Typography settings array
+ * @return string CSS properties
+ */
+function optstack_typography_css(array $typography): string
+{
+    $css = [];
+    
+    if (!empty($typography['fontFamily'])) {
+        $css[] = 'font-family: ' . $typography['fontFamily'];
+    }
+    
+    if (isset($typography['fontSize'])) {
+        $unit = $typography['fontSizeUnit'] ?? 'px';
+        $css[] = 'font-size: ' . $typography['fontSize'] . $unit;
+    }
+    
+    if (!empty($typography['fontWeight'])) {
+        $css[] = 'font-weight: ' . $typography['fontWeight'];
+    }
+    
+    if (!empty($typography['fontStyle']) && $typography['fontStyle'] !== 'normal') {
+        $css[] = 'font-style: ' . $typography['fontStyle'];
+    }
+    
+    if (isset($typography['lineHeight'])) {
+        $unit = $typography['lineHeightUnit'] ?? '';
+        $css[] = 'line-height: ' . $typography['lineHeight'] . $unit;
+    }
+    
+    if (isset($typography['letterSpacing']) && $typography['letterSpacing'] != 0) {
+        $unit = $typography['letterSpacingUnit'] ?? 'px';
+        $css[] = 'letter-spacing: ' . $typography['letterSpacing'] . $unit;
+    }
+    
+    if (!empty($typography['textTransform']) && $typography['textTransform'] !== 'none') {
+        $css[] = 'text-transform: ' . $typography['textTransform'];
+    }
+    
+    if (!empty($typography['textDecoration']) && $typography['textDecoration'] !== 'none') {
+        $css[] = 'text-decoration: ' . $typography['textDecoration'];
+    }
+    
+    if (!empty($typography['color'])) {
+        $css[] = 'color: ' . $typography['color'];
+    }
+    
+    return implode('; ', $css);
+}
+
+/**
+ * Get Google Font URL for typography settings.
+ * Use this to enqueue Google Fonts on the frontend.
+ *
+ * @param array $typographies Array of typography settings
+ * @return string|null Google Fonts URL or null if no Google fonts
+ */
+function optstack_get_google_fonts_url(array $typographies): ?string
+{
+    $fonts = [];
+    
+    foreach ($typographies as $typography) {
+        if (empty($typography['fontFamily'])) continue;
+        
+        // Check if it's a Google Font (contains quotes and sans-serif/serif)
+        if (preg_match('/"([^"]+)"/', $typography['fontFamily'], $matches)) {
+            $fontName = $matches[1];
+            $weight = $typography['fontWeight'] ?? '400';
+            
+            if (!isset($fonts[$fontName])) {
+                $fonts[$fontName] = [];
+            }
+            
+            if (!in_array($weight, $fonts[$fontName])) {
+                $fonts[$fontName][] = $weight;
+            }
+        }
+    }
+    
+    if (empty($fonts)) {
+        return null;
+    }
+    
+    $families = [];
+    foreach ($fonts as $name => $weights) {
+        sort($weights);
+        $families[] = str_replace(' ', '+', $name) . ':wght@' . implode(';', $weights);
+    }
+    
+    return 'https://fonts.googleapis.com/css2?family=' . implode('&family=', $families) . '&display=swap';
 }
 
 // =============================================================================
@@ -826,4 +1478,151 @@ $category_color = $category_settings['color'] ?? '#333';
 $profile = optstack_get_user_profile();
 $job_title = $profile['professional']['job_title'] ?? '';
 $bio = $profile['professional']['bio'] ?? '';
+
+// =============================================================================
+// TYPOGRAPHY FIELD USAGE
+// =============================================================================
+
+// Get typography settings
+$heading_typo = optstack_get_theme_option('heading_typography', []);
+$body_typo = optstack_get_theme_option('body_typography', []);
+
+// Generate inline CSS
+$heading_css = optstack_typography_css($heading_typo);
+// Output: font-family: "Montserrat", sans-serif; font-size: 32px; font-weight: 700; ...
+
+// Use in HTML
+echo '<h1 style="' . esc_attr($heading_css) . '">Page Title</h1>';
+
+// Or generate CSS variables in <head>
+$all_typography = [
+    optstack_get_theme_option('heading_typography', []),
+    optstack_get_theme_option('body_typography', []),
+    optstack_get_theme_option('nav_typography', []),
+];
+
+// Enqueue Google Fonts
+$google_fonts_url = optstack_get_google_fonts_url($all_typography);
+if ($google_fonts_url) {
+    wp_enqueue_style('theme-google-fonts', $google_fonts_url, [], null);
+}
+
+// Generate CSS stylesheet
+function mytheme_generate_typography_css() {
+    $heading = optstack_get_theme_option('heading_typography', []);
+    $body = optstack_get_theme_option('body_typography', []);
+    $button = optstack_get_theme_option('button_typography', []);
+    $nav = optstack_get_theme_option('nav_typography', []);
+    // Typography - Generated by OptStack
+    $css = "
+       
+        h1, h2, h3, h4, h5, h6 {
+            " . optstack_typography_css($heading) . ";
+        }
+        
+        body, p {
+            " . optstack_typography_css($body) . ";
+        }
+        
+        .btn, button, input[type='submit'] {
+            " . optstack_typography_css($button) . ";
+        }
+        
+        .nav-menu a {
+            " . optstack_typography_css($nav) . ";
+        }
+    ";
+    
+    return $css;
+}
+
+// Add to <head>
+add_action('wp_head', function() {
+    echo '<style id="theme-typography-css">' . mytheme_generate_typography_css() . '</style>';
+});
+
+// =============================================================================
+// SEARCHABLE FIELDS USAGE
+// =============================================================================
+// Searchable fields are stored as separate meta keys for efficient WP_Query.
+// Meta key format: _optstack_idx_{context}_{field_path}
+
+// Query posts by searchable field (price)
+$expensive_products = new WP_Query([
+    'post_type' => 'post',
+    'meta_query' => [
+        [
+            'key' => '_optstack_idx_post_price',
+            'value' => 100,
+            'compare' => '>=',
+            'type' => 'NUMERIC',
+        ],
+    ],
+]);
+
+// Query by status (select field)
+$active_products = new WP_Query([
+    'post_type' => 'post',
+    'meta_query' => [
+        [
+            'key' => '_optstack_idx_post_status',
+            'value' => 'active',
+        ],
+    ],
+]);
+
+// Query by featured toggle
+$featured_products = new WP_Query([
+    'post_type' => 'post',
+    'meta_query' => [
+        [
+            'key' => '_optstack_idx_post_featured',
+            'value' => '1', // Toggle values are stored as '1' or ''
+        ],
+    ],
+]);
+
+// Query by nested field (seo.title)
+$posts_with_seo = new WP_Query([
+    'post_type' => 'post',
+    'meta_query' => [
+        [
+            'key' => '_optstack_idx_post_seo_title', // Dots become underscores
+            'compare' => 'EXISTS',
+        ],
+    ],
+]);
+
+// Complex query with multiple searchable fields
+$filtered_products = new WP_Query([
+    'post_type' => 'post',
+    'meta_query' => [
+        'relation' => 'AND',
+        [
+            'key' => '_optstack_idx_post_status',
+            'value' => 'active',
+        ],
+        [
+            'key' => '_optstack_idx_post_price',
+            'value' => [50, 200],
+            'compare' => 'BETWEEN',
+            'type' => 'NUMERIC',
+        ],
+        [
+            'key' => '_optstack_idx_post_inventory_quantity',
+            'value' => 0,
+            'compare' => '>',
+            'type' => 'NUMERIC',
+        ],
+    ],
+    'orderby' => 'meta_value_num',
+    'meta_key' => '_optstack_idx_post_price',
+    'order' => 'ASC',
+]);
+
+// Get all indexed meta keys for a stack (for debugging)
+// $bootstrap = \OptStack\WordPress\Bootstrap::getInstance();
+// $manager = $bootstrap->getIndexedMetaManager();
+// $keys = $manager->getIndexedMetaKeys($stack);
+// Returns: ['price' => '_optstack_idx_post_price', 'seo.title' => '_optstack_idx_post_seo_title', ...]
 */

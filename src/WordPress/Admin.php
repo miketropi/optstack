@@ -6,6 +6,7 @@ namespace OptStack\WordPress;
 
 use OptStack\Core\Stack\Stack;
 use OptStack\Core\Stack\StackRegistry;
+use OptStack\WordPress\Index\IndexedMetaManager;
 
 /**
  * WordPress Admin Integration
@@ -278,7 +279,7 @@ class Admin
             <?php if ($stack->getDescription()): ?>
                 <p class="description"><?php echo esc_html($stack->getDescription()); ?></p>
             <?php endif; ?>
-
+            <br />
             <?php $this->renderMountPoint($stack); ?>
         </div>
         <?php
@@ -558,21 +559,16 @@ class Admin
     private function renderUserFields(Stack $stack, \WP_User $user): void
     {
         ?>
-        <h2><?php echo esc_html($stack->getLabel()); ?></h2>
+        <br />
+        <h2 style="font-size: 1.5em; font-weight: 600;"><?php echo esc_html($stack->getLabel()); ?></h2>
         <?php if ($stack->getDescription()): ?>
             <p class="description"><?php echo esc_html($stack->getDescription()); ?></p>
         <?php endif; ?>
-        <table class="form-table">
-            <tr>
-                <th scope="row">&nbsp;</th>
-                <td>
-                    <?php $this->renderMountPoint($stack, [
-                        'object_id' => $user->ID,
-                        'object_type' => 'user',
-                    ]); ?>
-                </td>
-            </tr>
-        </table>
+        <br />
+        <?php $this->renderMountPoint($stack, [
+            'object_id' => $user->ID,
+            'object_type' => 'user',
+        ]); ?>
         <?php
     }
 
@@ -634,6 +630,10 @@ class Admin
                 update_user_meta($objectId, $stackId, $data);
                 break;
         }
+
+        // Sync indexed meta for searchable fields
+        $indexedMetaManager = new IndexedMetaManager();
+        $indexedMetaManager->syncIndexedMeta($stack, $data, $objectId);
 
         /**
          * Action fired after stack data is saved.
@@ -699,6 +699,9 @@ class Admin
         $isDevMode = defined('OPTSTACK_DEV_MODE') && OPTSTACK_DEV_MODE;
         $devServer = defined('OPTSTACK_DEV_SERVER') ? OPTSTACK_DEV_SERVER : 'http://localhost:5173';
 
+        // enqueue google fonts 
+        wp_enqueue_style('os-google-fonts', 'https://fonts.googleapis.com/css2?family=Google+Sans+Code:ital,wght@0,300..800;1,300..800&family=Google+Sans+Flex:opsz,wght@6..144,1..1000&display=swap', [], OPTSTACK_VERSION);
+
         if ($isDevMode) {
             // Load from Vite dev server
             $this->enqueueDevAssets($devServer);
@@ -708,7 +711,7 @@ class Admin
         }
 
         // Pass data to JavaScript
-        $localizeData = array_merge([
+        $localizeData = array_merge([ 
             'nonce' => wp_create_nonce('wp_rest'),
             'restUrl' => rest_url('optstack/v1/'),
             'adminUrl' => admin_url(),

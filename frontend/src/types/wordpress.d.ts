@@ -13,15 +13,18 @@ interface WPMediaAttachment {
   sizes?: Record<string, { url: string }>
 }
 
+interface WPMediaSelection {
+  first: () => {
+    toJSON: () => WPMediaAttachment
+  }
+  toJSON: () => WPMediaAttachment[]
+}
+
 interface WPMediaFrame {
   on: (event: string, callback: () => void) => void
   open: () => void
   state: () => {
-    get: (key: string) => {
-      first: () => {
-        toJSON: () => WPMediaAttachment
-      }
-    }
+    get: (key: string) => WPMediaSelection
   }
 }
 

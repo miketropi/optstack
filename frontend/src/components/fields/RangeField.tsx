@@ -26,7 +26,7 @@ export function RangeField({ field, value, onChange, disabled, error }: FieldRen
       </div>
       
       <div className="os-field-body">
-        <div className="os-range-header">
+        <div className="os-range-header os-font-mono">
           {showValue && <span className="os-range-value">{displayValue}</span>}
         </div>
         
@@ -47,7 +47,7 @@ export function RangeField({ field, value, onChange, disabled, error }: FieldRen
             />
           </div>
           
-          <div className="os-range-labels">
+          <div className="os-range-labels os-font-mono">
             <span>{min}{unit}</span>
             <span>{max}{unit}</span>
           </div>
