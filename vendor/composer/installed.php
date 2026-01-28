@@ -1,9 +1,9 @@
 <?php return array(
     'root' => array(
         'name' => 'optstack/optstack',
-        'pretty_version' => '1.0.0+no-version-set',
-        'version' => '1.0.0.0',
-        'reference' => null,
+        'pretty_version' => 'dev-master',
+        'version' => 'dev-master',
+        'reference' => 'b59bbb3730dcd13fdcf44a618ec2cba3fe02c5ba',
         'type' => 'library',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -29,9 +29,9 @@
             'dev_requirement' => true,
         ),
         'optstack/optstack' => array(
-            'pretty_version' => '1.0.0+no-version-set',
-            'version' => '1.0.0.0',
-            'reference' => null,
+            'pretty_version' => 'dev-master',
+            'version' => 'dev-master',
+            'reference' => 'b59bbb3730dcd13fdcf44a618ec2cba3fe02c5ba',
             'type' => 'library',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
@@ -110,9 +110,9 @@
             'dev_requirement' => true,
         ),
         'phpunit/phpunit' => array(
-            'pretty_version' => '10.5.61',
-            'version' => '10.5.61.0',
-            'reference' => 'bd265b671a63b87e85a8155f885b6fbb41ee505b',
+            'pretty_version' => '10.5.63',
+            'version' => '10.5.63.0',
+            'reference' => '33198268dad71e926626b618f3ec3966661e4d90',
             'type' => 'library',
             'install_path' => __DIR__ . '/../phpunit/phpunit',
             'aliases' => array(),
