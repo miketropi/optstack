@@ -2645,3 +2645,488 @@
 .os-rounded { border-radius: var(--os-radius); }
 .os-p-3 { padding: 12px; }
 .os-border { border-width: 1px; border-style: solid; }
+
+/* ==========================================================================
+   Responsive - Tablet (max-width: 1024px)
+   ========================================================================== */
+
+@media screen and (max-width: 1024px) {
+  /* Fields - Reduce label width */
+  .os-field {
+    gap: 16px;
+  }
+  
+  .os-label {
+    flex: 0 0 160px;
+  }
+  
+  /* Inline Groups - Reduce label width */
+  .os-group-inline {
+    gap: 16px;
+  }
+  
+  .os-group-label {
+    flex: 0 0 160px;
+  }
+  
+  /* Typography controls - Single column on tablet */
+  .os-typography-controls {
+    grid-template-columns: 1fr;
+  }
+  
+  .os-typography-row {
+    border-right: none;
+  }
+  
+  .os-typography-row:nth-last-child(-n+2) {
+    border-bottom: 1px solid var(--os-gray-100);
+  }
+  
+  .os-typography-row:last-child {
+    border-bottom: none;
+  }
+  
+  /* Radio Image - Limit columns */
+  .os-radio-image-group {
+    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)) !important;
+  }
+  
+  /* Media grid - Smaller thumbnails */
+  .os-media-grid {
+    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+  }
+}
+
+/* ==========================================================================
+   Responsive - Mobile (max-width: 782px) - WordPress admin breakpoint
+   ========================================================================== */
+
+@media screen and (max-width: 782px) {
+  /* Base font size increase for touch */
+  .os-optstack-app {
+    font-size: 15px;
+  }
+  
+  /* Tabs - Horizontal scroll with larger touch targets */
+  .os-tab-nav {
+    padding: 0;
+    gap: 0;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  .os-tab-button {
+    padding: 16px 14px;
+    font-size: 13px;
+    min-width: max-content;
+  }
+  
+  .os-tab-description {
+    padding: 12px 16px;
+    font-size: 13px;
+  }
+  
+  /* Fields - Stack vertically */
+  .os-field {
+    flex-direction: column;
+    gap: 8px;
+    padding: 16px;
+  }
+  
+  .os-label {
+    flex: none;
+    width: 100%;
+    padding-top: 0;
+  }
+  
+  .os-field-body {
+    width: 100%;
+  }
+  
+  /* Inline Groups - Stack vertically */
+  .os-group-inline {
+    flex-direction: column;
+    gap: 12px;
+    padding: 16px;
+  }
+  
+  .os-group-label {
+    flex: none;
+    width: 100%;
+    padding-top: 0;
+  }
+  
+  .os-group-body {
+    width: 100%;
+  }
+  
+  .os-group-label-content {
+    flex-direction: row;
+    align-items: center;
+  }
+  
+  /* Group Headers */
+  .os-group-header {
+    padding: 14px 16px;
+  }
+  
+  .os-nested-groups {
+    padding: 16px;
+  }
+  
+  /* Inputs - Full width and larger touch targets */
+  .os-input {
+    max-width: 100%;
+    height: 44px;
+    font-size: 16px; /* Prevents iOS zoom */
+  }
+  
+  .os-textarea {
+    font-size: 16px;
+  }
+  
+  .os-select {
+    max-width: 100%;
+    height: 44px;
+    font-size: 16px;
+  }
+  
+  .os-select-wrapper {
+    max-width: 100%;
+  }
+  
+  /* Number field */
+  .os-number-wrapper {
+    width: 100%;
+  }
+  
+  .os-number-input {
+    width: 100%;
+    height: 44px;
+    font-size: 16px;
+  }
+  
+  .os-number-btn {
+    width: 44px;
+    height: 44px;
+  }
+  
+  /* Toggle - Larger touch target */
+  .os-field-toggle-wrap {
+    flex-direction: column;
+    gap: 12px;
+    padding: 16px;
+  }
+  
+  .os-field-toggle-wrap .os-label {
+    padding-top: 0;
+  }
+  
+  .os-toggle {
+    width: 52px;
+    height: 28px;
+  }
+  
+  .os-toggle::after {
+    width: 24px;
+    height: 24px;
+  }
+  
+  .os-toggle.os-toggle-active::after {
+    transform: translateX(24px);
+  }
+  
+  /* Radio & Checkbox - Larger touch targets */
+  .os-radio-option,
+  .os-checkbox-option {
+    padding: 8px 0;
+    min-height: 44px;
+  }
+  
+  .os-radio-control,
+  .os-checkbox-control {
+    width: 22px;
+    height: 22px;
+  }
+  
+  .os-radio-dot {
+    width: 10px;
+    height: 10px;
+  }
+  
+  .os-radio-cards,
+  .os-checkbox-cards {
+    grid-template-columns: 1fr;
+  }
+  
+  .os-radio-cards .os-radio-option,
+  .os-checkbox-cards .os-checkbox-option {
+    padding: 16px;
+  }
+  
+  /* Radio Image - 2 columns on mobile */
+  .os-radio-image-group {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 10px;
+  }
+  
+  .os-radio-image-container {
+    width: 100% !important;
+    height: auto !important;
+    aspect-ratio: 4/3;
+  }
+  
+  .os-radio-image-check {
+    width: 20px;
+    height: 20px;
+    top: 4px;
+    right: 4px;
+  }
+  
+  /* Color Field */
+  .os-color-input-group {
+    flex-wrap: wrap;
+  }
+  
+  .os-color-input {
+    flex: 1;
+    min-width: 80px;
+    height: 44px;
+    font-size: 16px;
+  }
+  
+  .os-color-preview {
+    width: 44px;
+    height: 44px;
+  }
+  
+  /* Date Field */
+  .os-date-wrapper {
+    max-width: 100%;
+  }
+  
+  .os-date-input {
+    height: 44px;
+    font-size: 16px;
+  }
+  
+  /* Range Slider */
+  .os-range-container {
+    max-width: 100%;
+  }
+  
+  .os-range-input::-webkit-slider-thumb {
+    width: 24px;
+    height: 24px;
+  }
+  
+  .os-range-input::-moz-range-thumb {
+    width: 24px;
+    height: 24px;
+  }
+  
+  /* Media Field */
+  .os-media-wrapper {
+    max-width: 100%;
+  }
+  
+  .os-media-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    padding: 8px;
+  }
+  
+  .os-media-grid-remove,
+  .os-media-grid-drag-handle {
+    opacity: 1; /* Always visible on mobile */
+  }
+  
+  .os-media-select {
+    padding: 24px 16px;
+  }
+  
+  /* Repeater */
+  .os-repeater {
+    padding: 12px;
+  }
+  
+  .os-repeater-item-header {
+    padding: 10px 12px;
+  }
+  
+  .os-repeater-item-content {
+    padding: 12px;
+  }
+  
+  .os-repeater-add {
+    padding: 16px;
+  }
+  
+  /* Typography Field */
+  .os-typography-wrapper {
+    max-width: 100%;
+  }
+  
+  .os-typography-controls {
+    grid-template-columns: 1fr;
+  }
+  
+  .os-typography-row {
+    padding: 12px 14px;
+    border-right: none;
+  }
+  
+  .os-typography-row:nth-last-child(-n+2) {
+    border-bottom: 1px solid var(--os-gray-100);
+  }
+  
+  .os-typography-row:last-child {
+    border-bottom: none;
+  }
+  
+  .os-typography-number,
+  .os-typography-color-input {
+    height: 44px;
+    font-size: 16px;
+  }
+  
+  .os-typography-color-swatch {
+    width: 44px;
+    height: 44px;
+  }
+  
+  /* Code Field */
+  .os-code-wrapper {
+    flex-direction: column;
+  }
+  
+  .os-code-line-numbers {
+    display: none; /* Hide line numbers on mobile */
+  }
+  
+  .os-code-textarea {
+    font-size: 14px;
+    min-height: 150px;
+  }
+  
+  /* Buttons - Larger touch targets */
+  .os-btn {
+    height: 44px;
+    padding: 0 20px;
+    font-size: 15px;
+  }
+  
+  .os-btn-sm {
+    height: 38px;
+    padding: 0 14px;
+  }
+  
+  .os-btn-icon {
+    width: 44px;
+    height: 44px;
+  }
+  
+  /* Save Bar */
+  .os-save-bar {
+    padding: 12px 16px;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  
+  .os-save-status {
+    width: 100%;
+    text-align: center;
+    margin-right: 0;
+    order: -1;
+  }
+  
+  .os-save-bar .os-flex {
+    width: 100%;
+    justify-content: stretch;
+  }
+  
+  .os-save-bar .os-btn {
+    flex: 1;
+  }
+  
+  /* WYSIWYG */
+  .os-tinymce-wrapper {
+    padding: 0.5em;
+  }
+}
+
+/* ==========================================================================
+   Responsive - Small Mobile (max-width: 480px)
+   ========================================================================== */
+
+@media screen and (max-width: 480px) {
+  /* Even smaller padding */
+  .os-field {
+    padding: 14px 12px;
+  }
+  
+  .os-group-inline {
+    padding: 14px 12px;
+  }
+  
+  .os-group-header {
+    padding: 12px;
+  }
+  
+  /* Radio Image - Single column on very small screens */
+  .os-radio-image-group {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+  
+  /* Media grid - 2 columns */
+  .os-media-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  /* Tab buttons - Smaller */
+  .os-tab-button {
+    padding: 14px 12px;
+    font-size: 12px;
+  }
+  
+  /* Repeater actions */
+  .os-repeater-actions {
+    flex-wrap: wrap;
+  }
+}
+
+/* ==========================================================================
+   Touch Device Enhancements
+   ========================================================================== */
+
+@media (hover: none) and (pointer: coarse) {
+  /* Remove hover effects that don't work well on touch */
+  .os-field:hover {
+    background: transparent;
+  }
+  
+  /* Make interactive elements more visible */
+  .os-media-grid-remove,
+  .os-media-grid-drag-handle {
+    opacity: 1;
+  }
+  
+  /* Increase touch target sizes */
+  .os-select-option {
+    padding: 14px 12px;
+  }
+  
+  .os-group-collapse-btn {
+    width: 36px;
+    height: 36px;
+  }
+  
+  .os-group-collapse-btn-sm {
+    width: 28px;
+    height: 28px;
+  }
+  
+  /* Disable drag on touch devices for better UX */
+  .os-repeater-item-handle {
+    cursor: default;
+  }
+}
