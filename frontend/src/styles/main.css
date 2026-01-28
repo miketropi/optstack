@@ -1424,6 +1424,8 @@
   background: transparent;
   font-size: 14px;
   color: var(--os-gray-800);
+  border: none !important;
+  box-shadow: none !important;
 }
 
 .os-date-input:focus {
@@ -1936,7 +1938,7 @@
   /* border: 1px solid var(--os-border);
   border-radius: var(--os-radius); */
   /* overflow: hidden; */
-  padding: 1em;
+  /* padding: 1em; */
   /* background: var(--os-white); */
   border: 1px solid var(--os-border);
 }

@@ -159,7 +159,7 @@ export function StackRenderer({ schema, objectId, objectType }: StackRendererPro
 
       {/* Status indicator for embedded forms */}
       {isEmbedded && isDirty && (
-        <div className="os-text-xs os-text-gray-500 os-mt-2 os-italic">
+        <div className="os-text-xs os-text-gray-500 os-mt-2 os-italic os-p-2 os-bg-gray-100">
           Changes will be saved when you update the {objectType || 'item'}.
         </div>
       )}
