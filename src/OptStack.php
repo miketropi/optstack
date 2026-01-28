@@ -147,6 +147,43 @@ class OptStack
     }
 
     /**
+     * Update a single field value in a stack.
+     *
+     * This is a convenience method for quickly updating a single field
+     * without needing to fetch and merge the entire data array.
+     *
+     * If the field is marked as searchable, the indexed meta will be
+     * automatically synced for efficient WP_Query operations.
+     *
+     * @param string $id Stack identifier
+     * @param string $key Field key (supports dot notation for nested fields)
+     * @param mixed $value New value
+     * @param int|null $objectId Object ID (post/term/user) - required for searchable field sync
+     * @return bool Success status
+     *
+     * @example
+     * // Update a simple field
+     * OptStack::updateField('product_data', 'price', 99.99, $post_id);
+     *
+     * // Update a nested field in a group
+     * OptStack::updateField('product_data', 'pricing.regular_price', 149.99, $post_id);
+     *
+     * // Update with searchable field auto-sync
+     * OptStack::updateField('product_data', 'status', 'active', $post_id);
+     * // Automatically syncs to: _optstack_idx_post_status
+     */
+    public static function updateField(string $id, string $key, mixed $value, ?int $objectId = null): bool
+    {
+        $stack = self::get($id);
+
+        if ($stack === null) {
+            return false;
+        }
+
+        return $stack->updateField($key, $value, $objectId);
+    }
+
+    /**
      * Export a stack's schema.
      *
      * @param string $id Stack identifier

@@ -102,6 +102,50 @@ class IndexedMetaManager
     }
 
     /**
+     * Sync indexed meta for a single field.
+     *
+     * This is used when updating a single field value without needing to
+     * sync all searchable fields in the stack.
+     *
+     * @param Stack $stack The stack definition
+     * @param string $fieldPath The field path (e.g., 'price' or 'seo.title')
+     * @param mixed $value The field value
+     * @param int $objectId The object ID (post/term/user ID)
+     * @return bool Whether the field was synced
+     */
+    public function syncSingleField(Stack $stack, string $fieldPath, mixed $value, int $objectId): bool
+    {
+        $context = $stack->getContext();
+        
+        // Options context doesn't support searchable fields
+        if ($context === 'options') {
+            return false;
+        }
+
+        // Resolve all searchable fields to find the matching one
+        $searchableFields = $this->resolver->resolve($stack);
+        
+        // Find the searchable field that matches this path
+        $searchableField = $searchableFields[$fieldPath] ?? null;
+        
+        if ($searchableField === null) {
+            // Field is not searchable or doesn't exist
+            return false;
+        }
+
+        $metaKey = $searchableField->getMetaKey();
+
+        // Determine if value should be indexed or deleted
+        if ($this->shouldIndex($value)) {
+            $this->updateMeta($context, $objectId, $metaKey, $value);
+        } else {
+            $this->deleteMeta($context, $objectId, $metaKey);
+        }
+
+        return true;
+    }
+
+    /**
      * Delete all indexed meta for a stack.
      *
      * Useful when deleting a post/term/user or clearing all indexed data.

@@ -962,7 +962,51 @@ $fonts_url = optstack_get_google_fonts_url([$typo]);
 wp_enqueue_style('theme-fonts', $fonts_url);
 ```
 
-### Pattern 8: Radio Image Field
+### Pattern 8: Quick Field Updates
+
+```php
+// Instead of this (the old way):
+$data = get_post_meta($post_id, 'product_data', true);
+$data['price'] = 99.99;
+update_post_meta($post_id, 'product_data', $data);
+// Problem: Searchable fields not synced!
+
+// Do this (the new way):
+OptStack::updateField('product_data', 'price', 99.99, $post_id);
+// ✅ Updates data
+// ✅ Auto-syncs searchable fields
+
+// Works with nested fields
+OptStack::updateField('product_data', 'pricing.regular_price', 149.99, $post_id);
+
+// Common use cases:
+// Update stock quantity after purchase
+add_action('woocommerce_payment_complete', function($order_id) {
+    $order = wc_get_order($order_id);
+    foreach ($order->get_items() as $item) {
+        $product_id = $item->get_product_id();
+        $current_stock = OptStack::getData('product_data', 'inventory.quantity', 0);
+        $new_stock = max(0, $current_stock - $item->get_quantity());
+        
+        OptStack::updateField('product_data', 'inventory.quantity', $new_stock, $product_id);
+        // Searchable field auto-synced for queries
+    }
+});
+
+// Update post status based on form submission
+add_action('gform_after_submission', function($entry, $form) {
+    $post_id = $entry['post_id'];
+    OptStack::updateField('product_data', 'status', 'pending_review', $post_id);
+}, 10, 2);
+
+// Bulk update fields
+$product_ids = [123, 456, 789];
+foreach ($product_ids as $product_id) {
+    OptStack::updateField('product_data', 'featured', true, $product_id);
+}
+```
+
+### Pattern 9: Radio Image Field
 
 ```php
 $stack->field('layout', [
@@ -1024,6 +1068,9 @@ OptStack::getData(string $id, ?string $key = null, mixed $default = null): mixed
 // Save data to a stack
 OptStack::saveData(string $id, array $data): bool
 
+// Update a single field (with searchable field auto-sync)
+OptStack::updateField(string $id, string $key, mixed $value, ?int $objectId = null): bool
+
 // Get stack schema (JSON)
 OptStack::schema(string $id): ?array
 
@@ -1084,6 +1131,7 @@ $stack->define(callable $callback)
 // Data access
 $stack->getData(): array
 $stack->saveData(array $data): bool
+$stack->updateField(string $key, mixed $value, ?int $objectId = null): bool
 $stack->getDefaults(): array
 
 // Schema
@@ -1423,7 +1471,85 @@ $products = new WP_Query([
 ]);
 ```
 
-### Example 5: Typography Field
+### Example 5: Quick Field Updates
+
+```php
+// Define a stack with searchable fields
+add_action('optstack_init', function() {
+    OptStack::make('product_data')
+        ->forPostType('product')
+        ->define(function($stack) {
+            $stack->field('price', [
+                'type' => 'number',
+                'searchable' => true,
+            ]);
+            
+            $stack->field('status', [
+                'type' => 'select',
+                'searchable' => true,
+                'options' => [
+                    ['value' => 'draft', 'label' => 'Draft'],
+                    ['value' => 'active', 'label' => 'Active'],
+                ],
+            ]);
+            
+            $stack->group('seo', function($group) {
+                $group->field('title', [
+                    'type' => 'text',
+                    'searchable' => true,
+                ]);
+            });
+        })
+        ->build();
+});
+
+// Quick update a single field (the old way - fetch, modify, save)
+$data = get_post_meta($post_id, 'product_data', true);
+$data['price'] = 99.99;
+update_post_meta($post_id, 'product_data', $data);
+// Problem: searchable field NOT synced automatically!
+
+// The new way - update field with auto-sync
+OptStack::updateField('product_data', 'price', 99.99, $post_id);
+// ✅ Updates main data
+// ✅ Automatically syncs _optstack_idx_post_price
+
+// Update nested field in group
+OptStack::updateField('product_data', 'seo.title', 'New SEO Title', $post_id);
+// ✅ Updates product_data['seo']['title']
+// ✅ Automatically syncs _optstack_idx_post_seo_title
+
+// Update status
+OptStack::updateField('product_data', 'status', 'active', $post_id);
+// ✅ Searchable field synced to _optstack_idx_post_status
+
+// Now queries work efficiently
+$active_products = new WP_Query([
+    'post_type' => 'product',
+    'meta_query' => [[
+        'key' => '_optstack_idx_post_status',
+        'value' => 'active',
+    ]],
+]);
+
+// You can also use the stack instance directly
+$stack = OptStack::get('product_data');
+$stack->updateField('price', 149.99, $post_id);
+
+// Hook into field update
+add_action('optstack_searchable_field_synced', function($stack, $fieldPath, $value, $objectId) {
+    error_log("Field {$fieldPath} updated to {$value} for #{$objectId}");
+}, 10, 4);
+```
+
+**Benefits of `updateField()`:**
+- ✅ **Simpler**: No need to fetch, merge, save
+- ✅ **Safer**: Atomic update, no race conditions
+- ✅ **Auto-sync**: Searchable fields synced automatically
+- ✅ **Nested support**: Dot notation for nested fields
+- ✅ **Performance**: Only updates what changed
+
+### Example 6: Typography Field
 
 ```php
 add_action('optstack_init', function() {

@@ -7,6 +7,7 @@
 - **Data-first, UI-agnostic** — Focus on data modeling, not UI
 - **Native WordPress compatibility** — Works with `get_option()`, `get_post_meta()`, `get_term_meta()`
 - **Unified data model** — Same field syntax across Options, Posts, Terms, Users
+- **Quick field updates** — Update single fields with automatic searchable field sync
 - **Composable & extensible** — Interface-driven architecture
 - **Future-proof** — Ready for Headless WordPress and REST workflows
 - **Modern Admin UI** — React + TypeScript + TailwindCSS frontend
@@ -79,6 +80,9 @@ add_action('optstack_init', function() {
 // Access data using native WordPress
 $settings = get_option('site_settings');
 // ['site_color' => '#000000', 'social' => ['twitter' => '...', 'facebook' => '...']]
+
+// Update a single field (with auto-sync for searchable fields)
+OptStack::updateField('site_settings', 'site_color', '#FF5733');
 ```
 
 ### Define a Post Type Stack

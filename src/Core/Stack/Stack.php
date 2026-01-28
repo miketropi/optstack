@@ -531,6 +531,296 @@ class Stack
     }
 
     /**
+     * Update a single field value.
+     *
+     * This is a convenience method for updating a single field without
+     * needing to fetch and merge the entire data array.
+     *
+     * If the field is marked as searchable, the indexed meta will be
+     * automatically synced.
+     *
+     * @param string $key Field key (supports dot notation for nested fields)
+     * @param mixed $value New value
+     * @param int|null $objectId Object ID (post/term/user) - required for searchable field sync
+     * @return bool Success status
+     *
+     * @example
+     * // Simple field update
+     * $stack->updateField('price', 99.99, $post_id);
+     *
+     * // Nested field update (group.field)
+     * $stack->updateField('pricing.regular_price', 149.99, $post_id);
+     */
+    public function updateField(string $key, mixed $value, ?int $objectId = null): bool
+    {
+        // If no store bound yet, try to bind it
+        if ($this->store === null) {
+            // For post_type, taxonomy, user contexts, we need object ID to bind store
+            if ($objectId !== null && in_array($this->context, ['post_type', 'post', 'taxonomy', 'term', 'user'])) {
+                $this->bindStoreForObject($objectId);
+            }
+            
+            // If still no store, can't proceed
+            if ($this->store === null) {
+                return false;
+            }
+        }
+
+        // Handle nested keys (e.g., 'pricing.regular_price')
+        if (str_contains($key, '.')) {
+            return $this->updateNestedField($key, $value, $objectId);
+        }
+
+        // Update the field in store
+        $success = $this->store->set($key, $value);
+
+        if (!$success) {
+            return false;
+        }
+
+        // Sync searchable field if applicable
+        $this->syncSearchableField($key, $value, $objectId);
+
+        return true;
+    }
+
+    /**
+     * Bind store for a specific object ID.
+     *
+     * @param int $objectId The object ID (post/term/user)
+     */
+    protected function bindStoreForObject(int $objectId): void
+    {
+        // Only bind if WordPress store classes are available
+        if (!class_exists('\\OptStack\\WordPress\\Store\\PostStore')) {
+            return;
+        }
+
+        switch ($this->context) {
+            case 'post':
+            case 'post_type':
+                $this->store = new \OptStack\WordPress\Store\PostStore($objectId, $this->id);
+                break;
+
+            case 'term':
+            case 'taxonomy':
+                $this->store = new \OptStack\WordPress\Store\TermStore($objectId, $this->id);
+                break;
+
+            case 'user':
+                $this->store = new \OptStack\WordPress\Store\UserStore($objectId, $this->id);
+                break;
+        }
+    }
+
+    /**
+     * Update a nested field value (supports dot notation).
+     *
+     * @param string $path Dot notation path (e.g., 'pricing.regular_price')
+     * @param mixed $value New value
+     * @param int|null $objectId Object ID for searchable field sync
+     * @return bool Success status
+     */
+    protected function updateNestedField(string $path, mixed $value, ?int $objectId = null): bool
+    {
+        // Ensure store is available (should already be checked by updateField, but double-check)
+        if ($this->store === null) {
+            return false;
+        }
+
+        $keys = explode('.', $path);
+        $rootKey = array_shift($keys);
+
+        // Get current root value
+        $rootData = $this->store->get($rootKey, []);
+        
+        if (!is_array($rootData)) {
+            $rootData = [];
+        }
+
+        // Navigate to the nested key and update
+        $current = &$rootData;
+        foreach ($keys as $i => $nestedKey) {
+            if ($i === count($keys) - 1) {
+                // Last key - set the value
+                $current[$nestedKey] = $value;
+            } else {
+                // Intermediate key - ensure it's an array
+                if (!isset($current[$nestedKey]) || !is_array($current[$nestedKey])) {
+                    $current[$nestedKey] = [];
+                }
+                $current = &$current[$nestedKey];
+            }
+        }
+
+        // Save updated root data
+        $success = $this->store->set($rootKey, $rootData);
+
+        if (!$success) {
+            return false;
+        }
+
+        // Sync searchable field if applicable
+        $this->syncSearchableField($path, $value, $objectId);
+
+        return true;
+    }
+
+    /**
+     * Sync indexed meta for a single searchable field.
+     *
+     * @param string $fieldPath Field path (may include dots for nested)
+     * @param mixed $value Field value
+     * @param int|null $objectId Object ID (post/term/user)
+     */
+    protected function syncSearchableField(string $fieldPath, mixed $value, ?int $objectId = null): void
+    {
+        // Options context doesn't support searchable fields
+        if ($this->context === 'options') {
+            return;
+        }
+
+        // Need object ID for meta sync
+        if ($objectId === null) {
+            // Try to get object ID from store config
+            $objectId = $this->getObjectIdFromStore();
+            
+            if ($objectId === null) {
+                return;
+            }
+        }
+
+        // Check if field is searchable
+        if (!$this->isFieldSearchable($fieldPath)) {
+            return;
+        }
+
+        // Sync the indexed meta via Bootstrap's IndexedMetaManager
+        if (class_exists('\\OptStack\\WordPress\\Bootstrap')) {
+            $bootstrap = \OptStack\WordPress\Bootstrap::getInstance();
+            $manager = $bootstrap->getIndexedMetaManager();
+            $manager->syncSingleField($this, $fieldPath, $value, $objectId);
+
+            /**
+             * Fires after a single searchable field has been synced.
+             *
+             * @param Stack $stack The stack instance
+             * @param string $fieldPath The field path that was synced
+             * @param mixed $value The field value
+             * @param int $objectId The object ID
+             */
+            do_action('optstack_searchable_field_synced', $this, $fieldPath, $value, $objectId);
+        }
+    }
+
+    /**
+     * Check if a field is marked as searchable.
+     *
+     * @param string $path Field path (supports dot notation)
+     * @return bool Whether the field is searchable
+     */
+    protected function isFieldSearchable(string $path): bool
+    {
+        $keys = explode('.', $path);
+        
+        // Check root-level fields
+        foreach ($this->fields->all() as $field) {
+            if ($field->getKey() === $keys[0]) {
+                return $field->isSearchable();
+            }
+        }
+
+        // Check fields in groups
+        if (count($keys) > 1) {
+            $groupKey = array_shift($keys);
+            if (isset($this->groups[$groupKey])) {
+                return $this->isFieldSearchableInGroup($this->groups[$groupKey], $keys);
+            }
+        }
+
+        // Check fields in tabs
+        foreach ($this->tabs as $tab) {
+            foreach ($tab->getFields()->all() as $field) {
+                if ($field->getKey() === $keys[0]) {
+                    return $field->isSearchable();
+                }
+            }
+            
+            if (count($keys) > 1) {
+                $groupKey = $keys[0];
+                $tabGroups = $tab->getGroups();
+                if (isset($tabGroups[$groupKey])) {
+                    $remainingKeys = array_slice($keys, 1);
+                    return $this->isFieldSearchableInGroup($tabGroups[$groupKey], $remainingKeys);
+                }
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Check if a field is searchable within a group (recursive).
+     *
+     * @param \OptStack\Core\Field\FieldGroup $group The group to search in
+     * @param array<string> $keys Remaining path keys
+     * @return bool Whether the field is searchable
+     */
+    protected function isFieldSearchableInGroup($group, array $keys): bool
+    {
+        $currentKey = array_shift($keys);
+        
+        // Check fields in this group
+        foreach ($group->getFields()->all() as $field) {
+            if ($field->getKey() === $currentKey && empty($keys)) {
+                return $field->isSearchable();
+            }
+        }
+
+        // Check nested groups
+        if (!empty($keys)) {
+            $nestedGroups = $group->getGroups();
+            if (isset($nestedGroups[$currentKey])) {
+                return $this->isFieldSearchableInGroup($nestedGroups[$currentKey], $keys);
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Get object ID from the store configuration.
+     *
+     * @return int|null Object ID if available
+     */
+    protected function getObjectIdFromStore(): ?int
+    {
+        // Try to get from config
+        $objectId = $this->getConfig('post_id') 
+                 ?? $this->getConfig('term_id') 
+                 ?? $this->getConfig('user_id');
+
+        if ($objectId !== null) {
+            return (int) $objectId;
+        }
+
+        // Try to get from store if it's a Post/Term/User store
+        if (method_exists($this->store, 'getPostId')) {
+            return $this->store->getPostId();
+        }
+
+        if (method_exists($this->store, 'getTermId')) {
+            return $this->store->getTermId();
+        }
+
+        if (method_exists($this->store, 'getUserId')) {
+            return $this->store->getUserId();
+        }
+
+        return null;
+    }
+
+    /**
      * Get default values for all fields.
      *
      * @return array<string, mixed>
