@@ -13,6 +13,7 @@ import { MediaField } from './fields/MediaField'
 import { WysiwygField } from './fields/WysiwygField'
 import { CodeField } from './fields/CodeField'
 import { TypographyField } from './fields/TypographyField'
+import { RadioImageField } from './fields/RadioImageField'
 
 /**
  * Map of field types to components.
@@ -35,6 +36,8 @@ const fieldComponents: Record<string, React.ComponentType<FieldRendererProps>> =
   select: SelectField,
   dropdown: SelectField,
   radio: RadioField,
+  'radio-image': RadioImageField,
+  'image-radio': RadioImageField,
   'checkbox-group': CheckboxGroupField,
   checkboxes: CheckboxGroupField,
   

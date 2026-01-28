@@ -1,10 +1,10 @@
 import { useState, useCallback, useMemo, useRef, useEffect } from 'react'
 import Select, { StylesConfig, SingleValue, components, OptionProps, SingleValueProps } from 'react-select'
 import { SketchPicker, ColorResult } from 'react-color'
-import type { FieldRendererProps } from '../../schema/types'
+import type { FieldRendererProps, OptStackConfig } from '../../schema/types'
 
 // Google Fonts API configuration
-const GOOGLE_FONTS_API_KEY = 'AIzaSyAKSB4y-8D7_cA11fIh62EnHGay555BPb8'
+const GOOGLE_FONTS_API_KEY = (window as unknown as { optstack?: Partial<OptStackConfig> }).optstack?.googleFontsApiKey
 const GOOGLE_FONTS_API_URL = `https://www.googleapis.com/webfonts/v1/webfonts?key=${GOOGLE_FONTS_API_KEY}&sort=popularity`
 
 interface TypographyValue {

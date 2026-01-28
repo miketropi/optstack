@@ -338,25 +338,81 @@ add_action('optstack_init', function () {
                     ],
                 ]);
 
+                // Radio Image: Sidebar Position with visual layout diagrams
                 $tab->field('sidebar_position', [
-                    'type' => 'radio',
+                    'type' => 'radio-image',
                     'label' => 'Default Sidebar Position',
+                    'description' => 'Choose the default page layout. Can be overridden per page.',
                     'default' => 'right',
                     'options' => [
-                        ['value' => 'left', 'label' => 'Left Sidebar'],
-                        ['value' => 'right', 'label' => 'Right Sidebar'],
-                        ['value' => 'none', 'label' => 'No Sidebar (Full Width)'],
+                        [
+                            'value' => 'left',
+                            'image' => 'https://placehold.co/120x80/e9ecef/495057?text=◀+Content',
+                            'label' => 'Left Sidebar',
+                            'description' => 'Left',
+                        ],
+                        [
+                            'value' => 'right',
+                            'image' => 'https://placehold.co/120x80/e9ecef/495057?text=Content+▶',
+                            'label' => 'Right Sidebar',
+                            'description' => 'Right',
+                        ],
+                        [
+                            'value' => 'none',
+                            'image' => 'https://placehold.co/120x80/e9ecef/495057?text=Full+Width',
+                            'label' => 'No Sidebar',
+                            'description' => 'Full Width',
+                        ],
+                        [
+                            'value' => 'both',
+                            'image' => 'https://placehold.co/120x80/e9ecef/495057?text=◀+Content+▶',
+                            'label' => 'Both Sidebars',
+                            'description' => 'Both',
+                        ],
+                    ],
+                    'attributes' => [
+                        'columns' => 4,
+                        'imageWidth' => '120px',
+                        'imageHeight' => '80px',
                     ],
                 ]);
 
+                // Radio Image: Header Style with visual previews
                 $tab->field('header_style', [
-                    'type' => 'radio',
+                    'type' => 'radio-image',
                     'label' => 'Header Style',
+                    'description' => 'Select the header layout style.',
                     'default' => 'standard',
                     'options' => [
-                        ['value' => 'standard', 'label' => 'Standard'],
-                        ['value' => 'centered', 'label' => 'Centered Logo'],
-                        ['value' => 'transparent', 'label' => 'Transparent (Hero)'],
+                        [
+                            'value' => 'standard',
+                            'image' => 'https://placehold.co/140x60/1d2327/ffffff?text=Logo++++Menu',
+                            'label' => 'Standard Header',
+                            'description' => 'Standard',
+                        ],
+                        [
+                            'value' => 'centered',
+                            'image' => 'https://placehold.co/140x60/1d2327/ffffff?text=+++Logo+++',
+                            'label' => 'Centered Logo',
+                            'description' => 'Centered',
+                        ],
+                        [
+                            'value' => 'transparent',
+                            'image' => 'https://placehold.co/140x60/6c757d/ffffff?text=Transparent',
+                            'label' => 'Transparent Header',
+                            'description' => 'Transparent',
+                        ],
+                        [
+                            'value' => 'minimal',
+                            'image' => 'https://placehold.co/140x60/f8f9fa/1d2327?text=≡+Logo',
+                            'label' => 'Minimal (Hamburger)',
+                            'description' => 'Minimal',
+                        ],
+                    ],
+                    'attributes' => [
+                        'columns' => 4,
+                        'imageWidth' => '140px',
+                        'imageHeight' => '60px',
                     ],
                 ]);
 
@@ -365,6 +421,39 @@ add_action('optstack_init', function () {
                     'label' => 'Sticky Header',
                     'default' => true,
                     'description' => 'Keep header fixed at top when scrolling.',
+                ]);
+
+                // Radio Image: Blog Layout Style
+                $tab->field('blog_layout', [
+                    'type' => 'radio-image',
+                    'label' => 'Blog Layout',
+                    'description' => 'Choose how blog posts are displayed on archive pages.',
+                    'default' => 'grid',
+                    'options' => [
+                        [
+                            'value' => 'list',
+                            'image' => 'https://placehold.co/100x80/dee2e6/495057?text=═══%0A═══%0A═══',
+                            'label' => 'List Layout',
+                            'description' => 'List',
+                        ],
+                        [
+                            'value' => 'grid',
+                            'image' => 'https://placehold.co/100x80/dee2e6/495057?text=▢+▢+▢%0A▢+▢+▢',
+                            'label' => 'Grid Layout',
+                            'description' => 'Grid',
+                        ],
+                        [
+                            'value' => 'masonry',
+                            'image' => 'https://placehold.co/100x80/dee2e6/495057?text=▢+▯+▢%0A▯+▢+▯',
+                            'label' => 'Masonry Layout',
+                            'description' => 'Masonry',
+                        ],
+                    ],
+                    'attributes' => [
+                        'columns' => 3,
+                        'imageWidth' => '100px',
+                        'imageHeight' => '80px',
+                    ],
                 ]);
 
                 $tab->field('show_breadcrumbs', [
@@ -382,14 +471,77 @@ add_action('optstack_init', function () {
                     // ->icon('dashicons-arrow-down-alt')
                     ->priority(45);
 
+                // Radio Image: Footer Layout with visual column diagrams
                 $tab->field('footer_columns', [
-                    'type' => 'select',
-                    'label' => 'Footer Widget Columns',
+                    'type' => 'radio-image',
+                    'label' => 'Footer Widget Layout',
+                    'description' => 'Choose the footer widget area layout.',
                     'default' => '4',
                     'options' => [
-                        ['value' => '2', 'label' => '2 Columns'],
-                        ['value' => '3', 'label' => '3 Columns'],
-                        ['value' => '4', 'label' => '4 Columns'],
+                        [
+                            'value' => '1',
+                            'image' => 'https://placehold.co/100x50/343a40/ffffff?text=━━━━━━━━',
+                            'label' => '1 Column (Full Width)',
+                            'description' => '1 Column',
+                        ],
+                        [
+                            'value' => '2',
+                            'image' => 'https://placehold.co/100x50/343a40/ffffff?text=━━━+━━━',
+                            'label' => '2 Columns',
+                            'description' => '2 Columns',
+                        ],
+                        [
+                            'value' => '3',
+                            'image' => 'https://placehold.co/100x50/343a40/ffffff?text=━━+━━+━━',
+                            'label' => '3 Columns',
+                            'description' => '3 Columns',
+                        ],
+                        [
+                            'value' => '4',
+                            'image' => 'https://placehold.co/100x50/343a40/ffffff?text=━+━+━+━',
+                            'label' => '4 Columns',
+                            'description' => '4 Columns',
+                        ],
+                        [
+                            'value' => '5',
+                            'image' => 'https://placehold.co/100x50/343a40/ffffff?text=━+━+━+━',
+                            'label' => '5 Columns',
+                            'description' => '5 Columns',
+                        ],
+                    ],
+                    'attributes' => [
+                        'columns' => 4,
+                        'imageWidth' => '100px',
+                        'imageHeight' => '50px',
+                    ],
+                ]);
+
+                // Radio Image: Footer Style
+                $tab->field('footer_style', [
+                    'type' => 'radio-image',
+                    'label' => 'Footer Style',
+                    'description' => 'Select the overall footer appearance.',
+                    'default' => 'dark',
+                    'options' => [
+                        [
+                            'value' => 'dark',
+                            'image' => 'https://placehold.co/80x50/1d2327/ffffff?text=Dark',
+                            'label' => 'Dark Footer',
+                        ],
+                        [
+                            'value' => 'light',
+                            'image' => 'https://placehold.co/80x50/f8f9fa/1d2327?text=Light',
+                            'label' => 'Light Footer',
+                        ],
+                        [
+                            'value' => 'colored',
+                            'image' => 'https://placehold.co/80x50/2271b1/ffffff?text=Brand',
+                            'label' => 'Brand Color',
+                        ],
+                    ],
+                    'attributes' => [
+                        'imageWidth' => '80px',
+                        'imageHeight' => '50px',
                     ],
                 ]);
 
@@ -1210,6 +1362,156 @@ add_action('optstack_init', function () {
                     // Searchable is ignored for fields in repeatable groups
                 ]);
             }, ['label' => 'Product Variants', 'description' => 'Variants cannot have searchable fields']);
+        })
+        ->build();
+
+    // =========================================================================
+    // EXAMPLE 8: Radio Image Field Demo
+    // =========================================================================
+    // This example demonstrates the Radio Image field type.
+    // Radio Image works like a Radio field but displays image thumbnails
+    // instead of text labels - perfect for theme/layout selection.
+    // =========================================================================
+    OptStack::make('radio_image_demo')
+        ->forOptions()
+        ->menuParent('optstack')
+        ->label('Radio Image Demo')
+        ->description('Demonstrates the Radio Image selection field')
+        ->define(function ($stack) {
+            // Basic Radio Image field
+            // Options use 'label' as the image URL for backwards compatibility
+            $stack->field('theme_style', [
+                'type' => 'radio-image',
+                'label' => 'Theme Style',
+                'description' => 'Select a color theme for your site. Uses label as image URL.',
+                'default' => 'light',
+                'options' => [
+                    [
+                        'value' => 'light',
+                        'label' => 'https://placehold.co/100x80/ffffff/333333?text=Light',
+                        'description' => 'Light Theme',
+                    ],
+                    [
+                        'value' => 'dark',
+                        'label' => 'https://placehold.co/100x80/1a1a2e/ffffff?text=Dark',
+                        'description' => 'Dark Theme',
+                    ],
+                    [
+                        'value' => 'blue',
+                        'label' => 'https://placehold.co/100x80/0066cc/ffffff?text=Blue',
+                        'description' => 'Blue Theme',
+                    ],
+                    [
+                        'value' => 'green',
+                        'label' => 'https://placehold.co/100x80/28a745/ffffff?text=Green',
+                        'description' => 'Green Theme',
+                    ],
+                ],
+            ]);
+
+            // Radio Image with explicit 'image' property and tooltips
+            $stack->field('layout_preset', [
+                'type' => 'radio-image',
+                'label' => 'Layout Preset',
+                'description' => 'Choose a page layout. Uses image property for URL and label for tooltip.',
+                'default' => 'sidebar-right',
+                'options' => [
+                    [
+                        'value' => 'full-width',
+                        'label' => 'Full Width Layout',
+                        'image' => 'https://placehold.co/120x90/e9ecef/495057?text=Full+Width',
+                        'tooltip' => 'Content spans the entire width',
+                    ],
+                    [
+                        'value' => 'sidebar-left',
+                        'label' => 'Sidebar Left',
+                        'image' => 'https://placehold.co/120x90/e9ecef/495057?text=◀+Content',
+                        'tooltip' => 'Sidebar on the left side',
+                    ],
+                    [
+                        'value' => 'sidebar-right',
+                        'label' => 'Sidebar Right',
+                        'image' => 'https://placehold.co/120x90/e9ecef/495057?text=Content+▶',
+                        'tooltip' => 'Sidebar on the right side',
+                    ],
+                    [
+                        'value' => 'dual-sidebar',
+                        'label' => 'Dual Sidebar',
+                        'image' => 'https://placehold.co/120x90/e9ecef/495057?text=◀+Content+▶',
+                        'tooltip' => 'Sidebars on both sides',
+                    ],
+                ],
+                'attributes' => [
+                    'columns' => 4, // Fixed 4 columns
+                    'imageWidth' => '120px',
+                    'imageHeight' => '90px',
+                ],
+            ]);
+
+            // Large images with custom dimensions
+            $stack->field('hero_style', [
+                'type' => 'radio-image',
+                'label' => 'Hero Section Style',
+                'description' => 'Select a hero section design. Larger preview images.',
+                'default' => 'centered',
+                'options' => [
+                    [
+                        'value' => 'centered',
+                        'label' => 'Centered Hero',
+                        'image' => 'https://placehold.co/200x120/6c5ce7/ffffff?text=Centered',
+                    ],
+                    [
+                        'value' => 'split',
+                        'label' => 'Split Layout',
+                        'image' => 'https://placehold.co/200x120/00b894/ffffff?text=Split',
+                    ],
+                    [
+                        'value' => 'video-bg',
+                        'label' => 'Video Background',
+                        'image' => 'https://placehold.co/200x120/e17055/ffffff?text=Video+BG',
+                    ],
+                ],
+                'attributes' => [
+                    'columns' => 3,
+                    'imageWidth' => '200px',
+                    'imageHeight' => '120px',
+                    'objectFit' => 'cover',
+                ],
+            ]);
+
+            // Compact icon/button selection
+            $stack->field('icon_pack', [
+                'type' => 'radio-image',
+                'label' => 'Icon Style',
+                'description' => 'Choose an icon style. Smaller square images work well for icons.',
+                'default' => 'outlined',
+                'options' => [
+                    [
+                        'value' => 'filled',
+                        'label' => 'Filled Icons',
+                        'image' => 'https://placehold.co/60x60/343a40/ffffff?text=●',
+                    ],
+                    [
+                        'value' => 'outlined',
+                        'label' => 'Outlined Icons',
+                        'image' => 'https://placehold.co/60x60/ffffff/343a40?text=○',
+                    ],
+                    [
+                        'value' => 'rounded',
+                        'label' => 'Rounded Icons',
+                        'image' => 'https://placehold.co/60x60/17a2b8/ffffff?text=◉',
+                    ],
+                    [
+                        'value' => 'duotone',
+                        'label' => 'Duotone Icons',
+                        'image' => 'https://placehold.co/60x60/6f42c1/e9d5ff?text=◐',
+                    ],
+                ],
+                'attributes' => [
+                    'imageWidth' => '60px',
+                    'imageHeight' => '60px',
+                ],
+            ]);
         })
         ->build();
 

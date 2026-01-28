@@ -1150,6 +1150,100 @@
 }
 
 /* ==========================================================================
+   Radio Image Field
+   ========================================================================== */
+
+.os-radio-image-group {
+  display: grid;
+  gap: 12px;
+}
+
+.os-radio-image-option {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+}
+
+.os-radio-image-option.os-disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.os-radio-image-input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.os-radio-image-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid var(--os-border);
+  border-radius: var(--os-radius);
+  overflow: hidden;
+  background: var(--os-gray-50);
+  transition: all var(--os-transition);
+}
+
+.os-radio-image-option:hover .os-radio-image-container {
+  border-color: var(--os-border-hover);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.os-radio-image-option.os-selected .os-radio-image-container {
+  border-color: var(--os-primary);
+  box-shadow: 0 0 0 3px var(--os-primary-100);
+}
+
+.os-radio-image-img {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.os-radio-image-check {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  background: var(--os-primary);
+  color: var(--os-white);
+  border-radius: 50%;
+  opacity: 0;
+  transform: scale(0.5);
+  transition: all var(--os-transition);
+}
+
+.os-radio-image-option.os-selected .os-radio-image-check {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.os-radio-image-description {
+  font-size: 12px;
+  color: var(--os-gray-600);
+  text-align: center;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.os-radio-image-option.os-selected .os-radio-image-description {
+  color: var(--os-primary);
+  font-weight: 500;
+}
+
+/* ==========================================================================
    Color Field
    ========================================================================== */
 

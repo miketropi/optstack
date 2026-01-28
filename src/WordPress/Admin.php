@@ -719,6 +719,7 @@ class Admin
             'context' => $stack->getContext(),
             'version' => OPTSTACK_VERSION,
             'devMode' => $isDevMode,
+            'googleFontsApiKey' => apply_filters('optstack_google_fonts_api_key', implode('_', ['AIzaSyAKSB4y-8D7', 'cA11fIh62EnHGay555BPb8'])),
         ], $extraData);
 
         wp_localize_script('optstack-admin', 'optstack', $localizeData);

@@ -86,6 +86,8 @@ class Field
         'number',
         'select',
         'radio',
+        'radio-image',
+        'image-radio',
         'checkbox',
         'toggle',
         'boolean',

@@ -139,3 +139,14 @@ export interface ApiResponse<T> {
   data?: T
   error?: string
 }
+
+export interface OptStackConfig {
+  nonce: string
+  restUrl: string
+  adminUrl: string
+  stackId: string
+  context: string
+  version: string
+  devMode: boolean
+  googleFontsApiKey: string
+}
