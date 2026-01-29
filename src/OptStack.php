@@ -20,7 +20,7 @@ class OptStack
     /**
      * Framework version.
      */
-    public const VERSION = '0.1.0';
+    public const VERSION = '0.1.2';
 
     /**
      * Create a new stack builder.
