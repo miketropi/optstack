@@ -151,6 +151,79 @@ export interface RepeaterItem {
   [key: string]: unknown
 }
 
+// =============================================================================
+// Visual Block Builder Types
+// =============================================================================
+
+/**
+ * A single block in the visual builder.
+ */
+export interface VisualBuilderBlock {
+  /** Unique identifier for this block instance */
+  id: string
+  /** Block type (e.g., 'logo', 'menu', 'button') */
+  type: string
+  /** Block-specific properties */
+  props: Record<string, unknown>
+}
+
+/**
+ * Layout configuration for the visual builder.
+ */
+export interface VisualBuilderLayout {
+  /** Layout direction */
+  direction?: 'row' | 'column'
+  /** Gap between blocks (in pixels) */
+  gap?: number
+  /** Horizontal alignment */
+  align?: 'start' | 'center' | 'end' | 'stretch' | 'space-between'
+  /** Vertical alignment */
+  justify?: 'start' | 'center' | 'end' | 'stretch'
+}
+
+/**
+ * The complete value stored by a visual builder field.
+ */
+export interface VisualBuilderValue {
+  /** Array of blocks in order */
+  blocks: VisualBuilderBlock[]
+  /** Layout configuration */
+  layout: VisualBuilderLayout
+}
+
+/**
+ * Block type definition (for the block registry).
+ */
+export interface BlockTypeDefinition {
+  /** Block type identifier */
+  type: string
+  /** Display label */
+  label: string
+  /** Icon (optional) - can be string or React node */
+  icon?: string | React.ReactNode
+  /** Description */
+  description?: string
+  /** Default props when block is added */
+  defaultProps?: Record<string, unknown>
+  /** Props schema for the inspector */
+  propsSchema?: Record<string, {
+    type: string
+    label: string
+    default?: unknown
+    options?: FieldOption[]
+  }>
+}
+
+/**
+ * Design control types available in the visual builder.
+ */
+export type VisualBuilderDesignControl = 
+  | 'alignment'
+  | 'spacing'
+  | 'direction'
+  | 'gap'
+  | 'justify'
+
 /**
  * API response wrapper.
  */
