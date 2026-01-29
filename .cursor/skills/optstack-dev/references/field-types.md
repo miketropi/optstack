@@ -387,9 +387,115 @@ Deferred groups show a trigger button instead of inline fields. Clicking opens a
 - Advanced settings most users won't need
 - Complex configurations that would clutter the main form
 - SEO, pricing, or technical settings
+- **Visual Block Builder fields** (required)
 
 Key points:
 - Data structure identical to normal groups
 - Validation works the same way
 - Just a rendering strategy, not a data model change
 - Existing data preserved if modal never opened
+
+---
+
+## Visual Block Builder
+
+**Type**: `visual_builder`
+
+The Visual Block Builder is a specialized field for composing layouts visually using drag-and-drop.
+
+### Block Architecture
+
+Visual Builder uses **two distinct block categories**:
+
+1. **Structure Blocks** (Containers):
+   - Hold and organize Element blocks
+   - Examples: `row`, `column`, `columns`, `section`, `container`
+   - Can contain other Structure or Element blocks
+   - Cannot be placed inside Element blocks
+
+2. **Element Blocks** (Content):
+   - Display actual content (text, images, buttons, etc.)
+   - Examples: `logo`, `menu`, `button`, `text`, `search`, `social`, `image`, `icon`, `spacer`, `divider`
+   - Must be placed inside Structure blocks
+   - Cannot contain other blocks (leaf nodes)
+
+### Field Definition
+
+```php
+$group->field('layout', [
+    'type' => 'visual_builder',
+    'label' => 'Header Layout',
+    'attributes' => [
+        // STRUCTURE BLOCKS (Containers)
+        'structure' => ['row', 'column', 'section'],
+        
+        // ELEMENT BLOCKS (Content)
+        'elements' => ['logo', 'menu', 'button', 'search', 'spacer'],
+        
+        // Design controls for Structure blocks
+        'design' => ['gap', 'padding', 'alignment', 'justify', 'background'],
+    ],
+    'default' => [
+        'structure' => [
+            [
+                'id' => 'main_row',
+                'type' => 'row',
+                'blockCategory' => 'structure',
+                'props' => ['gap' => 16, 'alignment' => 'center'],
+                'elements' => [
+                    ['id' => 'logo', 'type' => 'logo', 'blockCategory' => 'element', 'props' => []],
+                    ['id' => 'menu', 'type' => 'menu', 'blockCategory' => 'element', 'props' => []],
+                ],
+            ],
+        ],
+        'settings' => ['background' => '#ffffff'],
+    ],
+]);
+```
+
+### Requirements
+
+- **Must** be used inside a Deferred Group (modal/drawer)
+- **Cannot** be searchable
+- Stores pure JSON (no HTML, CSS, or JSX)
+
+### Data Structure
+
+```json
+{
+  "structure": [
+    {
+      "id": "row_1",
+      "type": "row",
+      "blockCategory": "structure",
+      "props": { "gap": 16, "alignment": "center" },
+      "elements": [
+        { "id": "logo_1", "type": "logo", "blockCategory": "element", "props": {} },
+        { "id": "menu_1", "type": "menu", "blockCategory": "element", "props": {} }
+      ]
+    }
+  ],
+  "settings": { "background": "#ffffff" }
+}
+```
+
+### Common Structure Types
+
+- `row`: Horizontal container (flex-direction: row)
+- `column`: Vertical container (flex-direction: column)
+- `columns`: Multi-column grid layout
+- `section`: Full-width section container
+- `container`: Generic wrapper with padding/margin
+
+### Common Element Types
+
+- `logo`: Site logo with size/link
+- `menu`: Navigation menu
+- `button`: CTA button
+- `text`: Rich text content
+- `search`: Search form
+- `social`: Social media links
+- `image`: Image with caption
+- `icon`: Icon with optional link
+- `spacer`: Flexible spacing element
+- `divider`: Visual separator line

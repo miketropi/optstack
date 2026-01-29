@@ -21,6 +21,7 @@ import {
   ChevronDown,
   ChevronUp,
   Square,
+  Code,
 } from 'lucide-react'
 import type { FieldRendererProps, VisualBuilderValue, VisualBuilderBlock, BlockTypeDefinition, FieldSchema } from '../../schema/types'
 import { FieldRenderer } from '../FieldRenderer'
@@ -74,6 +75,11 @@ const BUILT_IN_BLOCKS: Record<string, ExtendedBlockTypeDefinition> = {
           { value: 'large', label: 'Large' },
         ],
       },
+      custom_class: {
+        type: 'text',
+        label: 'Custom Class',
+        default: '',
+      }
     },
   },
   menu: {
@@ -99,6 +105,11 @@ const BUILT_IN_BLOCKS: Record<string, ExtendedBlockTypeDefinition> = {
           { value: 'dropdown', label: 'Dropdown' },
         ],
       },
+      custom_class: {
+        type: 'text',
+        label: 'Custom Class',
+        default: '',
+      }
     },
   },
   button: {
@@ -130,6 +141,11 @@ const BUILT_IN_BLOCKS: Record<string, ExtendedBlockTypeDefinition> = {
           { value: 'ghost', label: 'Ghost' },
         ],
       },
+      custom_class: {
+        type: 'text',
+        label: 'Custom Class',
+        default: '',
+      }
     },
   },
   search: {
@@ -155,6 +171,11 @@ const BUILT_IN_BLOCKS: Record<string, ExtendedBlockTypeDefinition> = {
           { value: 'expanded', label: 'Expanded' },
         ],
       },
+      custom_class: {
+        type: 'text',
+        label: 'Custom Class',
+        default: '',
+      }
     },
   },
   spacer: {
@@ -175,6 +196,11 @@ const BUILT_IN_BLOCKS: Record<string, ExtendedBlockTypeDefinition> = {
         label: 'Fixed Width (px)',
         default: '',
       },
+      custom_class: {
+        type: 'text',
+        label: 'Custom Class',
+        default: '',
+      }
     },
   },
   divider: {
@@ -195,6 +221,11 @@ const BUILT_IN_BLOCKS: Record<string, ExtendedBlockTypeDefinition> = {
           { value: 'none', label: 'None (spacing only)' },
         ],
       },
+      custom_class: {
+        type: 'text',
+        label: 'Custom Class',
+        default: '',
+      }
     },
   },
   social: {
@@ -215,6 +246,11 @@ const BUILT_IN_BLOCKS: Record<string, ExtendedBlockTypeDefinition> = {
           { value: 'filled', label: 'Filled' },
         ],
       },
+      custom_class: {
+        type: 'text',
+        label: 'Custom Class',
+        default: '',
+      }
     },
   },
   text: {
@@ -242,6 +278,32 @@ const BUILT_IN_BLOCKS: Record<string, ExtendedBlockTypeDefinition> = {
           { value: 'h3', label: 'Heading 3' },
         ],
       },
+      custom_class: {
+        type: 'text',
+        label: 'Custom Class',
+        default: '',
+      }
+    },
+  },
+  // elelemt shortcode
+  shortcode: {
+    type: 'shortcode',
+    label: 'Shortcode',
+    icon: <Code size={18} />,
+    category: 'element',
+    description: 'Shortcode',
+    defaultProps: { shortcode: '' },
+    propsSchema: {
+      shortcode: {
+        type: 'text',
+        label: 'Shortcode',
+        default: '',
+      },
+      custom_class: {
+        type: 'text',
+        label: 'Custom Class',
+        default: '',
+      }
     },
   },
 
@@ -261,6 +323,11 @@ const BUILT_IN_BLOCKS: Record<string, ExtendedBlockTypeDefinition> = {
         label: 'Padding (px)',
         default: 20,
       },
+      custom_class: {
+        type: 'text',
+        label: 'Custom Class',
+        default: '',
+      }
     },
   },
   columns_2: {
@@ -278,6 +345,11 @@ const BUILT_IN_BLOCKS: Record<string, ExtendedBlockTypeDefinition> = {
         label: 'Gap (px)',
         default: 20,
       },
+      custom_class: {
+        type: 'text',
+        label: 'Custom Class',
+        default: '',
+      }
     },
   },
   columns_3: {
@@ -295,6 +367,11 @@ const BUILT_IN_BLOCKS: Record<string, ExtendedBlockTypeDefinition> = {
         label: 'Gap (px)',
         default: 20,
       },
+      custom_class: {
+        type: 'text',
+        label: 'Custom Class',
+        default: '',
+      }
     },
   },
   columns_4: {
@@ -312,6 +389,11 @@ const BUILT_IN_BLOCKS: Record<string, ExtendedBlockTypeDefinition> = {
         label: 'Gap (px)',
         default: 16,
       },
+      custom_class: {
+        type: 'text',
+        label: 'Custom Class',
+        default: '',
+      }
     },
   },
   row: {
@@ -351,6 +433,11 @@ const BUILT_IN_BLOCKS: Record<string, ExtendedBlockTypeDefinition> = {
           { value: 'space-between', label: 'Space Between' },
         ],
       },
+      custom_class: {
+        type: 'text',
+        label: 'Custom Class',
+        default: '',
+      }
     },
   },
 }

@@ -1726,160 +1726,133 @@ add_action('optstack_init', function () {
     // Visual Builder allows users to compose structured layouts by
     // dragging and dropping predefined blocks.
     //
-    // Key points:
-    // - MUST be used inside a Deferred Group
+    // 🎯 Key Concepts:
+    // - MUST be used inside a Deferred Group (modal/drawer)
     // - Stores pure JSON data (no HTML, CSS, or JSX)
-    // - Data structure: { blocks: [...], layout: {...} }
+    // - Data structure: { structure: [...], settings: {...} }
     // - NOT searchable (layout configuration, not queryable data)
+    // - Block registry validates allowed blocks and their props
+    //
+    // 🏗️ Block Architecture (Two Categories):
+    //
+    // 1️⃣ STRUCTURE BLOCKS (Containers):
+    //    Purpose: Container blocks that hold and organize Element blocks
+    //    - row: Horizontal container (flex-direction: row)
+    //    - column: Vertical container (flex-direction: column)
+    //    - columns: Multi-column grid layout
+    //    - section: Full-width section container
+    //    - container: Generic wrapper with padding/margin
+    //    - Can contain: Other Structure blocks or Element blocks
+    //    - Cannot be: Placed inside Element blocks
+    //
+    // 2️⃣ ELEMENT BLOCKS (Content):
+    //    Purpose: Content blocks that display actual content
+    //    - logo: Site logo with size/link
+    //    - menu: Navigation menu
+    //    - button: CTA button with text/URL/style
+    //    - text: Rich text content
+    //    - search: Search form
+    //    - social: Social media links
+    //    - image: Image with caption
+    //    - icon: Icon with optional link
+    //    - spacer: Flexible spacing element
+    //    - divider: Visual separator line
+    //    - Must be: Placed inside Structure blocks
+    //    - Cannot contain: Other blocks (leaf nodes)
+    //
+    // 🎨 Design Controls (for Structure blocks):
+    // - gap: Space between blocks (px)
+    // - padding: Internal spacing
+    // - alignment: Vertical alignment (start/center/end)
+    // - justify: Horizontal distribution (start/center/end/space-between)
+    // - background: Background color
+    // - direction: Layout flow (row/column) - for row/column types
     // =========================================================================
     OptStack::make('visual_builder_demo')
         ->forOptions()
         ->menuParent('optstack')
         ->label('Visual Builder Demo')
-        ->description('Demonstrates the Visual Block Builder field')
+        ->description('Demonstrates the Visual Block Builder field for composing layouts')
         ->define(function ($stack) {
             // Site name for context
             $stack->field('site_name', [
                 'type' => 'text',
                 'label' => 'Site Name',
                 'default' => 'My Website',
+                'description' => 'Used in logo and footer blocks',
             ]);
 
-            // Header Layout using Visual Builder (in deferred group)
-            $stack->group('header', function ($group) {
+            // Site logo
+            $stack->field('site_logo', [
+                'type' => 'media',
+                'label' => 'Site Logo',
+                'description' => 'Used by logo blocks in layouts',
+                'attributes' => [
+                    'allowedTypes' => ['image'],
+                ],
+            ]);
+
+            
+
+            // ----------------------------------------------------------------
+            // 4. CTA BANNER - Minimal example
+            // ----------------------------------------------------------------
+            // Demonstrates a minimal configuration with limited blocks and
+            // design controls for simpler use cases.
+            $stack->group('cta_banner', function ($group) {
                 $group->field('layout', [
                     'type' => 'visual_builder',
-                    'label' => 'Header Layout',
-                    'description' => 'Drag and drop blocks to build your header.',
+                    'label' => 'CTA Banner',
                     'attributes' => [
                         // Specify which blocks are allowed
-                        'blocks' => ['logo', 'menu', 'button', 'search', 'spacer'],
-                        // Specify which design controls to show
-                        'design' => ['direction', 'gap', 'alignment', 'justify'],
+                        'blocks' => ['logo', 'menu', 'button', 'search', 'spacer', 'shortcode', 'row'],
                     ],
-                    'default' => [
-                        'blocks' => [
-                            [
-                                'id' => 'block_1',
-                                'type' => 'logo',
-                                'props' => ['align' => 'left', 'size' => 'medium'],
-                            ],
-                            [
-                                'id' => 'block_2',
-                                'type' => 'spacer',
-                                'props' => ['grow' => true],
-                            ],
-                            [
-                                'id' => 'block_3',
-                                'type' => 'menu',
-                                'props' => ['style' => 'horizontal'],
-                            ],
-                            [
-                                'id' => 'block_4',
-                                'type' => 'button',
-                                'props' => ['text' => 'Contact', 'style' => 'primary'],
-                            ],
-                        ],
-                        'layout' => [
-                            'direction' => 'row',
-                            'gap' => 16,
-                            'align' => 'center',
-                        ],
-                    ],
-                ]);
-
-                $group->field('sticky', [
-                    'type' => 'toggle',
-                    'label' => 'Sticky Header',
-                    'default' => false,
-                ]);
-
-                $group->field('background', [
-                    'type' => 'color',
-                    'label' => 'Background Color',
-                    'default' => '#ffffff',
                 ]);
             }, [
-                'label' => 'Header Builder',
-                'description' => 'Build your site header with drag-and-drop blocks.',
-                'deferred' => true, // Required for Visual Builder
-                'ui' => [
-                    'triggerLabel' => 'Edit Header Layout',
-                    'render' => 'modal',
-                ],
-            ]);
-
-            // Footer Layout using Visual Builder (in deferred group)
-            $stack->group('footer', function ($group) {
-                $group->field('layout', [
-                    'type' => 'visual_builder',
-                    'label' => 'Footer Layout',
-                    'description' => 'Drag and drop blocks to build your footer.',
-                    'attributes' => [
-                        'blocks' => ['logo', 'menu', 'text', 'social', 'divider'],
-                        'design' => ['direction', 'gap', 'alignment'],
-                    ],
-                    'default' => [
-                        'blocks' => [
-                            [
-                                'id' => 'footer_1',
-                                'type' => 'logo',
-                                'props' => ['size' => 'small'],
-                            ],
-                            [
-                                'id' => 'footer_2',
-                                'type' => 'text',
-                                'props' => ['content' => '© 2026 My Website', 'tag' => 'p'],
-                            ],
-                            [
-                                'id' => 'footer_3',
-                                'type' => 'social',
-                                'props' => ['style' => 'default'],
-                            ],
-                        ],
-                        'layout' => [
-                            'direction' => 'row',
-                            'gap' => 24,
-                            'align' => 'center',
-                            'justify' => 'space-between',
-                        ],
-                    ],
-                ]);
-
-                $group->field('copyright', [
-                    'type' => 'text',
-                    'label' => 'Copyright Text',
-                    'default' => '© 2026 All rights reserved.',
-                ]);
-            }, [
-                'label' => 'Footer Builder',
-                'description' => 'Build your site footer with drag-and-drop blocks.',
+                'label' => 'CTA Banner',
+                'description' => 'Simple call-to-action banner.',
                 'deferred' => true,
                 'ui' => [
-                    'triggerLabel' => 'Edit Footer Layout',
-                    'render' => 'modal',
-                ],
-            ]);
-
-            // Minimal Visual Builder (all blocks, minimal design controls)
-            $stack->group('cta_section', function ($group) {
-                $group->field('layout', [
-                    'type' => 'visual_builder',
-                    'label' => 'CTA Section',
-                    'attributes' => [
-                        // Empty blocks array = all blocks allowed
-                        'blocks' => [],
-                        // Only show gap control
-                        'design' => ['gap'],
-                    ],
-                ]);
-            }, [
-                'label' => 'CTA Section',
-                'description' => 'Build a call-to-action section.',
-                'deferred' => true,
-                'ui' => [
-                    'triggerLabel' => 'Edit CTA Section',
+                    'triggerLabel' => 'Edit CTA Banner',
                     'render' => 'drawer',
+                ],
+            ]);
+
+            // ----------------------------------------------------------------
+            // 5. FLEXIBLE SECTION - All blocks enabled
+            // ----------------------------------------------------------------
+            // Demonstrates complete flexibility with all blocks and design
+            // controls available.
+            $stack->group('flexible_section', function ($group) {
+                $group->field('layout', [
+                    'type' => 'visual_builder',
+                    'label' => 'Flexible Section',
+                    'description' => 'Build any layout with all available blocks.',
+                    'attributes' => [
+                        // Empty array = all structure blocks allowed
+                        'structure' => [],
+                        // Empty array = all element blocks allowed
+                        'elements' => [],
+                        // All design controls (empty = all)
+                        'design' => [],
+                    ],
+                ]);
+
+                $group->field('section_id', [
+                    'type' => 'text',
+                    'label' => 'Section ID',
+                    'description' => 'HTML ID attribute for anchor links',
+                    'attributes' => [
+                        'placeholder' => 'e.g., about-us',
+                    ],
+                ]);
+            }, [
+                'label' => 'Flexible Section',
+                'description' => 'Build any custom section layout.',
+                'deferred' => true,
+                'ui' => [
+                    'triggerLabel' => 'Edit Flexible Section',
+                    'render' => 'modal',
                 ],
             ]);
         })
@@ -2297,3 +2270,671 @@ $filtered_products = new WP_Query([
 // $keys = $manager->getIndexedMetaKeys($stack);
 // Returns: ['price' => '_optstack_idx_post_price', 'seo.title' => '_optstack_idx_post_seo_title', ...]
 */
+
+// =============================================================================
+// VISUAL BUILDER HELPER FUNCTIONS
+// =============================================================================
+
+/**
+ * Get Visual Builder layout data.
+ *
+ * @param string $group_key Group key (e.g., 'header', 'footer', 'hero')
+ * @return array Layout data: ['structure' => [...], 'settings' => [...]]
+ */
+function optstack_get_visual_layout(string $group_key): array
+{
+    $data = get_option('visual_builder_demo', []);
+    return $data[$group_key]['layout'] ?? ['structure' => [], 'settings' => []];
+}
+
+/**
+ * Get structure blocks from a Visual Builder layout.
+ *
+ * @param string $group_key Group key
+ * @return array Array of structure block objects
+ */
+function optstack_get_visual_structure(string $group_key): array
+{
+    $layout = optstack_get_visual_layout($group_key);
+    return $layout['structure'] ?? [];
+}
+
+/**
+ * Get all element blocks from all structure blocks (flattened).
+ *
+ * @param string $group_key Group key
+ * @return array Array of all element blocks
+ */
+function optstack_get_visual_elements(string $group_key): array
+{
+    $structure = optstack_get_visual_structure($group_key);
+    $elements = [];
+    
+    foreach ($structure as $struct_block) {
+        if (isset($struct_block['elements'])) {
+            $elements = array_merge($elements, $struct_block['elements']);
+        }
+    }
+    
+    return $elements;
+}
+
+/**
+ * Get global settings from a Visual Builder.
+ *
+ * @param string $group_key Group key
+ * @return array Global settings (background, minHeight, etc.)
+ */
+function optstack_get_visual_settings(string $group_key): array
+{
+    $layout = optstack_get_visual_layout($group_key);
+    return $layout['settings'] ?? [];
+}
+
+/**
+ * Render Visual Builder layout as HTML.
+ *
+ * This renders all structure blocks with their contained elements.
+ * In production, you'd want a more sophisticated rendering system.
+ *
+ * @param string $group_key Group key
+ * @param array  $options   Rendering options
+ * @return string HTML output
+ */
+function optstack_render_visual_layout(string $group_key, array $options = []): string
+{
+    $data = optstack_get_visual_layout($group_key);
+    $structure = $data['structure'] ?? [];
+    $settings = $data['settings'] ?? [];
+    
+    if (empty($structure)) {
+        return '';
+    }
+    
+    // Build wrapper with global settings
+    $wrapper_styles = [];
+    $wrapper_classes = ['optstack-visual-layout', "optstack-layout-{$group_key}"];
+    
+    if (!empty($settings['background'])) {
+        $wrapper_styles[] = 'background: ' . $settings['background'];
+    }
+    
+    if (!empty($settings['minHeight'])) {
+        $wrapper_styles[] = 'min-height: ' . $settings['minHeight'];
+    }
+    
+    $wrapper_style_attr = !empty($wrapper_styles) ? ' style="' . esc_attr(implode('; ', $wrapper_styles)) . '"' : '';
+    $wrapper_class_attr = ' class="' . esc_attr(implode(' ', $wrapper_classes)) . '"';
+    
+    // Render structure blocks
+    $html = '<div' . $wrapper_class_attr . $wrapper_style_attr . '>';
+    
+    foreach ($structure as $struct_block) {
+        $html .= optstack_render_structure_block($struct_block, $options);
+    }
+    
+    $html .= '</div>';
+    
+    return $html;
+}
+
+/**
+ * Render a structure block (container) with its elements.
+ *
+ * @param array $struct_block Structure block data
+ * @param array $options      Rendering options
+ * @return string HTML output
+ */
+function optstack_render_structure_block(array $struct_block, array $options = []): string
+{
+    $type = $struct_block['type'] ?? '';
+    $id = $struct_block['id'] ?? '';
+    $props = $struct_block['props'] ?? [];
+    $elements = $struct_block['elements'] ?? [];
+    
+    // Build structure styles
+    $styles = ['display: flex'];
+    $classes = ['optstack-structure', "optstack-structure-{$type}"];
+    
+    // Type-specific defaults
+    if ($type === 'row') {
+        $styles[] = 'flex-direction: row';
+    } elseif ($type === 'column') {
+        $styles[] = 'flex-direction: column';
+    }
+    
+    if (isset($props['gap'])) {
+        $styles[] = 'gap: ' . $props['gap'] . 'px';
+    }
+    
+    if (!empty($props['alignment'])) {
+        $styles[] = 'align-items: ' . $props['alignment'];
+    }
+    
+    if (!empty($props['justify'])) {
+        $styles[] = 'justify-content: ' . $props['justify'];
+    }
+    
+    if (!empty($props['padding']) && is_array($props['padding'])) {
+        $styles[] = sprintf(
+            'padding: %dpx %dpx %dpx %dpx',
+            $props['padding']['top'] ?? 0,
+            $props['padding']['right'] ?? 0,
+            $props['padding']['bottom'] ?? 0,
+            $props['padding']['left'] ?? 0
+        );
+    }
+    
+    if (!empty($props['background'])) {
+        $styles[] = 'background: ' . $props['background'];
+    }
+    
+    $style_attr = ' style="' . esc_attr(implode('; ', $styles)) . '"';
+    $class_attr = ' class="' . esc_attr(implode(' ', $classes)) . '"';
+    $id_attr = $id ? ' id="' . esc_attr($id) . '"' : '';
+    
+    // Render elements
+    $html = '<div' . $id_attr . $class_attr . $style_attr . '>';
+    
+    foreach ($elements as $element) {
+        // Check if element is another structure block (nested)
+        if (($element['blockCategory'] ?? '') === 'structure') {
+            $html .= optstack_render_structure_block($element, $options);
+        } else {
+            $html .= optstack_render_element_block($element, $options);
+        }
+    }
+    
+    $html .= '</div>';
+    
+    return $html;
+}
+
+/**
+ * Render a single element block.
+ *
+ * Element blocks are content blocks (logo, button, text, etc.) that
+ * cannot contain other blocks.
+ *
+ * @param array $element Element block data
+ * @param array $options Rendering options
+ * @return string HTML output
+ */
+function optstack_render_element_block(array $element, array $options = []): string
+{
+    $type = $element['type'] ?? '';
+    $id = $element['id'] ?? '';
+    $props = $element['props'] ?? [];
+    
+    $classes = ['optstack-element', "optstack-element-{$type}"];
+    $class_attr = ' class="' . esc_attr(implode(' ', $classes)) . '"';
+    $id_attr = $id ? ' id="' . esc_attr($id) . '"' : '';
+    
+    // Render based on element type
+    switch ($type) {
+        case 'logo':
+            return sprintf(
+                '<div%s%s>%s</div>',
+                $id_attr,
+                $class_attr,
+                optstack_render_logo_element($props)
+            );
+            
+        case 'menu':
+            return sprintf(
+                '<nav%s%s>%s</nav>',
+                $id_attr,
+                $class_attr,
+                optstack_render_menu_element($props)
+            );
+            
+        case 'button':
+            return sprintf(
+                '<div%s%s>%s</div>',
+                $id_attr,
+                $class_attr,
+                optstack_render_button_element($props)
+            );
+            
+        case 'text':
+            return sprintf(
+                '<div%s%s>%s</div>',
+                $id_attr,
+                $class_attr,
+                optstack_render_text_element($props)
+            );
+            
+        case 'spacer':
+            return sprintf(
+                '<div%s class="%s" style="flex-grow: %d"></div>',
+                $id_attr,
+                esc_attr(implode(' ', $classes)),
+                $props['grow'] ? 1 : 0
+            );
+            
+        case 'divider':
+            $style = $props['style'] ?? 'solid';
+            $color = $props['color'] ?? '#e5e7eb';
+            return sprintf(
+                '<hr%s class="%s" style="border-top: 1px %s %s; margin: 0;">',
+                $id_attr,
+                esc_attr(implode(' ', $classes)),
+                esc_attr($style),
+                esc_attr($color)
+            );
+            
+        case 'social':
+            return sprintf(
+                '<div%s%s>%s</div>',
+                $id_attr,
+                $class_attr,
+                optstack_render_social_element($props)
+            );
+            
+        case 'search':
+            return sprintf(
+                '<div%s%s>%s</div>',
+                $id_attr,
+                $class_attr,
+                optstack_render_search_element($props)
+            );
+            
+        case 'image':
+            return sprintf(
+                '<div%s%s>%s</div>',
+                $id_attr,
+                $class_attr,
+                optstack_render_image_element($props)
+            );
+            
+        default:
+            return sprintf(
+                '<div%s%s>[Element: %s]</div>',
+                $id_attr,
+                $class_attr,
+                esc_html($type)
+            );
+    }
+}
+
+/**
+ * Render logo element.
+ *
+ * @param array $props Element properties
+ * @return string HTML
+ */
+function optstack_render_logo_element(array $props): string
+{
+    $data = get_option('visual_builder_demo', []);
+    $logo_id = $data['site_logo'] ?? null;
+    $site_name = $data['site_name'] ?? get_bloginfo('name');
+    $link = $props['link'] ?? home_url('/');
+    $size = $props['size'] ?? 'medium';
+    
+    $sizes = [
+        'small' => 'thumbnail',
+        'medium' => 'medium',
+        'large' => 'large',
+    ];
+    
+    $html = '<a href="' . esc_url($link) . '" class="optstack-logo">';
+    
+    if ($logo_id) {
+        $html .= wp_get_attachment_image($logo_id, $sizes[$size] ?? 'medium', false, [
+            'alt' => $site_name,
+            'class' => 'optstack-logo-image',
+        ]);
+    } else {
+        $html .= '<span class="optstack-logo-text">' . esc_html($site_name) . '</span>';
+    }
+    
+    $html .= '</a>';
+    
+    return $html;
+}
+
+/**
+ * Render menu element.
+ *
+ * @param array $props Element properties
+ * @return string HTML
+ */
+function optstack_render_menu_element(array $props): string
+{
+    $menu_id = $props['menu_id'] ?? 'primary';
+    $style = $props['style'] ?? 'horizontal';
+    
+    $args = [
+        'theme_location' => $menu_id,
+        'container' => false,
+        'menu_class' => 'optstack-menu optstack-menu-' . $style,
+        'echo' => false,
+    ];
+    
+    return wp_nav_menu($args) ?: '<p>Menu not configured</p>';
+}
+
+/**
+ * Render button element.
+ *
+ * @param array $props Element properties
+ * @return string HTML
+ */
+function optstack_render_button_element(array $props): string
+{
+    $text = $props['text'] ?? 'Button';
+    $url = $props['url'] ?? '#';
+    $style = $props['style'] ?? 'primary';
+    $size = $props['size'] ?? 'medium';
+    $target = $props['target'] ?? '_self';
+    
+    $classes = ['optstack-button', "optstack-button-{$style}", "optstack-button-{$size}"];
+    
+    return sprintf(
+        '<a href="%s" target="%s" class="%s">%s</a>',
+        esc_url($url),
+        esc_attr($target),
+        esc_attr(implode(' ', $classes)),
+        esc_html($text)
+    );
+}
+
+/**
+ * Render text element.
+ *
+ * @param array $props Element properties
+ * @return string HTML
+ */
+function optstack_render_text_element(array $props): string
+{
+    $content = $props['content'] ?? '';
+    $align = $props['align'] ?? 'left';
+    
+    $style = $align !== 'left' ? ' style="text-align: ' . esc_attr($align) . '"' : '';
+    
+    return '<div class="optstack-text"' . $style . '>' . wp_kses_post($content) . '</div>';
+}
+
+/**
+ * Render social element.
+ *
+ * @param array $props Element properties
+ * @return string HTML
+ */
+function optstack_render_social_element(array $props): string
+{
+    $platforms = $props['platforms'] ?? ['twitter', 'facebook', 'instagram'];
+    $style = $props['style'] ?? 'icons';
+    $size = $props['size'] ?? 'medium';
+    
+    // Get social links from settings
+    $settings = get_option('site_settings', []);
+    $social_links = $settings['social_links'] ?? [];
+    
+    $html = '<div class="optstack-social optstack-social-' . esc_attr($style) . '">';
+    
+    foreach ($platforms as $platform) {
+        $url = $social_links[$platform] ?? '';
+        if ($url) {
+            $html .= sprintf(
+                '<a href="%s" target="_blank" rel="noopener" class="optstack-social-link optstack-social-%s" aria-label="%s">%s</a>',
+                esc_url($url),
+                esc_attr($platform),
+                esc_attr(ucfirst($platform)),
+                esc_html(strtoupper(substr($platform, 0, 1)))  // First letter as placeholder
+            );
+        }
+    }
+    
+    $html .= '</div>';
+    
+    return $html;
+}
+
+/**
+ * Render search element.
+ *
+ * @param array $props Element properties
+ * @return string HTML
+ */
+function optstack_render_search_element(array $props): string
+{
+    $placeholder = $props['placeholder'] ?? 'Search...';
+    $style = $props['style'] ?? 'default';
+    
+    return sprintf(
+        '<form role="search" method="get" class="optstack-search optstack-search-%s" action="%s">
+            <input type="search" name="s" placeholder="%s" class="optstack-search-input" />
+            <button type="submit" class="optstack-search-button">Search</button>
+        </form>',
+        esc_attr($style),
+        esc_url(home_url('/')),
+        esc_attr($placeholder)
+    );
+}
+
+/**
+ * Render image element.
+ *
+ * @param array $props Element properties
+ * @return string HTML
+ */
+function optstack_render_image_element(array $props): string
+{
+    $image_id = $props['image_id'] ?? null;
+    $caption = $props['caption'] ?? '';
+    $size = $props['size'] ?? 'large';
+    
+    if (!$image_id) {
+        return '<div class="optstack-image-placeholder">[No image selected]</div>';
+    }
+    
+    $html = '<figure class="optstack-image">';
+    $html .= wp_get_attachment_image($image_id, $size, false, ['class' => 'optstack-image-img']);
+    
+    if ($caption) {
+        $html .= '<figcaption class="optstack-image-caption">' . esc_html($caption) . '</figcaption>';
+    }
+    
+    $html .= '</figure>';
+    
+    return $html;
+}
+
+/**
+ * Find a specific element by ID in a layout.
+ *
+ * @param string $group_key Group key
+ * @param string $element_id Element ID
+ * @return array|null Element data or null if not found
+ */
+function optstack_find_visual_element(string $group_key, string $element_id): ?array
+{
+    $structure = optstack_get_visual_structure($group_key);
+    
+    return optstack_search_elements_recursive($structure, $element_id);
+}
+
+/**
+ * Recursively search for an element by ID.
+ *
+ * @param array  $blocks     Array of blocks to search
+ * @param string $element_id Element ID to find
+ * @return array|null Element data or null if not found
+ */
+function optstack_search_elements_recursive(array $blocks, string $element_id): ?array
+{
+    foreach ($blocks as $block) {
+        // Check if this is the element we're looking for
+        if (($block['id'] ?? '') === $element_id) {
+            return $block;
+        }
+        
+        // Search in nested elements (for structure blocks)
+        if (isset($block['elements']) && is_array($block['elements'])) {
+            $found = optstack_search_elements_recursive($block['elements'], $element_id);
+            if ($found) {
+                return $found;
+            }
+        }
+        
+        // Search in nested columns
+        if (($block['type'] ?? '') === 'columns' && isset($block['elements'])) {
+            foreach ($block['elements'] as $column) {
+                if (is_array($column)) {
+                    $found = optstack_search_elements_recursive($column, $element_id);
+                    if ($found) {
+                        return $found;
+                    }
+                }
+            }
+        }
+    }
+    
+    return null;
+}
+
+/**
+ * Find a specific structure block by ID.
+ *
+ * @param string $group_key    Group key
+ * @param string $structure_id Structure block ID
+ * @return array|null Structure data or null if not found
+ */
+function optstack_find_structure_block(string $group_key, string $structure_id): ?array
+{
+    $structure = optstack_get_visual_structure($group_key);
+    
+    return optstack_search_structure_recursive($structure, $structure_id);
+}
+
+/**
+ * Recursively search for a structure block by ID.
+ *
+ * @param array  $blocks       Array of blocks to search
+ * @param string $structure_id Structure ID to find
+ * @return array|null Structure data or null if not found
+ */
+function optstack_search_structure_recursive(array $blocks, string $structure_id): ?array
+{
+    foreach ($blocks as $block) {
+        if (($block['id'] ?? '') === $structure_id) {
+            return $block;
+        }
+        
+        // Search nested structure blocks
+        if (isset($block['elements']) && is_array($block['elements'])) {
+            foreach ($block['elements'] as $element) {
+                if (($element['blockCategory'] ?? '') === 'structure') {
+                    $found = optstack_search_structure_recursive([$element], $structure_id);
+                    if ($found) {
+                        return $found;
+                    }
+                }
+            }
+        }
+    }
+    
+    return null;
+}
+
+/**
+ * Get all elements of a specific type from a layout.
+ *
+ * @param string $group_key    Group key
+ * @param string $element_type Element type (e.g., 'button', 'logo')
+ * @return array Array of matching elements
+ */
+function optstack_get_elements_by_type(string $group_key, string $element_type): array
+{
+    $structure = optstack_get_visual_structure($group_key);
+    $matches = [];
+    
+    optstack_collect_elements_by_type($structure, $element_type, $matches);
+    
+    return $matches;
+}
+
+/**
+ * Recursively collect elements of a specific type.
+ *
+ * @param array  $blocks       Blocks to search
+ * @param string $element_type Element type to find
+ * @param array  &$matches     Reference to matches array
+ */
+function optstack_collect_elements_by_type(array $blocks, string $element_type, array &$matches): void
+{
+    foreach ($blocks as $block) {
+        // If this is an element of the desired type, add it
+        if (($block['blockCategory'] ?? '') === 'element' && ($block['type'] ?? '') === $element_type) {
+            $matches[] = $block;
+        }
+        
+        // Recurse into nested elements
+        if (isset($block['elements']) && is_array($block['elements'])) {
+            optstack_collect_elements_by_type($block['elements'], $element_type, $matches);
+        }
+    }
+}
+
+/*
+ * =============================================================================
+ * EXAMPLE USAGE: Visual Builder in Templates
+ * =============================================================================
+ *
+ * // In your theme's header.php:
+ * <header class="site-header">
+ *     <?php echo optstack_render_visual_layout('header'); ?>
+ * </header>
+ *
+ * // In your theme's footer.php:
+ * <footer class="site-footer">
+ *     <?php echo optstack_render_visual_layout('footer'); ?>
+ * </footer>
+ *
+ * // In your front-page.php:
+ * <section class="hero">
+ *     <?php echo optstack_render_visual_layout('hero'); ?>
+ * </section>
+ *
+ * // Get specific element data:
+ * $header_cta = optstack_find_visual_element('header', 'header_cta');
+ * if ($header_cta) {
+ *     echo 'CTA Text: ' . $header_cta['props']['text'];
+ * }
+ *
+ * // Get all buttons in footer:
+ * $footer_buttons = optstack_get_elements_by_type('footer', 'button');
+ * foreach ($footer_buttons as $button) {
+ *     echo 'Button: ' . $button['props']['text'];
+ * }
+ *
+ * // Get structure blocks:
+ * $header_structure = optstack_get_visual_structure('header');
+ * foreach ($header_structure as $struct) {
+ *     echo 'Structure: ' . $struct['type']; // 'row', 'column', etc.
+ * }
+ *
+ * // Find specific structure block:
+ * $header_row = optstack_find_structure_block('header', 'header_row');
+ * if ($header_row) {
+ *     $gap = $header_row['props']['gap'] ?? 16;
+ *     echo "Header gap: {$gap}px";
+ * }
+ *
+ * // Access global settings:
+ * $header_settings = optstack_get_visual_settings('header');
+ * $background = $header_settings['background'] ?? '#ffffff';
+ *
+ * // Check if layout exists:
+ * $hero_data = optstack_get_visual_layout('hero');
+ * if (!empty($hero_data['structure'])) {
+ *     echo optstack_render_visual_layout('hero');
+ * } else {
+ *     echo '<p>No hero section configured</p>';
+ * }
+ *
+ * // Get all elements (flattened from all structure blocks):
+ * $all_elements = optstack_get_visual_elements('header');
+ * echo 'Total elements: ' . count($all_elements);
+ */

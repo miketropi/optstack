@@ -109,12 +109,47 @@ $stack->group('header', function ($group) {
 
 ### Required Options
 
-* `blocks` (array of allowed block types)
+* `structure` (array of allowed Structure block types)
+* `elements` (array of allowed Element block types)
 
 ### Optional Options
 
 * `design` (array of allowed design controls)
 * `default` (initial layout structure)
+
+### Example Definition
+
+```php
+$group->field('layout', [
+    'type' => 'visual_builder',
+    'label' => 'Header Layout',
+    'attributes' => [
+        // Structure blocks (containers)
+        'structure' => ['row', 'column', 'section'],
+        
+        // Element blocks (content)
+        'elements' => ['logo', 'menu', 'button', 'search', 'spacer'],
+        
+        // Design controls for Structure blocks
+        'design' => ['gap', 'padding', 'alignment', 'justify', 'background'],
+    ],
+    'default' => [
+        'structure' => [
+            [
+                'id' => 'main_row',
+                'type' => 'row',
+                'blockCategory' => 'structure',
+                'props' => ['gap' => 16],
+                'elements' => [
+                    ['id' => 'logo_1', 'type' => 'logo', 'blockCategory' => 'element', 'props' => []],
+                    ['id' => 'menu_1', 'type' => 'menu', 'blockCategory' => 'element', 'props' => []],
+                ],
+            ],
+        ],
+        'settings' => [],
+    ],
+]);
+```
 
 ---
 
@@ -140,21 +175,77 @@ OptStack Core MUST treat this as a **single field**.
 
 ---
 
+## Block Types Architecture
+
+Visual Builder blocks are organized into **two distinct categories**:
+
+### 1. Structure Blocks (Containers)
+
+**Purpose**: Container blocks that hold and organize Element blocks.
+
+**Characteristics**:
+* Provide layout structure (rows, columns, sections, containers)
+* Can contain multiple Element blocks as children
+* Define spacing, direction, and alignment for their children
+* Cannot be nested inside Element blocks
+* Can be nested inside other Structure blocks (e.g., columns inside sections)
+
+**Common Structure Types**:
+* `row` - Horizontal container (flex-direction: row)
+* `column` - Vertical container (flex-direction: column)
+* `columns` - Multi-column grid layout
+* `section` - Full-width section container
+* `container` - Generic wrapper with padding/margin controls
+
+### 2. Element Blocks (Content)
+
+**Purpose**: Content blocks that display actual content (text, images, buttons, etc.).
+
+**Characteristics**:
+* Provide visual content and functionality
+* Cannot contain other blocks (leaf nodes)
+* Must be placed inside Structure blocks
+* Have specific props based on their type (text, URL, color, etc.)
+
+**Common Element Types**:
+* `logo` - Site logo with size/link
+* `menu` - Navigation menu
+* `button` - Call-to-action button
+* `text` - Rich text content
+* `search` - Search form
+* `social` - Social media links
+* `image` - Image with caption
+* `icon` - Icon with optional link
+* `spacer` - Flexible spacing element
+* `divider` - Visual separator line
+
+---
+
 ## Builder UI Model (Conceptual)
 
-Frontend implementation (React) will expose two main areas:
+Frontend implementation (React) will expose three main areas:
 
 ### 1. Blocks Panel
 
-* Lists allowed block types
+* Lists allowed block types **organized by category** (Structure / Elements)
 * Drag source only
 * No state stored here
+* Visual distinction between Structure and Element blocks
 
-### 2. Design / Inspector Panel
+### 2. Canvas / Composition Area
+
+* Visual preview of the layout
+* Drag-and-drop interface
+* Shows Structure blocks as containers
+* Shows Element blocks as content within containers
+* **Validation**: Elements must be dropped inside Structure blocks
+
+### 3. Design / Inspector Panel
 
 * Displays settings for selected block
 * Maps controls to block `props`
 * Uses schema-driven inputs
+* Shows different controls for Structure vs Elements
 
 OptStack Core MUST NOT implement this UI.
 
@@ -162,40 +253,133 @@ OptStack Core MUST NOT implement this UI.
 
 ## Data Model (MANDATORY)
 
-Visual Builder MUST store **pure structured data**.
+Visual Builder MUST store **pure structured data** with a clear hierarchy.
 
-### Example Stored Value
+### Data Structure
 
 ```json
 {
-  "blocks": [
+  "structure": [
     {
-      "id": "block_1",
-      "type": "logo",
+      "id": "struct_1",
+      "type": "row",              // Structure block type
+      "blockCategory": "structure",
       "props": {
-        "align": "left"
-      }
-    },
-    {
-      "id": "block_2",
-      "type": "menu",
-      "props": {
-        "menu_id": 12
-      }
-    },
-    {
-      "id": "block_3",
-      "type": "button",
-      "props": {
-        "text": "Donate",
-        "url": "/donate",
-        "style": "primary"
-      }
+        "gap": 16,
+        "align": "center",
+        "justify": "space-between",
+        "padding": { "top": 16, "bottom": 16, "left": 32, "right": 32 }
+      },
+      "elements": [               // Elements contained in this structure
+        {
+          "id": "elem_1",
+          "type": "logo",
+          "blockCategory": "element",
+          "props": {
+            "size": "medium",
+            "link": "/"
+          }
+        },
+        {
+          "id": "elem_2",
+          "type": "spacer",
+          "blockCategory": "element",
+          "props": {
+            "grow": true
+          }
+        },
+        {
+          "id": "elem_3",
+          "type": "menu",
+          "blockCategory": "element",
+          "props": {
+            "menu_id": "primary",
+            "style": "horizontal"
+          }
+        },
+        {
+          "id": "elem_4",
+          "type": "button",
+          "blockCategory": "element",
+          "props": {
+            "text": "Get Started",
+            "url": "/signup",
+            "style": "primary"
+          }
+        }
+      ]
     }
   ],
-  "layout": {
-    "direction": "row",
-    "gap": 16
+  "settings": {
+    "background": "#ffffff",
+    "minHeight": null
+  }
+}
+```
+
+### Nested Structure Example (Multi-column)
+
+```json
+{
+  "structure": [
+    {
+      "id": "footer_row",
+      "type": "row",
+      "blockCategory": "structure",
+      "props": {
+        "gap": 32,
+        "padding": { "top": 64, "bottom": 32, "left": 32, "right": 32 }
+      },
+      "elements": [
+        {
+          "id": "footer_columns",
+          "type": "columns",
+          "blockCategory": "structure",    // Structure can contain Structure
+          "props": {
+            "columns": 3,
+            "gap": 24
+          },
+          "elements": [
+            // Column 1
+            [
+              {
+                "id": "col1_logo",
+                "type": "logo",
+                "blockCategory": "element",
+                "props": { "size": "small" }
+              },
+              {
+                "id": "col1_text",
+                "type": "text",
+                "blockCategory": "element",
+                "props": { "content": "About us..." }
+              }
+            ],
+            // Column 2
+            [
+              {
+                "id": "col2_menu",
+                "type": "menu",
+                "blockCategory": "element",
+                "props": { "menu_id": "footer" }
+              }
+            ],
+            // Column 3
+            [
+              {
+                "id": "col3_social",
+                "type": "social",
+                "blockCategory": "element",
+                "props": { "platforms": ["twitter", "facebook"] }
+              }
+            ]
+          ]
+        }
+      ]
+    }
+  ],
+  "settings": {
+    "background": "#111827"
   }
 }
 ```
@@ -249,21 +433,111 @@ Visual Block Builder MUST remain compatible with:
 
 OptStack Core MUST NOT hardcode block definitions.
 
-A future-compatible registry MAY exist:
+A future-compatible registry MAY exist with **separate registration for Structure and Element blocks**:
+
+### Structure Block Registration
 
 ```php
-OptStack::registerBlock('logo', [
-    'label' => 'Logo',
+OptStack::registerStructureBlock('row', [
+    'label' => 'Row',
+    'category' => 'structure',
+    'icon' => 'dashicons-align-center',
+    'canContain' => ['structure', 'element'],  // Can contain both
     'props' => [
+        'gap' => [
+            'type' => 'number',
+            'label' => 'Gap',
+            'default' => 16,
+            'min' => 0,
+            'max' => 100,
+        ],
         'align' => [
             'type' => 'select',
-            'options' => ['left', 'center', 'right']
-        ]
-    ]
+            'label' => 'Vertical Alignment',
+            'options' => ['start', 'center', 'end', 'stretch'],
+        ],
+        'justify' => [
+            'type' => 'select',
+            'label' => 'Horizontal Alignment',
+            'options' => ['start', 'center', 'end', 'space-between', 'space-around'],
+        ],
+    ],
+]);
+
+OptStack::registerStructureBlock('columns', [
+    'label' => 'Columns',
+    'category' => 'structure',
+    'icon' => 'dashicons-columns',
+    'canContain' => ['element'],  // Can only contain elements
+    'props' => [
+        'columns' => [
+            'type' => 'number',
+            'label' => 'Number of Columns',
+            'default' => 2,
+            'min' => 1,
+            'max' => 6,
+        ],
+        'gap' => [
+            'type' => 'number',
+            'label' => 'Gap Between Columns',
+            'default' => 16,
+        ],
+    ],
 ]);
 ```
 
-Core should validate structure, not behavior.
+### Element Block Registration
+
+```php
+OptStack::registerElementBlock('logo', [
+    'label' => 'Logo',
+    'category' => 'element',
+    'icon' => 'dashicons-format-image',
+    'props' => [
+        'size' => [
+            'type' => 'select',
+            'label' => 'Size',
+            'options' => ['small', 'medium', 'large'],
+            'default' => 'medium',
+        ],
+        'link' => [
+            'type' => 'url',
+            'label' => 'Link URL',
+            'default' => '/',
+        ],
+    ],
+]);
+
+OptStack::registerElementBlock('button', [
+    'label' => 'Button',
+    'category' => 'element',
+    'icon' => 'dashicons-button',
+    'props' => [
+        'text' => [
+            'type' => 'text',
+            'label' => 'Button Text',
+            'default' => 'Click me',
+        ],
+        'url' => [
+            'type' => 'url',
+            'label' => 'Button URL',
+        ],
+        'style' => [
+            'type' => 'select',
+            'label' => 'Style',
+            'options' => ['primary', 'secondary', 'outline'],
+            'default' => 'primary',
+        ],
+    ],
+]);
+```
+
+### Validation Rules
+
+* **Structure blocks** can contain other blocks (elements or structure)
+* **Element blocks** cannot contain other blocks (leaf nodes)
+* Core should validate structure hierarchy, not behavior
+* Frontend validates block nesting based on `canContain` rules
 
 ---
 

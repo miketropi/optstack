@@ -3493,19 +3493,21 @@
   gap: 10px;
   width: 100%;
   padding: 12px 16px;
-  background: var(--os-white, #ffffff);
-  border: 1px solid var(--os-border, #e5e7eb);
-  border-radius: var(--os-radius, 6px);
+  /* background: var(--os-white, #ffffff); */
+  /* border: 1px solid var(--os-border, #e5e7eb);
+  border-radius: var(--os-radius, 6px); */
   color: var(--os-gray-700, #374151);
   font-size: 14px;
   font-weight: 500;
   cursor: pointer;
   transition: all var(--os-transition, 150ms ease);
+  background: var(--os-gray-50, #f9fafb);
 }
 
 .os-vb-trigger-btn:hover:not(:disabled) {
-  border-color: var(--os-primary, #3b82f6);
-  box-shadow: var(--os-shadow, 0 1px 3px 0 rgb(0 0 0 / 0.1));
+  /* border-color: var(--os-primary, #3b82f6); */
+  /* box-shadow: var(--os-shadow, 0 1px 3px 0 rgb(0 0 0 / 0.1)); */
+  background: var(--os-gray-100, #f3f4f6);
 }
 
 .os-vb-trigger-btn:hover:not(:disabled) svg {
@@ -3658,7 +3660,8 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 14px 16px;
+  padding: 16px 16px;
+  height: 50px;
   background: var(--os-white, #ffffff);
   border-bottom: 1px solid var(--os-border, #e5e7eb);
   color: var(--os-gray-700, #374151);
@@ -3758,6 +3761,7 @@
   align-items: center;
   gap: 8px;
   padding: 12px 20px;
+  height: 50px;
   background: var(--os-gray-50, #f9fafb);
   border-bottom: 1px solid var(--os-border, #e5e7eb);
   color: var(--os-gray-500, #6b7280);
@@ -4143,6 +4147,7 @@
   align-items: center;
   gap: 8px;
   padding: 14px 16px;
+  height: 50px;
   background: var(--os-white, #ffffff);
   border-bottom: 1px solid var(--os-border, #e5e7eb);
   color: var(--os-gray-700, #374151);

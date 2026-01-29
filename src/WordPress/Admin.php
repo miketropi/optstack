@@ -201,19 +201,19 @@ class Admin
             return;
         }
 
-        self::$createdParentMenus['optstack'] = true;
+        // self::$createdParentMenus['optstack'] = true;
 
-        add_menu_page(
-            __('OptStack', 'optstack'),
-            __('OptStack', 'optstack'),
-            'manage_options',
-            'optstack',
-            function () {
-                $this->renderOptStackDashboard();
-            },
-            'dashicons-database',
-            80
-        );
+        // add_menu_page(
+        //     __('OptStack', 'optstack'),
+        //     __('OptStack', 'optstack'),
+        //     'manage_options',
+        //     'optstack',
+        //     function () {
+        //         $this->renderOptStackDashboard();
+        //     },
+        //     'dashicons-database',
+        //     80
+        // );
     }
 
     /**
