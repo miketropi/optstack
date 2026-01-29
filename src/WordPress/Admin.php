@@ -809,6 +809,7 @@ class Admin
             'optstack-admin',
             $distUrl . 'optstack-admin.js',
             [
+                // 'vite-client',
                 'wp-element',
                 'wp-components',
                 'wp-data',

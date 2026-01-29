@@ -98,6 +98,7 @@ class Bootstrap
      */
     public static function boot(array $config = []): void
     {
+        $config = array_merge(self::getDefaultConfig(), $config);
         // Create and store context
         self::$context = new Context($config);
 
@@ -108,6 +109,45 @@ class Bootstrap
 
         // Perform bootstrap
         self::getInstance()->bootstrap();
+    }
+
+    /**
+     * Get the default configuration.
+     */
+    public static function getDefaultConfig(): array
+    {
+        return [
+            'file'    => self::resolveFile(),
+            'dir'     => self::resolveDir(),
+            'url'     => self::resolveUrl() . '/',
+            'version' => 'dev',
+        ];
+    }
+
+    /**
+     * Resolve the file.
+     */
+    public static function resolveFile(): string
+    {
+        return dirname(__DIR__, 2) . '/optstack.php';
+    }
+
+    /**
+     * Resolve the directory.
+     */
+    public static function resolveDir(): string
+    {
+        return dirname(__DIR__, 2) . '/';
+    }
+
+    /**
+     * Resolve the URL.
+     */
+    public static function resolveUrl(): string
+    {
+        return plugins_url(
+            basename(dirname(__DIR__, 2))
+        );
     }
 
     /**

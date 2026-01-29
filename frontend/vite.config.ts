@@ -39,14 +39,18 @@ export default defineConfig(({ command, mode }) => {
       // Use WP externals plugin in dev mode
       ...(isDev ? [wpReactExternals()] : []),
       // Use React plugin in production
-      ...(!isDev ? [react()] : []),
+      ...(!isDev ? [
+        react({
+          jsxRuntime: 'classic',
+        })
+      ] : []),
     ],
     // In dev mode, use esbuild for JSX
-    esbuild: isDev ? {
+    esbuild: {
       jsx: 'transform',
       jsxFactory: 'React.createElement',
       jsxFragment: 'React.Fragment',
-    } : undefined,
+    },
     resolve: {
       alias: {
         '@': path.resolve(__dirname, './src'),

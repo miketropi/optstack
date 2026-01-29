@@ -91,10 +91,10 @@ function optstack_init(): void
     // Bootstrap the framework with runtime context injection
     // The host (this plugin) provides its own context
     \OptStack\WordPress\Bootstrap::boot([
-        'file' => OPTSTACK_FILE,
-        'dir' => OPTSTACK_DIR,
-        'url' => OPTSTACK_URL,
-        'version' => OPTSTACK_VERSION,
+        // 'file' => OPTSTACK_FILE,
+        // 'dir' => OPTSTACK_DIR,
+        // 'url' => OPTSTACK_URL,
+        // 'version' => OPTSTACK_VERSION,
     ]);
 }
 
@@ -143,7 +143,7 @@ function optstack(): string
 
 // Load example usage (for testing - remove in production).
 // require_once OPTSTACK_DIR . 'examples/basic-usage.php';
-// require_once OPTSTACK_DIR . 'examples/exam2.php';
+require_once OPTSTACK_DIR . 'examples/exam2.php';
 
 // Debug listener for searchable fields (remove in production)
 add_action('optstack_indexed_meta_debug', function($debugInfo) {
