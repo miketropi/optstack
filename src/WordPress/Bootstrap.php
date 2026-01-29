@@ -6,6 +6,7 @@ namespace OptStack\WordPress;
 
 use OptStack\Core\Stack\Stack;
 use OptStack\Core\Stack\StackRegistry;
+use OptStack\Support\Context;
 use OptStack\WordPress\Store\OptionsStore;
 use OptStack\WordPress\Store\PostStore;
 use OptStack\WordPress\Store\TermStore;
@@ -15,11 +16,20 @@ use OptStack\WordPress\Index\IndexedMetaManager;
 /**
  * WordPress Bootstrap
  *
- * Bootstraps OptStack integration with WordPress.
- * Handles store binding, hooks registration, and REST API setup.
+ * Single entry point for WordPress integration with Runtime Context Injection.
+ * 
+ * Design Principle:
+ * - Plugin/Theme is the Host (provides context)
+ * - OptStack is the Guest (receives context)
+ * - No hardcoded assumptions about environment
  */
 class Bootstrap
 {
+    /**
+     * Runtime context provided by the host.
+     */
+    protected static ?Context $context = null;
+
     /**
      * Singleton instance.
      */
@@ -61,6 +71,16 @@ class Bootstrap
     }
 
     /**
+     * Get the runtime context.
+     * 
+     * @return Context|null The context if set, null otherwise
+     */
+    public static function context(): ?Context
+    {
+        return self::$context;
+    }
+
+    /**
      * Get the indexed meta manager.
      */
     public function getIndexedMetaManager(): IndexedMetaManager
@@ -69,10 +89,24 @@ class Bootstrap
     }
 
     /**
-     * Bootstrap OptStack.
+     * Bootstrap OptStack with runtime context injection.
+     * 
+     * This is the single entry point for initializing OptStack.
+     * The host (plugin/theme) must provide runtime context.
+     *
+     * @param array{file?: string, dir?: string, url?: string, version?: string} $config Runtime configuration
      */
-    public static function boot(): void
+    public static function boot(array $config = []): void
     {
+        // Create and store context
+        self::$context = new Context($config);
+
+        // Fail silently if WordPress is not available
+        if (!function_exists('add_action')) {
+            return;
+        }
+
+        // Perform bootstrap
         self::getInstance()->bootstrap();
     }
 

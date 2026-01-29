@@ -688,6 +688,12 @@ class Admin
      */
     private function enqueueAssets(Stack $stack, array $extraData = []): void
     {
+        // Get runtime context
+        $context = Bootstrap::context();
+        if (!$context) {
+            return;
+        }
+
         // Enqueue WordPress TinyMCE editor
         wp_enqueue_editor();
         wp_enqueue_media();
@@ -700,7 +706,7 @@ class Admin
         $devServer = defined('OPTSTACK_DEV_SERVER') ? OPTSTACK_DEV_SERVER : 'http://localhost:5173';
 
         // enqueue google fonts 
-        wp_enqueue_style('os-google-fonts', 'https://fonts.googleapis.com/css2?family=Google+Sans+Code:ital,wght@0,300..800;1,300..800&family=Google+Sans+Flex:opsz,wght@6..144,1..1000&display=swap', [], OPTSTACK_VERSION);
+        wp_enqueue_style('os-google-fonts', 'https://fonts.googleapis.com/css2?family=Google+Sans+Code:ital,wght@0,300..800;1,300..800&family=Google+Sans+Flex:opsz,wght@6..144,1..1000&display=swap', [], $context->version);
 
         if ($isDevMode) {
             // Load from Vite dev server
@@ -717,7 +723,7 @@ class Admin
             'adminUrl' => admin_url(),
             'stackId' => $stack->getId(),
             'context' => $stack->getContext(),
-            'version' => OPTSTACK_VERSION,
+            'version' => $context->version,
             'devMode' => $isDevMode,
             'googleFontsApiKey' => apply_filters('optstack_google_fonts_api_key', implode('_', ['AIzaSyAKSB4y-8D7', 'cA11fIh62EnHGay555BPb8'])),
         ], $extraData);
@@ -770,8 +776,13 @@ class Admin
      */
     private function enqueueBuiltAssets(): void
     {
-        $distPath = OPTSTACK_DIR . 'frontend/dist/';
-        $distUrl = OPTSTACK_URL . 'frontend/dist/';
+        $context = Bootstrap::context();
+        if (!$context) {
+            return;
+        }
+
+        $distPath = $context->path('frontend/dist/');
+        $distUrl = $context->url('frontend/dist/');
 
         $jsFile = $distPath . 'optstack-admin.js';
         $cssFile = $distPath . 'optstack-main.css';
@@ -781,7 +792,7 @@ class Admin
         }
 
         $jsVersion = filemtime($jsFile);
-        $cssVersion = file_exists($cssFile) ? filemtime($cssFile) : OPTSTACK_VERSION;
+        $cssVersion = file_exists($cssFile) ? filemtime($cssFile) : $context->version;
 
         // Enqueue CSS
         if (file_exists($cssFile)) {
@@ -815,7 +826,12 @@ class Admin
      */
     private function hasBuiltAssets(): bool
     {
-        return file_exists(OPTSTACK_DIR . 'frontend/dist/optstack-admin.js');
+        $context = Bootstrap::context();
+        if (!$context) {
+            return false;
+        }
+        
+        return file_exists($context->path('frontend/dist/optstack-admin.js'));
     }
 
     /**
@@ -823,12 +839,14 @@ class Admin
      */
     private function renderBuildNotice(): void
     {
+        $context = Bootstrap::context();
+        $frontendDir = $context ? $context->path('frontend') : '[plugin-dir]/frontend';
         ?>
         <div class="notice notice-warning" style="margin: 10px 0;">
             <p>
                 <strong><?php esc_html_e('OptStack frontend not built.', 'optstack'); ?></strong><br>
                 <?php esc_html_e('Run:', 'optstack'); ?>
-                <code>cd <?php echo esc_html(OPTSTACK_DIR); ?>frontend && npm install && npm run build</code>
+                <code>cd <?php echo esc_html($frontendDir); ?> && npm install && npm run build</code>
             </p>
         </div>
         <?php

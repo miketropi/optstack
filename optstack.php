@@ -64,7 +64,7 @@ if (file_exists($autoloader)) {
 }
 
 /**
- * Initialize OptStack.
+ * Initialize OptStack with Runtime Context Injection.
  */
 function optstack_init(): void
 {
@@ -88,8 +88,14 @@ function optstack_init(): void
         return;
     }
 
-    // Bootstrap the framework
-    \OptStack\WordPress\Bootstrap::boot();
+    // Bootstrap the framework with runtime context injection
+    // The host (this plugin) provides its own context
+    \OptStack\WordPress\Bootstrap::boot([
+        'file' => OPTSTACK_FILE,
+        'dir' => OPTSTACK_DIR,
+        'url' => OPTSTACK_URL,
+        'version' => OPTSTACK_VERSION,
+    ]);
 }
 
 // Initialize on plugins_loaded to ensure all dependencies are available

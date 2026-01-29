@@ -8,13 +8,14 @@
 
 1. [Overview](#overview)
 2. [Architecture Layers](#architecture-layers)
-3. [Core Concepts](#core-concepts)
-4. [Data Flow](#data-flow)
-5. [Development Workflow](#development-workflow)
-6. [Key Files Reference](#key-files-reference)
-7. [Common Patterns](#common-patterns)
-8. [API Reference](#api-reference)
-9. [Examples](#examples)
+3. [Runtime Context Injection](#runtime-context-injection)
+4. [Core Concepts](#core-concepts)
+5. [Data Flow](#data-flow)
+6. [Development Workflow](#development-workflow)
+7. [Key Files Reference](#key-files-reference)
+8. [Common Patterns](#common-patterns)
+9. [API Reference](#api-reference)
+10. [Examples](#examples)
 
 ---
 
@@ -145,6 +146,124 @@ OptStack is built with three distinct layers that maintain clean separation of c
 - TypeScript (strict mode)
 - TailwindCSS (with `os-` prefix)
 - Vite (build + HMR)
+
+---
+
+## Runtime Context Injection
+
+**OptStack uses Runtime Context Injection** - a foundational architectural pattern that allows it to work as a pure Composer library without hardcoded environment assumptions.
+
+### Design Principle
+
+> **Host (plugin/theme) provides context → OptStack consumes context**
+
+- **Host Responsibilities**: Determine file paths, URLs, version
+- **OptStack Responsibilities**: Receive context, store context, use context
+
+### Context Object
+
+The `Context` class stores runtime information:
+
+```php
+namespace OptStack\Support;
+
+final class Context
+{
+    public readonly string $baseFile;    // Main plugin/theme file
+    public readonly string $baseDir;     // Absolute path to host root
+    public readonly string $baseUrl;     // URL corresponding to baseDir
+    public readonly string $version;     // Host version
+    
+    // Helper methods
+    public function path(string $rel = ''): string;     // Build absolute path
+    public function url(string $rel = ''): string;      // Build URL
+    public function getAssetsDir(): string;             // Frontend dist path
+    public function getAssetsUrl(): string;             // Frontend dist URL
+    public function fileExists(string $rel): bool;      // Check file exists
+}
+```
+
+### Bootstrap Integration
+
+The `Bootstrap` class accepts and stores context:
+
+```php
+namespace OptStack\WordPress;
+
+class Bootstrap
+{
+    protected static ?Context $context = null;
+    
+    public static function boot(array $config = []): void
+    {
+        self::$context = new Context($config);
+        
+        // Fail silently if WordPress not available
+        if (!function_exists('add_action')) {
+            return;
+        }
+        
+        // Continue bootstrap...
+    }
+    
+    public static function context(): ?Context
+    {
+        return self::$context;
+    }
+}
+```
+
+### Usage Examples
+
+**In a Plugin:**
+```php
+// my-plugin.php
+require_once __DIR__ . '/vendor/autoload.php';
+
+\OptStack\WordPress\Bootstrap::boot([
+    'file' => __FILE__,
+    'dir' => plugin_dir_path(__FILE__),
+    'url' => plugin_dir_url(__FILE__),
+    'version' => '1.0.0',
+]);
+```
+
+**In a Theme:**
+```php
+// functions.php
+require_once __DIR__ . '/vendor/autoload.php';
+
+\OptStack\WordPress\Bootstrap::boot([
+    'file' => get_stylesheet_directory() . '/style.css',
+    'dir' => get_stylesheet_directory() . '/',
+    'url' => get_stylesheet_directory_uri() . '/',
+    'version' => wp_get_theme()->get('Version'),
+]);
+```
+
+**Accessing Context:**
+```php
+$context = \OptStack\WordPress\Bootstrap::context();
+
+if ($context) {
+    echo $context->url('assets/logo.png');
+    echo $context->path('config.php');
+}
+```
+
+### Benefits
+
+✅ **No Global Constants** - No `OPTSTACK_DIR`, `OPTSTACK_URL` in core library  
+✅ **Multiple Hosts** - Multiple plugins can use OptStack simultaneously  
+✅ **Flexible Deployment** - Works as plugin, in themes, via Composer  
+✅ **Easy Testing** - No WordPress dependency in core, mockable context  
+✅ **Clean Architecture** - Clear separation: host provides, OptStack consumes  
+
+### Documentation
+
+- **Specification**: `documents/OPTSTACK_RUNTIME_CONTEXT_INJECTION.md`
+- **Implementation**: `documents/RUNTIME_CONTEXT_IMPLEMENTATION_SUMMARY.md`
+- **Examples**: `examples/runtime-context-injection-example.php`
 
 ---
 

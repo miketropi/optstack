@@ -8,6 +8,7 @@
 - **Native WordPress compatibility** — Works with `get_option()`, `get_post_meta()`, `get_term_meta()`
 - **Unified data model** — Same field syntax across Options, Posts, Terms, Users
 - **Quick field updates** — Update single fields with automatic searchable field sync
+- **Runtime context injection** — Use as plugin or Composer library, no conflicts
 - **Composable & extensible** — Interface-driven architecture
 - **Future-proof** — Ready for Headless WordPress and REST workflows
 - **Modern Admin UI** — React + TypeScript + TailwindCSS frontend
@@ -25,6 +26,35 @@
 1. Clone or download to `wp-content/plugins/optstack/`
 2. Run `composer install` in the plugin directory
 3. Activate the plugin in WordPress admin
+
+### As a Composer Library (in Themes/Plugins)
+
+OptStack can be used as a pure Composer library in your own plugins or themes:
+
+```bash
+composer require optstack/optstack
+```
+
+Then bootstrap with runtime context injection:
+
+```php
+// In your plugin or theme
+require_once __DIR__ . '/vendor/autoload.php';
+
+\OptStack\WordPress\Bootstrap::boot([
+    'file' => __FILE__,
+    'dir' => plugin_dir_path(__FILE__),  // or get_template_directory() for themes
+    'url' => plugin_dir_url(__FILE__),   // or get_template_directory_uri() for themes
+    'version' => '1.0.0',
+]);
+```
+
+**Benefits:**
+- ✅ Multiple plugins/themes can use OptStack simultaneously
+- ✅ No conflicts between different hosts
+- ✅ Assets load from the correct location automatically
+
+See `documents/OPTSTACK_RUNTIME_CONTEXT_INJECTION.md` for details.
 
 ### For Frontend Development
 
