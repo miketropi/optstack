@@ -2,24 +2,41 @@ import { useState } from 'react'
 import { useConditions } from '../hooks/useConditions'
 import { FieldRenderer } from './FieldRenderer'
 import { Repeater } from './fields/Repeater'
+import { DeferredGroupModal } from './DeferredGroupModal'
 import type { FieldGroupSchema } from '../schema/types'
 
 interface Props {
   group: FieldGroupSchema
   data: Record<string, unknown>
   onChange: (key: string, value: unknown) => void
+  /** Called when a deferred group applies all changes at once */
+  onGroupApply?: (data: Record<string, unknown>) => void
   disabled?: boolean
   errors?: Record<string, string[]>
 }
 
-export function GroupRenderer({ group, data, onChange, disabled, errors }: Props) {
+export function GroupRenderer({ group, data, onChange, onGroupApply, disabled, errors }: Props) {
   const { isVisible } = useConditions(data)
   const [isCollapsed, setIsCollapsed] = useState(false)
   
   const collapsible = group.collapsible === true
   // Use inline layout (2-col like fields) by default, or box layout if specified
-  const layout = (group as { layout?: 'inline' | 'box' }).layout || 'inline'
+  const layout = group.layout || 'inline'
   const isInline = layout === 'inline'
+
+  // Handle deferred groups - render trigger button + modal instead of inline fields
+  if (group.deferred) {
+    return (
+      <DeferredGroupModal
+        group={group}
+        data={data}
+        onChange={onChange}
+        onGroupApply={onGroupApply}
+        disabled={disabled}
+        errors={errors}
+      />
+    )
+  }
 
   // Handle repeatable groups
   if (group.repeatable) {

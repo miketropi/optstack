@@ -11,6 +11,9 @@ use OptStack\Core\Condition\Condition;
  *
  * Represents a logical grouping of fields.
  * Groups can be nested and can be marked as repeatable.
+ *
+ * Supports deferred rendering where fields are shown only
+ * after user-triggered action (e.g., clicking a button that opens a modal).
  */
 class FieldGroup
 {
@@ -45,6 +48,32 @@ class FieldGroup
     protected int $maxItems = 0;
 
     /**
+     * Whether this group is collapsible.
+     */
+    protected bool $collapsible = false;
+
+    /**
+     * Layout style ('inline' or 'box').
+     */
+    protected string $layout = 'inline';
+
+    /**
+     * Whether this group uses deferred rendering.
+     *
+     * Deferred groups render a trigger button instead of inline fields.
+     * Fields are shown only when triggered (e.g., in a modal).
+     * This is a rendering strategy only - data model remains unchanged.
+     */
+    protected bool $deferred = false;
+
+    /**
+     * UI configuration for deferred groups.
+     *
+     * @var array{triggerLabel?: string, render?: string}
+     */
+    protected array $ui = [];
+
+    /**
      * Fields in this group.
      *
      * @var FieldCollection
@@ -70,6 +99,20 @@ class FieldGroup
      *
      * @param string $key Group key
      * @param array<string, mixed> $config Group configuration
+     *
+     * Supported config options:
+     * - label: string - Display label
+     * - description: string - Help text
+     * - repeatable: bool - Whether group can be repeated
+     * - min_items: int - Minimum items (repeatable)
+     * - max_items: int - Maximum items (repeatable)
+     * - collapsible: bool - Whether group can be collapsed
+     * - layout: 'inline'|'box' - Layout style
+     * - deferred: bool - Use deferred rendering (show in modal on trigger)
+     * - ui: array - UI hints for deferred rendering
+     *   - triggerLabel: string - Button label to open deferred group
+     *   - render: 'modal'|'drawer'|'panel' - How to render deferred content
+     * - conditions: array - Conditional visibility rules
      */
     public function __construct(string $key, array $config = [])
     {
@@ -79,6 +122,10 @@ class FieldGroup
         $this->repeatable = $config['repeatable'] ?? false;
         $this->minItems = $config['min_items'] ?? 0;
         $this->maxItems = $config['max_items'] ?? 0;
+        $this->collapsible = $config['collapsible'] ?? false;
+        $this->layout = $config['layout'] ?? 'inline';
+        $this->deferred = $config['deferred'] ?? false;
+        $this->ui = $config['ui'] ?? [];
         $this->fields = new FieldCollection();
 
         if (isset($config['conditions'])) {
@@ -144,6 +191,56 @@ class FieldGroup
     public function getMaxItems(): int
     {
         return $this->maxItems;
+    }
+
+    /**
+     * Check if group is collapsible.
+     */
+    public function isCollapsible(): bool
+    {
+        return $this->collapsible;
+    }
+
+    /**
+     * Get layout style.
+     */
+    public function getLayout(): string
+    {
+        return $this->layout;
+    }
+
+    /**
+     * Check if group uses deferred rendering.
+     *
+     * Deferred groups render a trigger button instead of inline fields.
+     * The actual fields are shown only when triggered (e.g., in a modal).
+     */
+    public function isDeferred(): bool
+    {
+        return $this->deferred;
+    }
+
+    /**
+     * Mark this group as deferred.
+     *
+     * @param array{triggerLabel?: string, render?: string} $ui UI configuration
+     */
+    public function deferred(array $ui = []): self
+    {
+        $this->deferred = true;
+        $this->ui = array_merge($this->ui, $ui);
+
+        return $this;
+    }
+
+    /**
+     * Get UI configuration for deferred rendering.
+     *
+     * @return array{triggerLabel?: string, render?: string}
+     */
+    public function getUi(): array
+    {
+        return $this->ui;
     }
 
     /**
@@ -267,6 +364,24 @@ class FieldGroup
         if ($this->repeatable) {
             $data['minItems'] = $this->minItems;
             $data['maxItems'] = $this->maxItems;
+        }
+
+        // Layout and collapsible
+        if ($this->collapsible) {
+            $data['collapsible'] = true;
+        }
+
+        if ($this->layout !== 'inline') {
+            $data['layout'] = $this->layout;
+        }
+
+        // Deferred rendering metadata
+        if ($this->deferred) {
+            $data['deferred'] = true;
+
+            if (!empty($this->ui)) {
+                $data['ui'] = $this->ui;
+            }
         }
 
         $data['fields'] = [];

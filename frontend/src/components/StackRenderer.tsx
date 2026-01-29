@@ -110,6 +110,8 @@ export function StackRenderer({ schema, objectId, objectType }: StackRendererPro
                 updateField(key, { ...currentGroupData, [fieldKey]: value })
               }
             }}
+            // For deferred groups, provide a way to update the entire group at once
+            onGroupApply={group.deferred ? (newData) => updateField(key, newData) : undefined}
           />
         )
       })}

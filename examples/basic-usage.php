@@ -1515,7 +1515,210 @@ add_action('optstack_init', function () {
         })
         ->build();
 
-  
+    // =========================================================================
+    // EXAMPLE 9: Deferred Group Demo
+    // =========================================================================
+    // This example demonstrates Deferred Groups.
+    // Deferred groups show a trigger button instead of inline fields.
+    // Clicking the button opens a modal with the group's fields.
+    // This reduces UI clutter for complex/advanced settings.
+    //
+    // Key points:
+    // - Data structure is identical to normal groups
+    // - Validation works the same way
+    // - Just a rendering strategy, not a data model change
+    // =========================================================================
+    OptStack::make('deferred_demo')
+        ->forOptions()
+        ->menuParent('optstack')
+        ->label('Deferred Group Demo')
+        ->description('Demonstrates deferred groups that open in modals')
+        ->define(function ($stack) {
+            // A simple field for context
+            $stack->field('product_name', [
+                'type' => 'text',
+                'label' => 'Product Name',
+                'description' => 'The name of your product.',
+            ]);
+
+            $stack->field('product_price', [
+                'type' => 'number',
+                'label' => 'Price',
+                'description' => 'Base price for the product.',
+                'attributes' => [
+                    'min' => 0,
+                    'step' => 0.01,
+                    'prefix' => '$',
+                ],
+            ]);
+
+            // Deferred group - opens in modal
+            // Perfect for advanced settings that most users won't need
+            $stack->group('pricing_options', function ($group) {
+                $group->field('regular_price', [
+                    'type' => 'number',
+                    'label' => 'Regular Price',
+                    'description' => 'The standard price without discounts.',
+                    'attributes' => ['min' => 0, 'step' => 0.01, 'prefix' => '$'],
+                ]);
+
+                $group->field('sale_price', [
+                    'type' => 'number',
+                    'label' => 'Sale Price',
+                    'description' => 'Discounted price (optional).',
+                    'attributes' => ['min' => 0, 'step' => 0.01, 'prefix' => '$'],
+                ]);
+
+                $group->field('currency', [
+                    'type' => 'select',
+                    'label' => 'Currency',
+                    'default' => 'USD',
+                    'options' => [
+                        ['value' => 'USD', 'label' => 'US Dollar ($)'],
+                        ['value' => 'EUR', 'label' => 'Euro (€)'],
+                        ['value' => 'GBP', 'label' => 'British Pound (£)'],
+                        ['value' => 'JPY', 'label' => 'Japanese Yen (¥)'],
+                    ],
+                ]);
+
+                $group->field('tax_class', [
+                    'type' => 'select',
+                    'label' => 'Tax Class',
+                    'default' => 'standard',
+                    'options' => [
+                        ['value' => 'standard', 'label' => 'Standard Rate'],
+                        ['value' => 'reduced', 'label' => 'Reduced Rate'],
+                        ['value' => 'zero', 'label' => 'Zero Rate'],
+                        ['value' => 'exempt', 'label' => 'Tax Exempt'],
+                    ],
+                ]);
+
+                $group->field('price_includes_tax', [
+                    'type' => 'toggle',
+                    'label' => 'Price Includes Tax',
+                    'default' => false,
+                ]);
+            }, [
+                'label' => 'Pricing Options',
+                'description' => 'Configure detailed pricing settings including currency, tax, and discounts.',
+                'deferred' => true, // This makes it a deferred group!
+                'ui' => [
+                    'triggerLabel' => 'Configure Pricing',
+                    'render' => 'modal', // Opens in modal (default)
+                ],
+            ]);
+
+            // Another deferred group for SEO
+            $stack->group('seo_settings', function ($group) {
+                $group->field('meta_title', [
+                    'type' => 'text',
+                    'label' => 'Meta Title',
+                    'description' => 'Title for search engines (60 chars max recommended).',
+                    'attributes' => ['maxlength' => 70],
+                ]);
+
+                $group->field('meta_description', [
+                    'type' => 'textarea',
+                    'label' => 'Meta Description',
+                    'description' => 'Description for search engines (160 chars max recommended).',
+                    'attributes' => ['rows' => 3, 'maxlength' => 170],
+                ]);
+
+                $group->field('focus_keyword', [
+                    'type' => 'text',
+                    'label' => 'Focus Keyword',
+                    'description' => 'Primary keyword for this content.',
+                ]);
+
+                $group->field('canonical_url', [
+                    'type' => 'url',
+                    'label' => 'Canonical URL',
+                    'description' => 'The canonical URL for this page (leave empty to use default).',
+                ]);
+
+                $group->field('noindex', [
+                    'type' => 'toggle',
+                    'label' => 'No Index',
+                    'description' => 'Prevent search engines from indexing this page.',
+                    'default' => false,
+                ]);
+
+                $group->field('nofollow', [
+                    'type' => 'toggle',
+                    'label' => 'No Follow',
+                    'description' => 'Prevent search engines from following links on this page.',
+                    'default' => false,
+                ]);
+            }, [
+                'label' => 'SEO Settings',
+                'description' => 'Search engine optimization settings.',
+                'deferred' => true,
+                'ui' => [
+                    'triggerLabel' => 'Configure SEO',
+                    'render' => 'modal',
+                ],
+            ]);
+
+            // Deferred group with drawer render mode
+            $stack->group('advanced_options', function ($group) {
+                $group->field('custom_css', [
+                    'type' => 'code',
+                    'label' => 'Custom CSS',
+                    'description' => 'Add custom CSS styles.',
+                    'attributes' => ['language' => 'text/css', 'rows' => 10],
+                ]);
+
+                $group->field('custom_js', [
+                    'type' => 'code',
+                    'label' => 'Custom JavaScript',
+                    'description' => 'Add custom JavaScript code.',
+                    'attributes' => ['language' => 'application/javascript', 'rows' => 10],
+                ]);
+
+                $group->field('tracking_code', [
+                    'type' => 'textarea',
+                    'label' => 'Tracking Code',
+                    'description' => 'Analytics or tracking code (added to header).',
+                    'attributes' => ['rows' => 4, 'placeholder' => '<!-- Paste your tracking code here -->'],
+                ]);
+
+                $group->field('schema_markup', [
+                    'type' => 'textarea',
+                    'label' => 'Schema Markup',
+                    'description' => 'JSON-LD structured data markup.',
+                    'attributes' => ['rows' => 6, 'placeholder' => '{"@context": "https://schema.org"...}'],
+                ]);
+            }, [
+                'label' => 'Advanced Options',
+                'description' => 'Custom code and advanced configuration (for developers).',
+                'deferred' => true,
+                'ui' => [
+                    'triggerLabel' => 'Advanced Settings',
+                    'render' => 'drawer', // Opens as drawer from right side
+                ],
+            ]);
+
+            // Regular (non-deferred) group for comparison
+            $stack->group('basic_info', function ($group) {
+                $group->field('sku', [
+                    'type' => 'text',
+                    'label' => 'SKU',
+                    'description' => 'Stock keeping unit.',
+                ]);
+
+                $group->field('barcode', [
+                    'type' => 'text',
+                    'label' => 'Barcode',
+                    'description' => 'UPC, EAN, or ISBN.',
+                ]);
+            }, [
+                'label' => 'Basic Info',
+                'description' => 'This is a regular inline group (not deferred).',
+                // No 'deferred' key = renders inline as usual
+            ]);
+        })
+        ->build();
+
     // $bootstrap = \OptStack\WordPress\Bootstrap::getInstance();
     // $manager = $bootstrap->getIndexedMetaManager();
     // $keys = $manager->getIndexedMetaKeys($__stack);

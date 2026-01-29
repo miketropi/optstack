@@ -28,6 +28,11 @@ export function TabContainer({ tabs, data, onChange, disabled, errors }: TabCont
     }
   }, [data, onChange])
 
+  // Handle deferred group apply - replaces entire group data at once
+  const handleGroupApply = useCallback((groupKey: string, newData: Record<string, unknown>) => {
+    onChange(groupKey, newData)
+  }, [onChange])
+
   if (tabEntries.length === 0) {
     return null
   }
@@ -117,6 +122,8 @@ export function TabContainer({ tabs, data, onChange, disabled, errors }: TabCont
                     : ((groupData as Record<string, unknown>) || {})
                   }
                   onChange={(fieldKey, value) => handleGroupChange(key, fieldKey, value, group)}
+                  // For deferred groups, provide a way to update the entire group at once
+                  onGroupApply={group.deferred ? (newData) => handleGroupApply(key, newData) : undefined}
                   disabled={disabled}
                   errors={errors}
                 />

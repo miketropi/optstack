@@ -39,6 +39,16 @@ export interface FieldSchema {
 }
 
 /**
+ * UI configuration for deferred groups.
+ */
+export interface DeferredGroupUi {
+  /** Button label to open deferred group */
+  triggerLabel?: string
+  /** How to render deferred content */
+  render?: 'modal' | 'drawer' | 'panel'
+}
+
+/**
  * Field group schema.
  */
 export interface FieldGroupSchema {
@@ -47,8 +57,18 @@ export interface FieldGroupSchema {
   description?: string
   repeatable: boolean
   collapsible?: boolean
+  /** Layout style */
+  layout?: 'inline' | 'box'
   minItems?: number
   maxItems?: number
+  /**
+   * Whether this group uses deferred rendering.
+   * Deferred groups render a trigger button instead of inline fields.
+   * Fields are shown only when triggered (e.g., in a modal).
+   */
+  deferred?: boolean
+  /** UI configuration for deferred rendering */
+  ui?: DeferredGroupUi
   fields?: Record<string, FieldSchema>
   groups?: Record<string, FieldGroupSchema>
   conditions?: Condition[]
