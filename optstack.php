@@ -3,7 +3,7 @@
  * Plugin Name: OptStack
  * Plugin URI: https://github.com/optstack/optstack
  * Description: WordPress Data Stack Framework - A PHP framework for defining, storing, and managing structured data in WordPress using a unified, extensible stack-based model.
- * Version: 0.1.0
+ * Version: 0.1.1
  * Author: OptStack Team
  * Author URI: https://optstack.dev
  * License: MIT
@@ -22,7 +22,7 @@ if (!defined('ABSPATH')) {
 }
 
 // Plugin constants
-define('OPTSTACK_VERSION', '0.1.0');
+define('OPTSTACK_VERSION', '0.1.1');
 define('OPTSTACK_FILE', __FILE__);
 define('OPTSTACK_DIR', plugin_dir_path(__FILE__));
 define('OPTSTACK_URL', plugin_dir_url(__FILE__));
@@ -137,7 +137,7 @@ function optstack(): string
 
 // Load example usage (for testing - remove in production).
 // require_once OPTSTACK_DIR . 'examples/basic-usage.php';
-require_once OPTSTACK_DIR . 'examples/exam2.php';
+// require_once OPTSTACK_DIR . 'examples/exam2.php';
 
 // Debug listener for searchable fields (remove in production)
 add_action('optstack_indexed_meta_debug', function($debugInfo) {
