@@ -14,6 +14,7 @@ import { WysiwygField } from './fields/WysiwygField'
 import { CodeField } from './fields/CodeField'
 import { TypographyField } from './fields/TypographyField'
 import { RadioImageField } from './fields/RadioImageField'
+import { VisualBuilderField } from './fields/VisualBuilderField'
 
 /**
  * Map of field types to components.
@@ -72,6 +73,11 @@ const fieldComponents: Record<string, React.ComponentType<FieldRendererProps>> =
   
   // Composite types
   typography: TypographyField,
+  
+  // Visual Builder
+  visual_builder: VisualBuilderField,
+  'visual-builder': VisualBuilderField,
+  visualbuilder: VisualBuilderField,
 }
 
 interface Props {

@@ -1719,6 +1719,172 @@ add_action('optstack_init', function () {
         })
         ->build();
 
+    // =========================================================================
+    // EXAMPLE 10: Visual Block Builder Demo
+    // =========================================================================
+    // This example demonstrates the Visual Block Builder field.
+    // Visual Builder allows users to compose structured layouts by
+    // dragging and dropping predefined blocks.
+    //
+    // Key points:
+    // - MUST be used inside a Deferred Group
+    // - Stores pure JSON data (no HTML, CSS, or JSX)
+    // - Data structure: { blocks: [...], layout: {...} }
+    // - NOT searchable (layout configuration, not queryable data)
+    // =========================================================================
+    OptStack::make('visual_builder_demo')
+        ->forOptions()
+        ->menuParent('optstack')
+        ->label('Visual Builder Demo')
+        ->description('Demonstrates the Visual Block Builder field')
+        ->define(function ($stack) {
+            // Site name for context
+            $stack->field('site_name', [
+                'type' => 'text',
+                'label' => 'Site Name',
+                'default' => 'My Website',
+            ]);
+
+            // Header Layout using Visual Builder (in deferred group)
+            $stack->group('header', function ($group) {
+                $group->field('layout', [
+                    'type' => 'visual_builder',
+                    'label' => 'Header Layout',
+                    'description' => 'Drag and drop blocks to build your header.',
+                    'attributes' => [
+                        // Specify which blocks are allowed
+                        'blocks' => ['logo', 'menu', 'button', 'search', 'spacer'],
+                        // Specify which design controls to show
+                        'design' => ['direction', 'gap', 'alignment', 'justify'],
+                    ],
+                    'default' => [
+                        'blocks' => [
+                            [
+                                'id' => 'block_1',
+                                'type' => 'logo',
+                                'props' => ['align' => 'left', 'size' => 'medium'],
+                            ],
+                            [
+                                'id' => 'block_2',
+                                'type' => 'spacer',
+                                'props' => ['grow' => true],
+                            ],
+                            [
+                                'id' => 'block_3',
+                                'type' => 'menu',
+                                'props' => ['style' => 'horizontal'],
+                            ],
+                            [
+                                'id' => 'block_4',
+                                'type' => 'button',
+                                'props' => ['text' => 'Contact', 'style' => 'primary'],
+                            ],
+                        ],
+                        'layout' => [
+                            'direction' => 'row',
+                            'gap' => 16,
+                            'align' => 'center',
+                        ],
+                    ],
+                ]);
+
+                $group->field('sticky', [
+                    'type' => 'toggle',
+                    'label' => 'Sticky Header',
+                    'default' => false,
+                ]);
+
+                $group->field('background', [
+                    'type' => 'color',
+                    'label' => 'Background Color',
+                    'default' => '#ffffff',
+                ]);
+            }, [
+                'label' => 'Header Builder',
+                'description' => 'Build your site header with drag-and-drop blocks.',
+                'deferred' => true, // Required for Visual Builder
+                'ui' => [
+                    'triggerLabel' => 'Edit Header Layout',
+                    'render' => 'modal',
+                ],
+            ]);
+
+            // Footer Layout using Visual Builder (in deferred group)
+            $stack->group('footer', function ($group) {
+                $group->field('layout', [
+                    'type' => 'visual_builder',
+                    'label' => 'Footer Layout',
+                    'description' => 'Drag and drop blocks to build your footer.',
+                    'attributes' => [
+                        'blocks' => ['logo', 'menu', 'text', 'social', 'divider'],
+                        'design' => ['direction', 'gap', 'alignment'],
+                    ],
+                    'default' => [
+                        'blocks' => [
+                            [
+                                'id' => 'footer_1',
+                                'type' => 'logo',
+                                'props' => ['size' => 'small'],
+                            ],
+                            [
+                                'id' => 'footer_2',
+                                'type' => 'text',
+                                'props' => ['content' => '© 2026 My Website', 'tag' => 'p'],
+                            ],
+                            [
+                                'id' => 'footer_3',
+                                'type' => 'social',
+                                'props' => ['style' => 'default'],
+                            ],
+                        ],
+                        'layout' => [
+                            'direction' => 'row',
+                            'gap' => 24,
+                            'align' => 'center',
+                            'justify' => 'space-between',
+                        ],
+                    ],
+                ]);
+
+                $group->field('copyright', [
+                    'type' => 'text',
+                    'label' => 'Copyright Text',
+                    'default' => '© 2026 All rights reserved.',
+                ]);
+            }, [
+                'label' => 'Footer Builder',
+                'description' => 'Build your site footer with drag-and-drop blocks.',
+                'deferred' => true,
+                'ui' => [
+                    'triggerLabel' => 'Edit Footer Layout',
+                    'render' => 'modal',
+                ],
+            ]);
+
+            // Minimal Visual Builder (all blocks, minimal design controls)
+            $stack->group('cta_section', function ($group) {
+                $group->field('layout', [
+                    'type' => 'visual_builder',
+                    'label' => 'CTA Section',
+                    'attributes' => [
+                        // Empty blocks array = all blocks allowed
+                        'blocks' => [],
+                        // Only show gap control
+                        'design' => ['gap'],
+                    ],
+                ]);
+            }, [
+                'label' => 'CTA Section',
+                'description' => 'Build a call-to-action section.',
+                'deferred' => true,
+                'ui' => [
+                    'triggerLabel' => 'Edit CTA Section',
+                    'render' => 'drawer',
+                ],
+            ]);
+        })
+        ->build();
+
     // $bootstrap = \OptStack\WordPress\Bootstrap::getInstance();
     // $manager = $bootstrap->getIndexedMetaManager();
     // $keys = $manager->getIndexedMetaKeys($__stack);
