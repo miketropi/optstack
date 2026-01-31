@@ -43,12 +43,9 @@ function example_plugin_init(): void
     require_once $autoloader;
     
     // Bootstrap OptStack with runtime context injection
-    // The HOST (this plugin) provides its own context
+    // Only version is required - OptStack auto-detects file/dir/url
     \OptStack\WordPress\Bootstrap::boot([
-        'file' => __FILE__,                        // Plugin main file
-        'dir' => plugin_dir_path(__FILE__),       // Plugin directory
-        'url' => plugin_dir_url(__FILE__),        // Plugin URL
-        'version' => '1.0.0',                     // Plugin version
+        'version' => '1.0.0',
     ]);
 }
 
@@ -76,12 +73,9 @@ function example_theme_init(): void
     require_once $autoloader;
     
     // Bootstrap OptStack with runtime context injection
-    // The HOST (this theme) provides its own context
+    // Only version is required - OptStack auto-detects file/dir/url
     \OptStack\WordPress\Bootstrap::boot([
-        'file' => get_template_directory() . '/style.css',  // Theme main file
-        'dir' => get_template_directory() . '/',            // Theme directory
-        'url' => get_template_directory_uri() . '/',        // Theme URL
-        'version' => wp_get_theme()->get('Version'),        // Theme version
+        'version' => wp_get_theme()->get('Version'),
     ]);
 }
 
@@ -99,11 +93,8 @@ function example_plugin_a_init(): void
 {
     require_once plugin_dir_path(__FILE__) . '../vendor/autoload.php';
     
-    // Plugin A provides its own context
+    // Plugin A bootstraps OptStack
     \OptStack\WordPress\Bootstrap::boot([
-        'file' => __FILE__,
-        'dir' => plugin_dir_path(__FILE__),
-        'url' => plugin_dir_url(__FILE__),
         'version' => '2.0.0',
     ]);
     
@@ -127,12 +118,8 @@ function example_plugin_b_init(): void
 {
     require_once plugin_dir_path(__FILE__) . '../vendor/autoload.php';
     
-    // Plugin B provides its own context
-    // OptStack will use Plugin B's assets when rendering Plugin B's stacks
+    // Plugin B bootstraps OptStack
     \OptStack\WordPress\Bootstrap::boot([
-        'file' => __FILE__,
-        'dir' => plugin_dir_path(__FILE__),
-        'url' => plugin_dir_url(__FILE__),
         'version' => '1.5.0',
     ]);
     
@@ -168,9 +155,6 @@ function example_get_context(): void
     }
     
     // Access context properties
-    echo 'Base File: ' . $context->baseFile . PHP_EOL;
-    echo 'Base Directory: ' . $context->baseDir . PHP_EOL;
-    echo 'Base URL: ' . $context->baseUrl . PHP_EOL;
     echo 'Version: ' . $context->version . PHP_EOL;
     
     // Use helper methods
@@ -203,9 +187,6 @@ function example_headless_init(): void
     
     // Custom context for headless environment
     \OptStack\WordPress\Bootstrap::boot([
-        'file' => __FILE__,
-        'dir' => '/var/www/api/',
-        'url' => 'https://api.mysite.com/optstack/',
         'version' => 'headless-v1',
     ]);
 }
@@ -224,9 +205,6 @@ function example_standalone_test(): void
     
     // Bootstrap will fail silently if WordPress is not available
     \OptStack\WordPress\Bootstrap::boot([
-        'file' => __FILE__,
-        'dir' => __DIR__ . '/',
-        'url' => 'http://localhost/',
         'version' => 'test',
     ]);
     
@@ -242,13 +220,14 @@ function example_standalone_test(): void
 }
 
 // =============================================================================
-// BENEFITS OF RUNTIME CONTEXT INJECTION
+// BENEFITS OF SIMPLIFIED BOOTSTRAP
 // =============================================================================
 
 /*
- * ✅ No Global Constants
- *    - No OPTSTACK_DIR, OPTSTACK_URL defined in core library
- *    - Each host provides its own context
+ * ✅ Minimal Configuration
+ *    - Only 'version' parameter required
+ *    - OptStack auto-detects file/dir/url paths
+ *    - No manual path configuration needed
  * 
  * ✅ Multiple Hosts Support
  *    - Multiple plugins can use OptStack simultaneously
@@ -267,12 +246,11 @@ function example_standalone_test(): void
  * 
  * ✅ Clean Architecture
  *    - Clear separation of concerns
- *    - Host provides environment
- *    - OptStack provides functionality
+ *    - Host provides version info
+ *    - OptStack handles the rest
  * 
  * ✅ AI-Friendly
- *    - Clear, explicit dependencies
- *    - No hidden assumptions
+ *    - Minimal boilerplate
  *    - Easy to understand and extend
  */
 
@@ -281,16 +259,15 @@ function example_standalone_test(): void
 // =============================================================================
 
 /*
- * Runtime Context Injection is correctly implemented if:
+ * Bootstrap is correctly implemented if:
  * 
  * ✓ OptStack works when installed via Composer
  * ✓ No constants are defined inside src/ directory
  * ✓ OptStack can be used by multiple plugins simultaneously
- * ✓ Frontend assets load with correct URLs from context
+ * ✓ Frontend assets load with correct URLs automatically
  * ✓ No fatal errors when running outside WordPress
- * ✓ Bootstrap::context() returns the injected context
- * ✓ Admin.php uses context for asset loading
- * ✓ All file/URL operations use context methods
+ * ✓ Bootstrap::context() returns the context
+ * ✓ Only 'version' parameter is required
  */
 
 // =============================================================================
@@ -308,8 +285,7 @@ function example_standalone_test(): void
  * After (New Way - Using Context):
  * 
  * \OptStack\WordPress\Bootstrap::boot([
- *     'dir' => plugin_dir_path(__FILE__),
- *     'url' => plugin_dir_url(__FILE__),
+ *     'version' => '1.0.0',
  * ]);
  * 
  * $context = \OptStack\WordPress\Bootstrap::context();
@@ -334,9 +310,6 @@ function optstack_debug_context(): void
     
     echo '<pre>';
     echo '<h3>OptStack Runtime Context</h3>';
-    echo '<strong>Base File:</strong> ' . esc_html($context->baseFile) . PHP_EOL;
-    echo '<strong>Base Dir:</strong> ' . esc_html($context->baseDir) . PHP_EOL;
-    echo '<strong>Base URL:</strong> ' . esc_url($context->baseUrl) . PHP_EOL;
     echo '<strong>Version:</strong> ' . esc_html($context->version) . PHP_EOL;
     echo PHP_EOL;
     echo '<strong>Assets Dir:</strong> ' . esc_html($context->getAssetsDir()) . PHP_EOL;

@@ -50,31 +50,31 @@ if (class_exists('OptStack\OptStack')) {
 #### Site Identity
 ```php
 // Get site logo
-$logo_id = mytheme_option('general.identity.site_logo');
+$logo_id = mytheme_option('identity.site_logo');
 $logo_url = wp_get_attachment_url($logo_id);
 
 // Get logo width
-$logo_width = mytheme_option('general.identity.logo_width', 180);
+$logo_width = mytheme_option('identity.logo_width', 180);
 ```
 
 #### Layout Options
 ```php
 // Get container width
-$container_width = mytheme_option('general.layout.container_width', 1200);
+$container_width = mytheme_option('layout.container_width', 1200);
 
 // Get sidebar layout
-$sidebar = mytheme_option('general.layout.sidebar_layout', 'right');
+$sidebar = mytheme_option('layout.sidebar_layout', 'right');
 
 // Check if boxed layout
-$is_boxed = mytheme_option('general.layout.boxed_layout', false);
+$is_boxed = mytheme_option('layout.boxed_layout', false);
 ```
 
 #### Preloader
 ```php
 // Check if preloader enabled
-if (mytheme_option('general.preloader.enable', false)) {
-    $style = mytheme_option('general.preloader.style', 'spinner');
-    $bg_color = mytheme_option('general.preloader.background_color', '#ffffff');
+if (mytheme_option('preloader.enable', false)) {
+    $style = mytheme_option('preloader.style', 'spinner');
+    $bg_color = mytheme_option('preloader.background_color', '#ffffff');
     // Display preloader...
 }
 ```
@@ -84,28 +84,28 @@ if (mytheme_option('general.preloader.enable', false)) {
 #### Header Layout
 ```php
 // Get header style
-$header_style = mytheme_option('header.header_layout.style', 'default');
+$header_style = mytheme_option('header_layout.style', 'default');
 // Options: default, centered, split, vertical
 
 // Check sticky header
-$is_sticky = mytheme_option('header.header_layout.sticky', true);
+$is_sticky = mytheme_option('header_layout.sticky', true);
 
 // Check transparent header
-$is_transparent = mytheme_option('header.header_layout.transparent', false);
+$is_transparent = mytheme_option('header_layout.transparent', false);
 
 // Get header height
-$height = mytheme_option('header.header_layout.height', 80);
+$height = mytheme_option('header_layout.height', 80);
 
 // Get header background
-$bg = mytheme_option('header.header_layout.background', '#ffffff');
+$bg = mytheme_option('header_layout.background', '#ffffff');
 ```
 
 #### Top Bar
 ```php
-if (mytheme_option('header.top_bar.enable', false)) {
-    $left = mytheme_option('header.top_bar.content_left', '');
-    $right = mytheme_option('header.top_bar.content_right', '');
-    $bg = mytheme_option('header.top_bar.background', '#f8f9fa');
+if (mytheme_option('top_bar.enable', false)) {
+    $left = mytheme_option('top_bar.content_left', '');
+    $right = mytheme_option('top_bar.content_right', '');
+    $bg = mytheme_option('top_bar.background', '#f8f9fa');
     
     echo '<div class="top-bar" style="background: ' . esc_attr($bg) . '">';
     echo '<div class="top-bar-left">' . wp_kses_post($left) . '</div>';
@@ -117,28 +117,28 @@ if (mytheme_option('header.top_bar.enable', false)) {
 #### Mobile Menu
 ```php
 // Get mobile breakpoint
-$breakpoint = mytheme_option('header.mobile_menu.breakpoint', 992);
+$breakpoint = mytheme_option('mobile_menu.breakpoint', 992);
 
 // Get mobile menu style
-$mobile_style = mytheme_option('header.mobile_menu.style', 'slide');
+$mobile_style = mytheme_option('mobile_menu.style', 'slide');
 // Options: slide, dropdown, fullscreen
 
 // Get slide position
-$position = mytheme_option('header.mobile_menu.position', 'left');
+$position = mytheme_option('mobile_menu.position', 'left');
 ```
 
 #### Header Elements
 ```php
 // Check if search icon enabled
-$show_search = mytheme_option('header.header_elements.search', true);
+$show_search = mytheme_option('header_elements.search', true);
 
 // Check if cart icon enabled
-$show_cart = mytheme_option('header.header_elements.cart', false);
+$show_cart = mytheme_option('header_elements.cart', false);
 
 // Check CTA button
-if (mytheme_option('header.header_elements.cta_button', false)) {
-    $cta_text = mytheme_option('header.header_elements.cta_text', 'Get Started');
-    $cta_url = mytheme_option('header.header_elements.cta_url', '');
+if (mytheme_option('header_elements.cta_button', false)) {
+    $cta_text = mytheme_option('header_elements.cta_text', 'Get Started');
+    $cta_url = mytheme_option('header_elements.cta_url', '');
     
     echo '<a href="' . esc_url($cta_url) . '" class="cta-button">' . esc_html($cta_text) . '</a>';
 }
@@ -149,20 +149,20 @@ if (mytheme_option('header.header_elements.cta_button', false)) {
 #### Footer Layout
 ```php
 // Get footer columns
-$columns = mytheme_option('footer.footer_layout.columns', '4');
+$columns = mytheme_option('footer_layout.columns', '4');
 
 // Get footer colors
-$bg = mytheme_option('footer.footer_layout.background', '#1f2937');
-$text_color = mytheme_option('footer.footer_layout.text_color', '#9ca3af');
-$heading_color = mytheme_option('footer.footer_layout.heading_color', '#ffffff');
+$bg = mytheme_option('footer_layout.background', '#1f2937');
+$text_color = mytheme_option('footer_layout.text_color', '#9ca3af');
+$heading_color = mytheme_option('footer_layout.heading_color', '#ffffff');
 ```
 
 #### Copyright Bar
 ```php
-if (mytheme_option('footer.copyright.enable', true)) {
-    $text = mytheme_option('footer.copyright.text', '© {year} {site_name}. All rights reserved.');
-    $links = mytheme_option('footer.copyright.links', '');
-    $bg = mytheme_option('footer.copyright.background', '#111827');
+if (mytheme_option('copyright.enable', true)) {
+    $text = mytheme_option('copyright.text', '© {year} {site_name}. All rights reserved.');
+    $links = mytheme_option('copyright.links', '');
+    $bg = mytheme_option('copyright.background', '#111827');
     
     // Replace tokens
     $text = str_replace(
@@ -180,9 +180,9 @@ if (mytheme_option('footer.copyright.enable', true)) {
 
 #### Back to Top Button
 ```php
-if (mytheme_option('footer.back_to_top.enable', true)) {
-    $position = mytheme_option('footer.back_to_top.position', 'right');
-    $style = mytheme_option('footer.back_to_top.style', 'circle');
+if (mytheme_option('back_to_top.enable', true)) {
+    $position = mytheme_option('back_to_top.position', 'right');
+    $style = mytheme_option('back_to_top.style', 'circle');
     
     echo '<button class="back-to-top back-to-top-' . esc_attr($position) . ' back-to-top-' . esc_attr($style) . '">';
     echo '<i class="icon-arrow-up"></i>';
@@ -194,7 +194,7 @@ if (mytheme_option('footer.back_to_top.enable', true)) {
 
 #### Body Font
 ```php
-$body_font = mytheme_option('typography.body_font', []);
+$body_font = mytheme_option('body_font', []);
 
 // Apply body typography
 $css = "
@@ -210,15 +210,15 @@ body {
 
 #### Heading Font
 ```php
-$heading_font = mytheme_option('typography.heading_font', []);
+$heading_font = mytheme_option('heading_font', []);
 
 // Individual heading sizes
-$h1 = mytheme_option('typography.heading_sizes.h1_size', 48);
-$h2 = mytheme_option('typography.heading_sizes.h2_size', 36);
-$h3 = mytheme_option('typography.heading_sizes.h3_size', 28);
-$h4 = mytheme_option('typography.heading_sizes.h4_size', 22);
-$h5 = mytheme_option('typography.heading_sizes.h5_size', 18);
-$h6 = mytheme_option('typography.heading_sizes.h6_size', 16);
+$h1 = mytheme_option('heading_sizes.h1_size', 48);
+$h2 = mytheme_option('heading_sizes.h2_size', 36);
+$h3 = mytheme_option('heading_sizes.h3_size', 28);
+$h4 = mytheme_option('heading_sizes.h4_size', 22);
+$h5 = mytheme_option('heading_sizes.h5_size', 18);
+$h6 = mytheme_option('heading_sizes.h6_size', 16);
 
 $css = "
 h1, h2, h3, h4, h5, h6 {
@@ -240,38 +240,29 @@ h6 { font-size: {$h6}px; }
 
 #### Primary Colors
 ```php
-$brand = mytheme_option('colors.primary.brand', '#3b82f6');
-$secondary = mytheme_option('colors.primary.secondary', '#8b5cf6');
-$accent = mytheme_option('colors.primary.accent', '#10b981');
+$brand = mytheme_option('primary.brand', '#3b82f6');
+$secondary = mytheme_option('primary.secondary', '#8b5cf6');
+$accent = mytheme_option('primary.accent', '#10b981');
 ```
 
 #### Text Colors
 ```php
-$text_primary = mytheme_option('colors.text.primary', '#111827');
-$text_secondary = mytheme_option('colors.text.secondary', '#6b7280');
-$text_muted = mytheme_option('colors.text.muted', '#9ca3af');
+$text_primary = mytheme_option('text.primary', '#111827');
+$text_secondary = mytheme_option('text.secondary', '#6b7280');
+$text_muted = mytheme_option('text.muted', '#9ca3af');
 ```
 
-#### Link Colors
+#### Border Colors
 ```php
-$link_color = mytheme_option('colors.links.default', '#3b82f6');
-$link_hover = mytheme_option('colors.links.hover', '#2563eb');
-
-$css = "
-a {
-    color: {$link_color};
-}
-a:hover {
-    color: {$link_hover};
-}
-";
+$border_default = mytheme_option('borders.default', '#e5e7eb');
+$border_strong = mytheme_option('borders.strong', '#d1d5db');
 ```
 
 #### Button Colors
 ```php
-$btn_primary_bg = mytheme_option('colors.buttons.primary_bg', '#3b82f6');
-$btn_primary_text = mytheme_option('colors.buttons.primary_text', '#ffffff');
-$btn_primary_hover = mytheme_option('colors.buttons.primary_hover', '#2563eb');
+$btn_primary_bg = mytheme_option('buttons.primary_bg', '#3b82f6');
+$btn_primary_text = mytheme_option('buttons.primary_text', '#ffffff');
+$btn_primary_hover = mytheme_option('buttons.primary_hover', '#2563eb');
 
 $css = "
 .button-primary {
@@ -282,6 +273,13 @@ $css = "
     background: {$btn_primary_hover};
 }
 ";
+```
+
+#### Background Colors
+```php
+$body_bg = mytheme_option('backgrounds.body', '#ffffff');
+$alternate_bg = mytheme_option('backgrounds.alternate', '#f9fafb');
+$sidebar_bg = mytheme_option('backgrounds.sidebar', '#f9fafb');
 ```
 
 ### **6. Social Media**
@@ -295,8 +293,8 @@ mytheme_social_icons([
     'show_label' => false,
 ]);
 
-// Get social links array
-$social_links = mytheme_get_social_links();
+// Get social links array (stored as repeatable group at 'links' key)
+$social_links = mytheme_get_social_links(); // Returns mytheme_option('links', [])
 foreach ($social_links as $link) {
     $platform = $link['platform'];  // facebook, twitter, instagram, etc.
     $url = $link['url'];
@@ -307,14 +305,14 @@ foreach ($social_links as $link) {
 #### Social Sharing
 ```php
 // Check if sharing enabled on posts
-$enable_posts = mytheme_option('social.sharing.enable_posts', true);
-$enable_pages = mytheme_option('social.sharing.enable_pages', false);
+$enable_posts = mytheme_option('sharing.enable_posts', true);
+$enable_pages = mytheme_option('sharing.enable_pages', false);
 
 // Get sharing platforms
-$platforms = mytheme_option('social.sharing.platforms', ['facebook', 'twitter', 'linkedin']);
+$platforms = mytheme_option('sharing.platforms', ['facebook', 'twitter', 'linkedin']);
 
 // Get sharing position
-$position = mytheme_option('social.sharing.position', 'bottom');
+$position = mytheme_option('sharing.position', 'bottom');
 // Options: top, bottom, both, float
 ```
 
@@ -323,22 +321,22 @@ $position = mytheme_option('social.sharing.position', 'bottom');
 #### Basic SEO
 ```php
 // Get site name for SEO
-$site_name = mytheme_option('seo.basic.site_name', get_bloginfo('name'));
-$separator = mytheme_option('seo.basic.separator', '|');
+$site_name = mytheme_option('basic.site_name', get_bloginfo('name'));
+$separator = mytheme_option('basic.separator', '|');
 
 // Homepage SEO
-$home_title = mytheme_option('seo.basic.home_title', '');
-$home_description = mytheme_option('seo.basic.home_description', '');
-$keywords = mytheme_option('seo.basic.keywords', '');
+$home_title = mytheme_option('basic.home_title', '');
+$home_description = mytheme_option('basic.home_description', '');
+$keywords = mytheme_option('basic.keywords', '');
 ```
 
 #### Open Graph
 ```php
-if (mytheme_option('seo.opengraph.enable', true) && is_singular()) {
+if (mytheme_option('opengraph.enable', true) && is_singular()) {
     $og_title = get_the_title();
     $og_description = get_the_excerpt();
     $og_image = get_the_post_thumbnail_url(null, 'large') 
-        ?: wp_get_attachment_url(mytheme_option('seo.opengraph.default_image'));
+        ?: wp_get_attachment_url(mytheme_option('opengraph.default_image'));
     
     echo '<meta property="og:title" content="' . esc_attr($og_title) . '">';
     echo '<meta property="og:description" content="' . esc_attr($og_description) . '">';
@@ -348,14 +346,22 @@ if (mytheme_option('seo.opengraph.enable', true) && is_singular()) {
 
 #### Twitter Cards
 ```php
-if (mytheme_option('seo.twitter.enable', true)) {
-    $card_type = mytheme_option('seo.twitter.card_type', 'summary_large_image');
-    $username = mytheme_option('seo.twitter.username', '');
+if (mytheme_option('twitter.enable', true)) {
+    $card_type = mytheme_option('twitter.card_type', 'summary_large_image');
+    $username = mytheme_option('twitter.username', '');
     
     echo '<meta name="twitter:card" content="' . esc_attr($card_type) . '">';
     if ($username) {
         echo '<meta name="twitter:site" content="@' . esc_attr($username) . '">';
     }
+}
+```
+
+#### Schema Markup
+```php
+if (mytheme_option('schema.enable', true)) {
+    $org_name = mytheme_option('schema.organization_name', '');
+    $org_logo = mytheme_option('schema.organization_logo', '');
 }
 ```
 
@@ -365,21 +371,21 @@ All custom code is automatically output via action hooks:
 
 ```php
 // Custom CSS (wp_head priority 999)
-$custom_css = mytheme_option('custom_code.custom_css', '');
+$custom_css = mytheme_option('custom_css', '');
 
 // Custom JS (wp_footer priority 999)
-$custom_js = mytheme_option('custom_code.custom_js', '');
+$custom_js = mytheme_option('custom_js', '');
 
 // Header code (wp_head priority 1)
-$header_code = mytheme_option('custom_code.header_code', '');
+$header_code = mytheme_option('header_code', '');
 
 // Footer code (wp_footer priority 999)
-$footer_code = mytheme_option('custom_code.footer_code', '');
+$footer_code = mytheme_option('footer_code', '');
 
 // Google Analytics (auto-injected if enabled)
-$ga_enabled = mytheme_option('custom_code.analytics.enable', false);
-$ga_id = mytheme_option('custom_code.analytics.tracking_id', '');
-$anonymize_ip = mytheme_option('custom_code.analytics.anonymize_ip', true);
+$ga_enabled = mytheme_option('analytics.enable', false);
+$ga_id = mytheme_option('analytics.tracking_id', '');
+$anonymize_ip = mytheme_option('analytics.anonymize_ip', true);
 ```
 
 ### **9. Performance**
@@ -387,40 +393,40 @@ $anonymize_ip = mytheme_option('custom_code.analytics.anonymize_ip', true);
 #### Optimization Settings
 ```php
 // Lazy load images
-$lazy_load = mytheme_option('performance.optimization.lazy_load_images', true);
+$lazy_load = mytheme_option('optimization.lazy_load_images', true);
 
 // Disable emojis
-$disable_emojis = mytheme_option('performance.optimization.disable_emojis', false);
+$disable_emojis = mytheme_option('optimization.disable_emojis', false);
 
 // Disable embeds
-$disable_embeds = mytheme_option('performance.optimization.disable_embeds', false);
+$disable_embeds = mytheme_option('optimization.disable_embeds', false);
 
 // Remove query strings
-$remove_query_strings = mytheme_option('performance.optimization.remove_query_strings', false);
+$remove_query_strings = mytheme_option('optimization.remove_query_strings', false);
 ```
 
 #### Asset Loading
 ```php
 // Minification settings
-$minify_css = mytheme_option('performance.assets.minify_css', false);
-$minify_js = mytheme_option('performance.assets.minify_js', false);
-$defer_js = mytheme_option('performance.assets.defer_js', false);
+$minify_css = mytheme_option('assets.minify_css', false);
+$minify_js = mytheme_option('assets.minify_js', false);
+$defer_js = mytheme_option('assets.defer_js', false);
 ```
 
 #### Font Loading
 ```php
 // Google Fonts display
-$font_display = mytheme_option('performance.fonts.google_fonts_display', 'swap');
+$font_display = mytheme_option('fonts.google_fonts_display', 'swap');
 
 // Preload fonts
-$preload_fonts = mytheme_option('performance.fonts.preload_fonts', false);
+$preload_fonts = mytheme_option('fonts.preload_fonts', false);
 ```
 
 #### Caching
 ```php
 // Browser cache
-$browser_cache = mytheme_option('performance.caching.browser_cache', true);
-$cache_duration = mytheme_option('performance.caching.cache_duration', 7);
+$browser_cache = mytheme_option('caching.browser_cache', true);
+$cache_duration = mytheme_option('caching.cache_duration', 7);
 ```
 
 ### **10. Advanced**
@@ -433,8 +439,9 @@ if (mytheme_is_maintenance_mode()) {
 }
 
 // Get maintenance settings
-$maintenance_title = mytheme_option('advanced.maintenance.title', 'Site Under Maintenance');
-$maintenance_message = mytheme_option('advanced.maintenance.message', '');
+$maintenance_enabled = mytheme_option('maintenance.enable', false);
+$maintenance_title = mytheme_option('maintenance.title', 'Site Under Maintenance');
+$maintenance_message = mytheme_option('maintenance.message', '');
 ```
 
 ---
@@ -447,10 +454,10 @@ $maintenance_message = mytheme_option('advanced.maintenance.message', '');
 // Get all theme options
 $options = mytheme_get_options();
 
-// Get specific option (supports dot notation)
-$value = mytheme_option('header.header_layout.sticky', true);
+// Get specific option (supports dot notation: 'group.field')
+$value = mytheme_option('header_layout.sticky', true);
 
-// Get social links
+// Get social links (returns the 'links' repeatable group)
 $social = mytheme_get_social_links();
 
 // Display social icons
@@ -502,20 +509,20 @@ add_action('template_redirect', 'mytheme_show_maintenance_page', 1);
 ```php
 <?php
 // Get header settings
-$header_style = mytheme_option('header.header_layout.style', 'default');
-$is_sticky = mytheme_option('header.header_layout.sticky', true);
-$is_transparent = mytheme_option('header.header_layout.transparent', false);
-$header_height = mytheme_option('header.header_layout.height', 80);
-$header_bg = mytheme_option('header.header_layout.background', '#ffffff');
+$header_style = mytheme_option('header_layout.style', 'default');
+$is_sticky = mytheme_option('header_layout.sticky', true);
+$is_transparent = mytheme_option('header_layout.transparent', false);
+$header_height = mytheme_option('header_layout.height', 80);
+$header_bg = mytheme_option('header_layout.background', '#ffffff');
 
 // Get logo
-$logo_id = mytheme_option('general.identity.site_logo');
-$logo_width = mytheme_option('general.identity.logo_width', 180);
+$logo_id = mytheme_option('identity.site_logo');
+$logo_width = mytheme_option('identity.logo_width', 180);
 
 // Get header elements
-$show_search = mytheme_option('header.header_elements.search', true);
-$show_cart = mytheme_option('header.header_elements.cart', false);
-$show_cta = mytheme_option('header.header_elements.cta_button', false);
+$show_search = mytheme_option('header_elements.search', true);
+$show_cart = mytheme_option('header_elements.cart', false);
+$show_cta = mytheme_option('header_elements.cta_button', false);
 ?>
 
 <header 
@@ -552,8 +559,8 @@ $show_cta = mytheme_option('header.header_elements.cta_button', false);
         <?php endif; ?>
         
         <?php if ($show_cta): ?>
-            <a href="<?php echo esc_url(mytheme_option('header.header_elements.cta_url')); ?>" class="cta-button">
-                <?php echo esc_html(mytheme_option('header.header_elements.cta_text', 'Get Started')); ?>
+            <a href="<?php echo esc_url(mytheme_option('header_elements.cta_url')); ?>" class="cta-button">
+                <?php echo esc_html(mytheme_option('header_elements.cta_text', 'Get Started')); ?>
             </a>
         <?php endif; ?>
     </div>
@@ -565,21 +572,21 @@ $show_cta = mytheme_option('header.header_elements.cta_button', false);
 ```php
 <?php
 // Get footer settings
-$footer_columns = mytheme_option('footer.footer_layout.columns', '4');
-$footer_bg = mytheme_option('footer.footer_layout.background', '#1f2937');
-$footer_text = mytheme_option('footer.footer_layout.text_color', '#9ca3af');
-$heading_color = mytheme_option('footer.footer_layout.heading_color', '#ffffff');
+$footer_columns = mytheme_option('footer_layout.columns', '4');
+$footer_bg = mytheme_option('footer_layout.background', '#1f2937');
+$footer_text = mytheme_option('footer_layout.text_color', '#9ca3af');
+$heading_color = mytheme_option('footer_layout.heading_color', '#ffffff');
 
 // Copyright settings
-$show_copyright = mytheme_option('footer.copyright.enable', true);
-$copyright_text = mytheme_option('footer.copyright.text', '© {year} {site_name}. All rights reserved.');
-$copyright_links = mytheme_option('footer.copyright.links', '');
-$copyright_bg = mytheme_option('footer.copyright.background', '#111827');
+$show_copyright = mytheme_option('copyright.enable', true);
+$copyright_text = mytheme_option('copyright.text', '© {year} {site_name}. All rights reserved.');
+$copyright_links = mytheme_option('copyright.links', '');
+$copyright_bg = mytheme_option('copyright.background', '#111827');
 
 // Back to top
-$show_back_to_top = mytheme_option('footer.back_to_top.enable', true);
-$back_to_top_position = mytheme_option('footer.back_to_top.position', 'right');
-$back_to_top_style = mytheme_option('footer.back_to_top.style', 'circle');
+$show_back_to_top = mytheme_option('back_to_top.enable', true);
+$back_to_top_position = mytheme_option('back_to_top.position', 'right');
+$back_to_top_style = mytheme_option('back_to_top.style', 'circle');
 
 // Replace tokens
 $copyright_text = str_replace(
@@ -648,15 +655,15 @@ function mytheme_generate_theme_css() {
     $css = '';
     
     // Container width
-    $container_width = mytheme_option('general.layout.container_width', 1200);
+    $container_width = mytheme_option('layout.container_width', 1200);
     $css .= ".container { max-width: {$container_width}px; }";
     
     // Primary colors
-    $brand_color = mytheme_option('colors.primary.brand', '#3b82f6');
+    $brand_color = mytheme_option('primary.brand', '#3b82f6');
     $css .= ":root { --color-brand: {$brand_color}; }";
     
     // Typography
-    $body_font = mytheme_option('typography.body_font', []);
+    $body_font = mytheme_option('body_font', []);
     if (!empty($body_font)) {
         $css .= "body { 
             font-family: {$body_font['fontFamily']}; 

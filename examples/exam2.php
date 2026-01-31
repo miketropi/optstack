@@ -30,6 +30,7 @@ if (!defined('ABSPATH')) {
 }
 
 add_action('optstack_init', function () {
+    
     OptStack::make('theme_options')
         ->forOptions()
         ->menuParent('themes.php')
@@ -196,6 +197,7 @@ add_action('optstack_init', function () {
             // TAB 2: HEADER & NAVIGATION
             // ================================================================
             $stack->tab('header', function ($tab) {
+
                 // Header Layout
                 $tab->group('header_layout', function ($group) {
                     $group->field('style', [
@@ -1419,7 +1421,7 @@ function mytheme_option(string $key, mixed $default = null): mixed
  */
 function mytheme_output_custom_css(): void
 {
-    $custom_css = mytheme_option('custom_code.custom_css', '');
+    $custom_css = mytheme_option('custom_css', '');
     
     if (!empty($custom_css)) {
         echo '<style id="mytheme-custom-css">' . wp_strip_all_tags($custom_css) . '</style>';
@@ -1432,7 +1434,7 @@ add_action('wp_head', 'mytheme_output_custom_css', 999);
  */
 function mytheme_output_custom_js(): void
 {
-    $custom_js = mytheme_option('custom_code.custom_js', '');
+    $custom_js = mytheme_option('custom_js', '');
     
     if (!empty($custom_js)) {
         echo '<script id="mytheme-custom-js">' . $custom_js . '</script>';
@@ -1445,7 +1447,7 @@ add_action('wp_footer', 'mytheme_output_custom_js', 999);
  */
 function mytheme_output_header_code(): void
 {
-    $header_code = mytheme_option('custom_code.header_code', '');
+    $header_code = mytheme_option('header_code', '');
     
     if (!empty($header_code)) {
         echo $header_code;
@@ -1458,7 +1460,7 @@ add_action('wp_head', 'mytheme_output_header_code', 1);
  */
 function mytheme_output_footer_code(): void
 {
-    $footer_code = mytheme_option('custom_code.footer_code', '');
+    $footer_code = mytheme_option('footer_code', '');
     
     if (!empty($footer_code)) {
         echo $footer_code;
@@ -1471,12 +1473,12 @@ add_action('wp_footer', 'mytheme_output_footer_code', 999);
  */
 function mytheme_output_google_analytics(): void
 {
-    if (!mytheme_option('custom_code.analytics.enable', false)) {
+    if (!mytheme_option('analytics.enable', false)) {
         return;
     }
     
-    $tracking_id = mytheme_option('custom_code.analytics.tracking_id', '');
-    $anonymize = mytheme_option('custom_code.analytics.anonymize_ip', true);
+    $tracking_id = mytheme_option('analytics.tracking_id', '');
+    $anonymize = mytheme_option('analytics.anonymize_ip', true);
     
     if (empty($tracking_id)) {
         return;
@@ -1499,7 +1501,7 @@ add_action('wp_head', 'mytheme_output_google_analytics', 1);
  */
 function mytheme_add_favicon(): void
 {
-    $favicon_id = mytheme_option('general.identity.favicon');
+    $favicon_id = mytheme_option('identity.favicon');
     
     if ($favicon_id) {
         $favicon_url = wp_get_attachment_url($favicon_id);
@@ -1517,7 +1519,7 @@ add_action('wp_head', 'mytheme_add_favicon');
  */
 function mytheme_get_social_links(): array
 {
-    return mytheme_option('social.links', []);
+    return mytheme_option('links', []);
 }
 
 /**
@@ -1586,7 +1588,7 @@ function mytheme_is_maintenance_mode(): bool
         return false;
     }
     
-    return mytheme_option('advanced.maintenance.enable', false);
+    return mytheme_option('maintenance.enable', false);
 }
 
 /**
@@ -1598,8 +1600,8 @@ function mytheme_show_maintenance_page(): void
         return;
     }
     
-    $title = mytheme_option('advanced.maintenance.title', 'Site Under Maintenance');
-    $message = mytheme_option('advanced.maintenance.message', '');
+    $title = mytheme_option('maintenance.title', 'Site Under Maintenance');
+    $message = mytheme_option('maintenance.message', '');
     
     wp_die(
         wp_kses_post($message),
