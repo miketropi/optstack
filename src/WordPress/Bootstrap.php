@@ -367,21 +367,26 @@ class Bootstrap
             return new \WP_Error('not_found', 'Stack not found', ['status' => 404]);
         }
 
-        // Bind store based on context
-        $bindResult = $this->bindStoreForRequest($stack, $request);
+        // Bind store based on context (object_id NOT required for GET - allows loading UI for new posts/terms)
+        $bindResult = $this->bindStoreForRequest($stack, $request, false);
         if (is_wp_error($bindResult)) {
             return $bindResult;
         }
 
-        $data = $stack->getData();
+        // Get data from store (will be empty if no store bound - new post/term case)
+        $data = $stack->getStore() !== null ? $stack->getData() : [];
         $defaults = $stack->getDefaults();
 
         // Deep merge defaults with data (data takes precedence)
         $mergedData = $this->deepMerge($defaults, $data);
 
+        // Include isNew flag to indicate this is a new object (no object_id provided)
+        $objectId = $request->get_param('object_id');
+        
         return new \WP_REST_Response([
             'schema' => $stack->toArray(),
-            'data' => $mergedData
+            'data' => $mergedData,
+            'isNew' => empty($objectId),
         ]);
     }
 
@@ -400,8 +405,10 @@ class Bootstrap
             return new \WP_Error('not_found', 'Stack not found', ['status' => 404]);
         }
 
-        // Bind store based on context
-        $bindResult = $this->bindStoreForRequest($stack, $request);
+        // Bind store based on context (object_id IS required for POST - can't save without knowing the object)
+        // Note: For 'options' context, object_id is not needed
+        $requireObjectId = !in_array($stack->getContext(), ['options'], true);
+        $bindResult = $this->bindStoreForRequest($stack, $request, $requireObjectId);
         if (is_wp_error($bindResult)) {
             return $bindResult;
         }
@@ -441,9 +448,10 @@ class Bootstrap
      *
      * @param Stack $stack
      * @param \WP_REST_Request $request
+     * @param bool $requireObjectId Whether object_id is required (true for save, false for get)
      * @return true|\WP_Error
      */
-    private function bindStoreForRequest(Stack $stack, \WP_REST_Request $request): true|\WP_Error
+    private function bindStoreForRequest(Stack $stack, \WP_REST_Request $request, bool $requireObjectId = false): true|\WP_Error
     {
         $context = $stack->getContext();
         $objectId = $request->get_param('object_id');
@@ -457,14 +465,22 @@ class Bootstrap
             return true;
         }
 
-        // For post_type, taxonomy, user contexts - object_id is required
+        // For post_type, taxonomy, user contexts
         if (in_array($context, ['post_type', 'post', 'taxonomy', 'term', 'user'], true)) {
+            // If object_id is not provided
             if (!$objectId) {
-                return new \WP_Error(
-                    'missing_object_id',
-                    sprintf('object_id parameter is required for %s context', $context),
-                    ['status' => 400]
-                );
+                // For save operations, object_id is required
+                if ($requireObjectId) {
+                    return new \WP_Error(
+                        'missing_object_id',
+                        sprintf('object_id parameter is required for %s context when saving data', $context),
+                        ['status' => 400]
+                    );
+                }
+                
+                // For read operations (e.g., new post/term), return true without binding store
+                // The UI will load with default/empty values
+                return true;
             }
 
             $objectId = (int) $objectId;
