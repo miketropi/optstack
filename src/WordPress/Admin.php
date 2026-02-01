@@ -294,33 +294,35 @@ class Admin
      */
     private function registerMetaBox(Stack $stack): void
     {
-        $postType = $stack->getPostType();
+        $postTypes = $stack->getPostTypes();
 
-        if (!$postType) {
+        if (empty($postTypes)) {
             return;
         }
 
-        // Register meta box - WordPress will only show it for the specified post type
-        add_action('add_meta_boxes', function () use ($stack, $postType) {
-            // Validate post type exists
-            if (!post_type_exists($postType)) {
-                return;
-            }
+        // Register meta box for each post type
+        add_action('add_meta_boxes', function () use ($stack, $postTypes) {
+            foreach ($postTypes as $postType) {
+                // Validate post type exists
+                if (!post_type_exists($postType)) {
+                    continue;
+                }
 
-            add_meta_box(
-                'optstack-' . $stack->getId(),
-                $stack->getLabel(),
-                function ($post) use ($stack, $postType) {
-                    $this->renderMetaBox($stack, $post, $postType);
-                },
-                $postType,
-                'normal',
-                'high'
-            );
+                add_meta_box(
+                    'optstack-' . $stack->getId(),
+                    $stack->getLabel(),
+                    function ($post) use ($stack) {
+                        $this->renderMetaBox($stack, $post);
+                    },
+                    $postType,
+                    'normal',
+                    'high'
+                );
+            }
         });
 
         // Enqueue assets on post edit screen
-        add_action('admin_enqueue_scripts', function ($hook) use ($stack, $postType) {
+        add_action('admin_enqueue_scripts', function ($hook) use ($stack, $postTypes) {
             global $post_type, $post;
 
             // Only on post edit screens
@@ -328,13 +330,13 @@ class Admin
                 return;
             }
 
-            // Validate post type matches
-            if ($post_type !== $postType) {
+            // Validate post type matches one of the registered types
+            if (!in_array($post_type, $postTypes, true)) {
                 return;
             }
 
             // Validate post type exists
-            if (!post_type_exists($postType)) {
+            if (!post_type_exists($post_type)) {
                 return;
             }
 
@@ -343,18 +345,21 @@ class Admin
         });
 
         // Save meta box data - use generic save_post with validation
-        add_action('save_post', function ($postId, $post) use ($stack, $postType) {
-            $this->saveMetaBoxData($stack, $postId, $post, $postType);
+        add_action('save_post', function ($postId, $post) use ($stack, $postTypes) {
+            // Check if post type is in the registered types
+            if (in_array($post->post_type, $postTypes, true)) {
+                $this->saveMetaBoxData($stack, $postId, $post);
+            }
         }, 10, 2);
     }
 
     /**
      * Render a meta box.
      */
-    private function renderMetaBox(Stack $stack, \WP_Post $post, string $expectedPostType): void
+    private function renderMetaBox(Stack $stack, \WP_Post $post): void
     {
         // Double-check post type matches (safety check)
-        if ($post->post_type !== $expectedPostType) {
+        if (!$stack->hasPostType($post->post_type)) {
             return;
         }
 
@@ -370,10 +375,10 @@ class Admin
     /**
      * Save meta box data.
      */
-    private function saveMetaBoxData(Stack $stack, int $postId, \WP_Post $post, string $expectedPostType): void
+    private function saveMetaBoxData(Stack $stack, int $postId, \WP_Post $post): void
     {
-        // Validate post type matches
-        if ($post->post_type !== $expectedPostType) {
+        // Validate post type matches one of the registered types
+        if (!$stack->hasPostType($post->post_type)) {
             return;
         }
 
@@ -404,7 +409,7 @@ class Admin
         }
 
         // Check permissions based on post type
-        $postTypeObj = get_post_type_object($expectedPostType);
+        $postTypeObj = get_post_type_object($post->post_type);
         if (!$postTypeObj) {
             return;
         }
@@ -427,37 +432,40 @@ class Admin
      */
     private function registerTaxonomyFields(Stack $stack): void
     {
-        $taxonomy = $stack->getTaxonomy();
+        $taxonomies = $stack->getTaxonomies();
 
-        if (!$taxonomy) {
+        if (empty($taxonomies)) {
             return;
         }
 
-        // Add fields to "Add New Term" form
-        add_action($taxonomy . '_add_form_fields', function () use ($stack) {
-            $this->renderTaxonomyAddFields($stack);
-        });
+        // Register hooks for each taxonomy
+        foreach ($taxonomies as $taxonomy) {
+            // Add fields to "Add New Term" form
+            add_action($taxonomy . '_add_form_fields', function () use ($stack) {
+                $this->renderTaxonomyAddFields($stack);
+            });
 
-        // Add fields to "Edit Term" form
-        add_action($taxonomy . '_edit_form_fields', function ($term) use ($stack) {
-            $this->renderTaxonomyEditFields($stack, $term);
-        });
+            // Add fields to "Edit Term" form
+            add_action($taxonomy . '_edit_form_fields', function ($term) use ($stack) {
+                $this->renderTaxonomyEditFields($stack, $term);
+            });
 
-        // Enqueue assets
-        add_action('admin_enqueue_scripts', function ($hook) use ($stack, $taxonomy) {
+            // Save term meta
+            add_action('created_' . $taxonomy, function ($termId) use ($stack) {
+                $this->saveTermData($stack, $termId);
+            });
+            add_action('edited_' . $taxonomy, function ($termId) use ($stack) {
+                $this->saveTermData($stack, $termId);
+            });
+        }
+
+        // Enqueue assets (single hook that checks all taxonomies)
+        add_action('admin_enqueue_scripts', function ($hook) use ($stack, $taxonomies) {
             $screen = get_current_screen();
-            if ($screen && ($screen->taxonomy === $taxonomy)) {
+            if ($screen && in_array($screen->taxonomy, $taxonomies, true)) {
                 $termId = isset($_GET['tag_ID']) ? (int) $_GET['tag_ID'] : 0;
                 $this->enqueueAssets($stack, ['term_id' => $termId]);
             }
-        });
-
-        // Save term meta
-        add_action('created_' . $taxonomy, function ($termId) use ($stack) {
-            $this->saveTermData($stack, $termId);
-        });
-        add_action('edited_' . $taxonomy, function ($termId) use ($stack) {
-            $this->saveTermData($stack, $termId);
         });
     }
 
@@ -505,10 +513,19 @@ class Admin
      */
     private function saveTermData(Stack $stack, int $termId): void
     {
+        // Get the term to find its taxonomy
+        $term = get_term($termId);
+        if (!$term || is_wp_error($term)) {
+            return;
+        }
+
+        // Validate the term's taxonomy is one of the registered taxonomies
+        if (!$stack->hasTaxonomy($term->taxonomy)) {
+            return;
+        }
+
         // Check permissions
-        $taxonomy = $stack->getTaxonomy();
-        $taxonomyObj = get_taxonomy($taxonomy);
-        
+        $taxonomyObj = get_taxonomy($term->taxonomy);
         if ($taxonomyObj && !current_user_can($taxonomyObj->cap->edit_terms)) {
             return;
         }

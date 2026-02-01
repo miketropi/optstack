@@ -412,15 +412,22 @@ OptStack::make('site_settings')
 
 ---
 
-#### `postType(string $id, string $postType, callable $callback): Stack`
+#### `postType(string $id, string|array $postType, callable $callback): Stack`
 
-Define and register a post type meta stack.
+Define and register a post type meta stack. Supports single or multiple post types.
 
 ```php
+// Single post type
 OptStack::postType('product_data', 'product', function($stack) {
     $stack->field('price', ['type' => 'number', 'searchable' => true]);
     $stack->field('stock', ['type' => 'number']);
     $stack->field('sku', ['type' => 'text', 'searchable' => true]);
+});
+
+// Multiple post types (same fields for posts and pages)
+OptStack::postType('seo_settings', ['post', 'page'], function($stack) {
+    $stack->field('meta_title', ['type' => 'text']);
+    $stack->field('meta_description', ['type' => 'textarea']);
 });
 ```
 
@@ -430,19 +437,32 @@ OptStack::make('product_data')
     ->forPostType('product')
     ->define($callback)
     ->build();
+
+// Or with multiple post types
+OptStack::make('seo_settings')
+    ->forPostType(['post', 'page'])
+    ->define($callback)
+    ->build();
 ```
 
 ---
 
-#### `taxonomy(string $id, string $taxonomy, callable $callback): Stack`
+#### `taxonomy(string $id, string|array $taxonomy, callable $callback): Stack`
 
-Define and register a taxonomy term meta stack.
+Define and register a taxonomy term meta stack. Supports single or multiple taxonomies.
 
 ```php
+// Single taxonomy
 OptStack::taxonomy('category_settings', 'category', function($stack) {
     $stack->field('icon', ['type' => 'media']);
     $stack->field('color', ['type' => 'color']);
     $stack->field('featured', ['type' => 'toggle']);
+});
+
+// Multiple taxonomies (same fields for categories and tags)
+OptStack::taxonomy('term_settings', ['category', 'post_tag', 'product_cat'], function($stack) {
+    $stack->field('icon', ['type' => 'media']);
+    $stack->field('color', ['type' => 'color']);
 });
 ```
 
@@ -450,6 +470,12 @@ OptStack::taxonomy('category_settings', 'category', function($stack) {
 ```php
 OptStack::make('category_settings')
     ->forTaxonomy('category')
+    ->define($callback)
+    ->build();
+
+// Or with multiple taxonomies
+OptStack::make('term_settings')
+    ->forTaxonomy(['category', 'post_tag', 'product_cat'])
     ->define($callback)
     ->build();
 ```
@@ -488,9 +514,18 @@ $stack = OptStack::get('product_data');
 // Get stack info
 $id = $stack->getId();              // 'product_data'
 $context = $stack->getContext();    // 'post_type'
-$postType = $stack->getPostType();  // 'product'
 $label = $stack->getLabel();        // 'Product Data'
 $description = $stack->getDescription();
+
+// Post type methods (single or array)
+$postType = $stack->getPostType();  // 'product' or ['post', 'page']
+$postTypes = $stack->getPostTypes(); // Always array: ['product'] or ['post', 'page']
+$hasPost = $stack->hasPostType('post'); // Check if stack supports specific post type
+
+// Taxonomy methods (single or array)
+$taxonomy = $stack->getTaxonomy();  // 'category' or ['category', 'post_tag']
+$taxonomies = $stack->getTaxonomies(); // Always array: ['category'] or ['category', 'post_tag']
+$hasCategory = $stack->hasTaxonomy('category'); // Check if stack supports specific taxonomy
 
 // Get store
 $store = $stack->getStore();        // StoreInterface
@@ -576,8 +611,19 @@ OptStack::saveData('product_data', ['price' => 99.99, 'stock' => 50]);
 | `updateField($id, $key, $value, $objectId)` | Update single field | `bool` |
 | `schema($id)` | Export stack schema | `array\|null` |
 | `options($id, $callback)` | Define options stack | `Stack` |
-| `postType($id, $postType, $callback)` | Define post type stack | `Stack` |
-| `taxonomy($id, $taxonomy, $callback)` | Define taxonomy stack | `Stack` |
+| `postType($id, $postType, $callback)` | Define post type stack (single or array) | `Stack` |
+| `taxonomy($id, $taxonomy, $callback)` | Define taxonomy stack (single or array) | `Stack` |
+
+### Stack Instance Methods
+
+| Method | Purpose | Returns |
+|--------|---------|---------|
+| `getPostType()` | Get post type(s) | `string\|array\|null` |
+| `getPostTypes()` | Get post types as array | `array` |
+| `hasPostType($type)` | Check if supports post type | `bool` |
+| `getTaxonomy()` | Get taxonomy/taxonomies | `string\|array\|null` |
+| `getTaxonomies()` | Get taxonomies as array | `array` |
+| `hasTaxonomy($tax)` | Check if supports taxonomy | `bool` |
 
 ---
 

@@ -30,14 +30,18 @@ class Stack
     protected string $context = 'options';
 
     /**
-     * Post type (for post context).
+     * Post type(s) (for post context).
+     * 
+     * @var string|array<string>|null
      */
-    protected ?string $postType = null;
+    protected string|array|null $postType = null;
 
     /**
-     * Taxonomy (for term context).
+     * Taxonomy/taxonomies (for term context).
+     * 
+     * @var string|array<string>|null
      */
-    protected ?string $taxonomy = null;
+    protected string|array|null $taxonomy = null;
 
     /**
      * Stack label.
@@ -112,19 +116,83 @@ class Stack
     }
 
     /**
-     * Get post type.
+     * Get post type(s).
+     * 
+     * @return string|array<string>|null
      */
-    public function getPostType(): ?string
+    public function getPostType(): string|array|null
     {
         return $this->postType;
     }
 
     /**
-     * Get taxonomy.
+     * Get post types as array (normalized).
+     * 
+     * @return array<string>
      */
-    public function getTaxonomy(): ?string
+    public function getPostTypes(): array
+    {
+        if ($this->postType === null) {
+            return [];
+        }
+
+        return is_array($this->postType) ? $this->postType : [$this->postType];
+    }
+
+    /**
+     * Check if stack is registered for a specific post type.
+     */
+    public function hasPostType(string $postType): bool
+    {
+        if ($this->postType === null) {
+            return false;
+        }
+
+        if (is_array($this->postType)) {
+            return in_array($postType, $this->postType, true);
+        }
+
+        return $this->postType === $postType;
+    }
+
+    /**
+     * Get taxonomy/taxonomies.
+     * 
+     * @return string|array<string>|null
+     */
+    public function getTaxonomy(): string|array|null
     {
         return $this->taxonomy;
+    }
+
+    /**
+     * Get taxonomies as array (normalized).
+     * 
+     * @return array<string>
+     */
+    public function getTaxonomies(): array
+    {
+        if ($this->taxonomy === null) {
+            return [];
+        }
+
+        return is_array($this->taxonomy) ? $this->taxonomy : [$this->taxonomy];
+    }
+
+    /**
+     * Check if stack is registered for a specific taxonomy.
+     */
+    public function hasTaxonomy(string $taxonomy): bool
+    {
+        if ($this->taxonomy === null) {
+            return false;
+        }
+
+        if (is_array($this->taxonomy)) {
+            return in_array($taxonomy, $this->taxonomy, true);
+        }
+
+        return $this->taxonomy === $taxonomy;
     }
 
     /**
@@ -281,8 +349,10 @@ class Stack
 
     /**
      * Configure for post type storage.
+     * 
+     * @param string|array<string> $postType Single post type or array of post types
      */
-    public function forPostType(string $postType): self
+    public function forPostType(string|array $postType): self
     {
         $this->context = 'post_type';
         $this->postType = $postType;
@@ -305,8 +375,10 @@ class Stack
 
     /**
      * Configure for taxonomy storage.
+     * 
+     * @param string|array<string> $taxonomy Single taxonomy or array of taxonomies
      */
-    public function forTaxonomy(string $taxonomy): self
+    public function forTaxonomy(string|array $taxonomy): self
     {
         $this->context = 'taxonomy';
         $this->taxonomy = $taxonomy;
@@ -947,11 +1019,13 @@ class Stack
         }
 
         if ($this->postType !== null) {
-            $data['postType'] = $this->postType;
+            // Always return as array for consistency in schema
+            $data['postType'] = is_array($this->postType) ? $this->postType : [$this->postType];
         }
 
         if ($this->taxonomy !== null) {
-            $data['taxonomy'] = $this->taxonomy;
+            // Always return as array for consistency in schema
+            $data['taxonomy'] = is_array($this->taxonomy) ? $this->taxonomy : [$this->taxonomy];
         }
 
         // Fields

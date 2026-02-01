@@ -113,7 +113,7 @@ class StackRegistry
         return array_filter(
             self::getInstance()->stacks,
             fn(Stack $stack) => $stack->getContext() === 'post_type'
-                && $stack->getPostType() === $postType
+                && $stack->hasPostType($postType)
         );
     }
 
@@ -127,7 +127,7 @@ class StackRegistry
         return array_filter(
             self::getInstance()->stacks,
             fn(Stack $stack) => $stack->getContext() === 'taxonomy'
-                && $stack->getTaxonomy() === $taxonomy
+                && $stack->hasTaxonomy($taxonomy)
         );
     }
 

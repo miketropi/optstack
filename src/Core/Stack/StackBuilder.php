@@ -79,8 +79,10 @@ class StackBuilder
 
     /**
      * Configure for post type storage.
+     * 
+     * @param string|array<string> $postType Single post type or array of post types
      */
-    public function forPostType(string $postType): self
+    public function forPostType(string|array $postType): self
     {
         $this->stack->forPostType($postType);
 
@@ -99,8 +101,10 @@ class StackBuilder
 
     /**
      * Configure for taxonomy storage.
+     * 
+     * @param string|array<string> $taxonomy Single taxonomy or array of taxonomies
      */
-    public function forTaxonomy(string $taxonomy): self
+    public function forTaxonomy(string|array $taxonomy): self
     {
         $this->stack->forTaxonomy($taxonomy);
 

@@ -1,6 +1,6 @@
 # Select Field
 
-A dropdown select menu for choosing from predefined options.
+A dropdown select menu for choosing from predefined options. Supports both single and multiple selection modes.
 
 ## Basic Usage
 
@@ -24,10 +24,19 @@ $stack->field('layout', [
 | `type` | string | - | **Required.** Must be `'select'` |
 | `label` | string | - | Field label displayed to users |
 | `description` | string | `''` | Help text below the field |
-| `default` | string | `''` | Default selected value |
+| `default` | string/array | `''` | Default selected value(s) |
 | `options` | array | `[]` | **Required.** Array of options |
 | `attributes` | array | `[]` | Additional attributes |
 | `conditions` | array | `[]` | Conditional display rules |
+
+## Attributes
+
+| Attribute | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `multiple` | boolean | `false` | Enable multiple selection |
+| `searchable` | boolean | `true` | Allow searching/filtering options |
+| `clearable` | boolean | `false` | Show clear button to reset selection |
+| `placeholder` | string | `'Select...'` | Placeholder text when no selection |
 
 ## Options Format
 
@@ -39,7 +48,70 @@ Each option should have:
 ]
 ```
 
-## Examples
+## Multiple Selection
+
+Enable multiple selection with the `multiple` attribute. The value will be stored as an array.
+
+```php
+$stack->field('categories', [
+    'type' => 'select',
+    'label' => 'Categories',
+    'default' => ['news', 'featured'],
+    'attributes' => [
+        'multiple' => true,
+        'placeholder' => 'Select categories...',
+    ],
+    'options' => [
+        ['value' => 'news', 'label' => 'News'],
+        ['value' => 'featured', 'label' => 'Featured'],
+        ['value' => 'popular', 'label' => 'Popular'],
+        ['value' => 'trending', 'label' => 'Trending'],
+    ],
+]);
+```
+
+### Social Platforms Example
+
+```php
+$stack->field('social_platforms', [
+    'type' => 'select',
+    'label' => 'Share Platforms',
+    'description' => 'Select which social platforms to show share buttons for',
+    'default' => ['facebook', 'twitter'],
+    'attributes' => [
+        'multiple' => true,
+        'searchable' => true,
+        'clearable' => true,
+    ],
+    'options' => [
+        ['value' => 'facebook', 'label' => 'Facebook'],
+        ['value' => 'twitter', 'label' => 'Twitter/X'],
+        ['value' => 'linkedin', 'label' => 'LinkedIn'],
+        ['value' => 'pinterest', 'label' => 'Pinterest'],
+        ['value' => 'whatsapp', 'label' => 'WhatsApp'],
+        ['value' => 'email', 'label' => 'Email'],
+    ],
+]);
+```
+
+### Retrieving Multiple Values
+
+```php
+// Returns array: ['facebook', 'twitter']
+$platforms = OptStack::getField('settings', 'social_platforms', [], $post_id);
+
+// Loop through selected values
+foreach ($platforms as $platform) {
+    echo "Share on: {$platform}";
+}
+
+// Check if specific value is selected
+if (in_array('facebook', $platforms)) {
+    // Show Facebook share button
+}
+```
+
+## Examples (Single Select)
 
 ### Header Style
 

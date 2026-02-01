@@ -517,10 +517,15 @@ class Bootstrap
                     return new \WP_Error('post_not_found', 'Post not found', ['status' => 404]);
                 }
                 // Validate post type matches (for post_type context)
-                if ($context === 'post_type' && $stack->getPostType() && $post->post_type !== $stack->getPostType()) {
+                if ($context === 'post_type' && $stack->getPostType() && !$stack->hasPostType($post->post_type)) {
+                    $expectedTypes = $stack->getPostTypes();
                     return new \WP_Error(
                         'post_type_mismatch',
-                        sprintf('Post type mismatch. Expected %s, got %s', $stack->getPostType(), $post->post_type),
+                        sprintf(
+                            'Post type mismatch. Expected %s, got %s',
+                            implode(', ', $expectedTypes),
+                            $post->post_type
+                        ),
                         ['status' => 400]
                     );
                 }
@@ -533,10 +538,15 @@ class Bootstrap
                     return new \WP_Error('term_not_found', 'Term not found', ['status' => 404]);
                 }
                 // Validate taxonomy matches (for taxonomy context)
-                if ($context === 'taxonomy' && $stack->getTaxonomy() && $term->taxonomy !== $stack->getTaxonomy()) {
+                if ($context === 'taxonomy' && $stack->getTaxonomy() && !$stack->hasTaxonomy($term->taxonomy)) {
+                    $expectedTaxonomies = $stack->getTaxonomies();
                     return new \WP_Error(
                         'taxonomy_mismatch',
-                        sprintf('Taxonomy mismatch. Expected %s, got %s', $stack->getTaxonomy(), $term->taxonomy),
+                        sprintf(
+                            'Taxonomy mismatch. Expected %s, got %s',
+                            implode(', ', $expectedTaxonomies),
+                            $term->taxonomy
+                        ),
                         ['status' => 400]
                     );
                 }

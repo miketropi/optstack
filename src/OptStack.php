@@ -305,11 +305,11 @@ class OptStack
      * Define a stack for a post type.
      *
      * @param string $id Stack identifier
-     * @param string $postType Post type slug
+     * @param string|array<string> $postType Post type slug or array of post type slugs
      * @param callable $callback Definition callback
      * @return Stack
      */
-    public static function postType(string $id, string $postType, callable $callback): Stack
+    public static function postType(string $id, string|array $postType, callable $callback): Stack
     {
         return self::make($id)
             ->forPostType($postType)
@@ -321,11 +321,11 @@ class OptStack
      * Define a stack for a taxonomy.
      *
      * @param string $id Stack identifier
-     * @param string $taxonomy Taxonomy slug
+     * @param string|array<string> $taxonomy Taxonomy slug or array of taxonomy slugs
      * @param callable $callback Definition callback
      * @return Stack
      */
-    public static function taxonomy(string $id, string $taxonomy, callable $callback): Stack
+    public static function taxonomy(string $id, string|array $taxonomy, callable $callback): Stack
     {
         return self::make($id)
             ->forTaxonomy($taxonomy)

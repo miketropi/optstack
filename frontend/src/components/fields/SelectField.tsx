@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import Select, { StylesConfig, SingleValue } from 'react-select'
+import Select, { StylesConfig, SingleValue, MultiValue } from 'react-select'
 import type { FieldRendererProps } from '../../schema/types'
 
 interface SelectOption {
@@ -8,8 +8,8 @@ interface SelectOption {
 }
 
 export function SelectField({ field, value, onChange, disabled, error }: FieldRendererProps) {
-  const selectedValue = value ?? field.default ?? ''
-  const placeholder = (field.attributes?.placeholder as string) || 'Select...'
+  const isMultiple = field.attributes?.multiple === true
+  const placeholder = (field.attributes?.placeholder as string) || (isMultiple ? 'Select options...' : 'Select...')
   const searchable = field.attributes?.searchable !== false
   const clearable = field.attributes?.clearable === true
   
@@ -21,17 +21,33 @@ export function SelectField({ field, value, onChange, disabled, error }: FieldRe
     }))
   }, [field.options])
   
-  // Find selected option
+  // Find selected option(s)
   const selectedOption = useMemo(() => {
-    return options.find(opt => opt.value === String(selectedValue)) || null
-  }, [options, selectedValue])
+    if (isMultiple) {
+      // For multiple: value should be an array
+      const selectedValues = Array.isArray(value) ? value : (value ? [value] : [])
+      return options.filter(opt => selectedValues.map(String).includes(opt.value))
+    } else {
+      // For single: find the matching option
+      const selectedValue = value ?? field.default ?? ''
+      return options.find(opt => opt.value === String(selectedValue)) || null
+    }
+  }, [options, value, field.default, isMultiple])
 
-  const handleChange = (newValue: SingleValue<SelectOption>) => {
-    onChange(newValue ? newValue.value : '')
+  const handleChange = (newValue: SingleValue<SelectOption> | MultiValue<SelectOption>) => {
+    if (isMultiple) {
+      // For multiple: return array of values
+      const multiValue = newValue as MultiValue<SelectOption>
+      onChange(multiValue ? multiValue.map(opt => opt.value) : [])
+    } else {
+      // For single: return single value
+      const singleValue = newValue as SingleValue<SelectOption>
+      onChange(singleValue ? singleValue.value : '')
+    }
   }
 
   // Custom styles to match the design
-  const customStyles: StylesConfig<SelectOption, false> = {
+  const customStyles: StylesConfig<SelectOption, boolean> = {
     control: (base, state) => ({
       ...base,
       minHeight: '38px',
@@ -125,11 +141,33 @@ export function SelectField({ field, value, onChange, disabled, error }: FieldRe
       ...base,
       color: '#9e9e9e',
       fontSize: '14px'
+    }),
+    // Multi-value styles (for multiple select)
+    multiValue: (base) => ({
+      ...base,
+      backgroundColor: '#e3f2fd',
+      borderRadius: '4px',
+      margin: '2px'
+    }),
+    multiValueLabel: (base) => ({
+      ...base,
+      color: '#1976d2',
+      fontSize: '13px',
+      padding: '2px 6px'
+    }),
+    multiValueRemove: (base) => ({
+      ...base,
+      color: '#1976d2',
+      borderRadius: '0 4px 4px 0',
+      '&:hover': {
+        backgroundColor: '#bbdefb',
+        color: '#1565c0'
+      }
     })
   }
 
   return (
-    <div className={`os-field os-field-select ${error ? 'os-field-error' : ''}`}>
+    <div className={`os-field os-field-select ${isMultiple ? 'os-field-select-multiple' : ''} ${error ? 'os-field-error' : ''}`}>
       <label htmlFor={field.key} className="os-label">
         {field.label}
         {field.attributes?.required === true && <span className="os-required">*</span>}
@@ -137,7 +175,7 @@ export function SelectField({ field, value, onChange, disabled, error }: FieldRe
       
       <div className="os-field-body">
         <div className="os-select-wrapper">
-          <Select<SelectOption, false>
+          <Select<SelectOption, boolean>
             inputId={field.key}
             value={selectedOption}
             onChange={handleChange}
@@ -146,6 +184,8 @@ export function SelectField({ field, value, onChange, disabled, error }: FieldRe
             isDisabled={disabled}
             isSearchable={searchable}
             isClearable={clearable}
+            isMulti={isMultiple}
+            closeMenuOnSelect={!isMultiple}
             styles={customStyles}
             noOptionsMessage={() => 'No options'}
             classNamePrefix="os-react-select"
