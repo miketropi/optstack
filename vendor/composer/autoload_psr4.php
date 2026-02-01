@@ -7,7 +7,7 @@ $baseDir = dirname($vendorDir);
 
 return array(
     'PhpParser\\' => array($vendorDir . '/nikic/php-parser/lib/PhpParser'),
-    'OptStack\\Tests\\' => array($baseDir . '/tests'),
+    'OptStack\\Tests\\' => array($baseDir . '/tests/php'),
     'OptStack\\' => array($baseDir . '/src'),
     'DeepCopy\\' => array($vendorDir . '/myclabs/deep-copy/src/DeepCopy'),
 );

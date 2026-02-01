@@ -23,7 +23,7 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "OptStack\\Tests\\": "tests/"
+            "OptStack\\Tests\\": "tests/php/"
         }
     },
     "scripts": {

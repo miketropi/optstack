@@ -35,7 +35,7 @@ class ComposerStaticInit28dfdf63eda495cb13f317e1ec2336e7
         ),
         'OptStack\\Tests\\' =>
         array (
-            0 => __DIR__ . '/../..' . '/tests',
+            0 => __DIR__ . '/../..' . '/tests/php',
         ),
         'OptStack\\' =>
         array (
@@ -95,6 +95,13 @@ class ComposerStaticInit28dfdf63eda495cb13f317e1ec2336e7
         'OptStack\\OptStack' => __DIR__ . '/../..' . '/src/OptStack.php',
         'OptStack\\Schema\\SchemaExporter' => __DIR__ . '/../..' . '/src/Schema/SchemaExporter.php',
         'OptStack\\Schema\\SchemaNormalizer' => __DIR__ . '/../..' . '/src/Schema/SchemaNormalizer.php',
+        'OptStack\\Support\\Context' => __DIR__ . '/../..' . '/src/Support/Context.php',
+        'OptStack\\Tests\\Unit\\ArrTest' => __DIR__ . '/../..' . '/tests/php/Unit/ArrTest.php',
+        'OptStack\\Tests\\Unit\\ConditionEvaluatorTest' => __DIR__ . '/../..' . '/tests/php/Unit/ConditionEvaluatorTest.php',
+        'OptStack\\Tests\\Unit\\ConditionTest' => __DIR__ . '/../..' . '/tests/php/Unit/ConditionTest.php',
+        'OptStack\\Tests\\Unit\\FieldGroupTest' => __DIR__ . '/../..' . '/tests/php/Unit/FieldGroupTest.php',
+        'OptStack\\Tests\\Unit\\FieldTest' => __DIR__ . '/../..' . '/tests/php/Unit/FieldTest.php',
+        'OptStack\\Tests\\Unit\\SearchableFieldTest' => __DIR__ . '/../..' . '/tests/php/Unit/SearchableFieldTest.php',
         'OptStack\\WordPress\\Admin' => __DIR__ . '/../..' . '/src/WordPress/Admin.php',
         'OptStack\\WordPress\\Bootstrap' => __DIR__ . '/../..' . '/src/WordPress/Bootstrap.php',
         'OptStack\\WordPress\\Index\\IndexedMetaManager' => __DIR__ . '/../..' . '/src/WordPress/Index/IndexedMetaManager.php',

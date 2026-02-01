@@ -531,6 +531,83 @@ class Stack
     }
 
     /**
+     * Get a single field value.
+     *
+     * This is a convenience method for retrieving a single field value
+     * without needing to fetch the entire data array.
+     *
+     * @param string $key Field key (supports dot notation for nested fields)
+     * @param mixed $default Default value if field not found
+     * @param int|null $objectId Object ID (post/term/user) - for context binding
+     * @return mixed Field value or default
+     *
+     * @example
+     * // Simple field retrieval
+     * $price = $stack->getField('price', 0, $post_id);
+     *
+     * // Nested field retrieval (group.field)
+     * $regularPrice = $stack->getField('pricing.regular_price', 0, $post_id);
+     */
+    public function getField(string $key, mixed $default = null, ?int $objectId = null): mixed
+    {
+        // If no store bound yet, try to bind it
+        if ($this->store === null) {
+            // For post_type, taxonomy, user contexts, we need object ID to bind store
+            if ($objectId !== null && in_array($this->context, ['post_type', 'post', 'taxonomy', 'term', 'user'])) {
+                $this->bindStoreForObject($objectId);
+            }
+            
+            // If still no store, return default
+            if ($this->store === null) {
+                return $default;
+            }
+        }
+
+        // Handle nested keys (e.g., 'pricing.regular_price')
+        if (str_contains($key, '.')) {
+            return $this->getNestedField($key, $default);
+        }
+
+        // Get the field from store
+        return $this->store->get($key, $default);
+    }
+
+    /**
+     * Get a nested field value (supports dot notation).
+     *
+     * @param string $path Dot notation path (e.g., 'pricing.regular_price')
+     * @param mixed $default Default value if not found
+     * @return mixed Field value or default
+     */
+    protected function getNestedField(string $path, mixed $default = null): mixed
+    {
+        // Ensure store is available
+        if ($this->store === null) {
+            return $default;
+        }
+
+        $keys = explode('.', $path);
+        $rootKey = array_shift($keys);
+
+        // Get root value
+        $value = $this->store->get($rootKey);
+        
+        if ($value === null) {
+            return $default;
+        }
+
+        // Navigate to the nested key
+        foreach ($keys as $nestedKey) {
+            if (!is_array($value) || !array_key_exists($nestedKey, $value)) {
+                return $default;
+            }
+            $value = $value[$nestedKey];
+        }
+
+        return $value;
+    }
+
+    /**
      * Update a single field value.
      *
      * This is a convenience method for updating a single field without

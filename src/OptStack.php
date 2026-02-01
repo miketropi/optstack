@@ -147,6 +147,39 @@ class OptStack
     }
 
     /**
+     * Get a single field value from a stack.
+     *
+     * This is a convenience method for quickly retrieving a single field
+     * without needing to fetch the entire data array.
+     *
+     * @param string $id Stack identifier
+     * @param string $key Field key (supports dot notation for nested fields)
+     * @param mixed $default Default value if field not found
+     * @param int|null $objectId Object ID (post/term/user) - for context binding
+     * @return mixed Field value or default
+     *
+     * @example
+     * // Get a simple field
+     * $price = OptStack::getField('product_data', 'price', 0, $post_id);
+     *
+     * // Get a nested field in a group
+     * $regularPrice = OptStack::getField('product_data', 'pricing.regular_price', 0, $post_id);
+     *
+     * // Get with default value
+     * $status = OptStack::getField('product_data', 'status', 'draft', $post_id);
+     */
+    public static function getField(string $id, string $key, mixed $default = null, ?int $objectId = null): mixed
+    {
+        $stack = self::get($id);
+
+        if ($stack === null) {
+            return $default;
+        }
+
+        return $stack->getField($key, $default, $objectId);
+    }
+
+    /**
      * Update a single field value in a stack.
      *
      * This is a convenience method for quickly updating a single field

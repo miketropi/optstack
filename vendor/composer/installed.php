@@ -3,7 +3,7 @@
         'name' => 'optstack/optstack',
         'pretty_version' => 'dev-master',
         'version' => 'dev-master',
-        'reference' => 'b59bbb3730dcd13fdcf44a618ec2cba3fe02c5ba',
+        'reference' => '2ea5d09f3c0e60038345c746c9000f8ae7cb9c8c',
         'type' => 'library',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -31,7 +31,7 @@
         'optstack/optstack' => array(
             'pretty_version' => 'dev-master',
             'version' => 'dev-master',
-            'reference' => 'b59bbb3730dcd13fdcf44a618ec2cba3fe02c5ba',
+            'reference' => '2ea5d09f3c0e60038345c746c9000f8ae7cb9c8c',
             'type' => 'library',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),

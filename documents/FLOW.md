@@ -221,9 +221,6 @@ class Bootstrap
 require_once __DIR__ . '/vendor/autoload.php';
 
 \OptStack\WordPress\Bootstrap::boot([
-    'file' => __FILE__,
-    'dir' => plugin_dir_path(__FILE__),
-    'url' => plugin_dir_url(__FILE__),
     'version' => '1.0.0',
 ]);
 ```
@@ -234,9 +231,6 @@ require_once __DIR__ . '/vendor/autoload.php';
 require_once __DIR__ . '/vendor/autoload.php';
 
 \OptStack\WordPress\Bootstrap::boot([
-    'file' => get_stylesheet_directory() . '/style.css',
-    'dir' => get_stylesheet_directory() . '/',
-    'url' => get_stylesheet_directory_uri() . '/',
     'version' => wp_get_theme()->get('Version'),
 ]);
 ```
