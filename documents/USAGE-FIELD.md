@@ -12,6 +12,12 @@ This document provides a comprehensive guide on how to use fields in OptStack. F
 - [Conditional Logic](#conditional-logic)
 - [Field Attributes](#field-attributes)
 - [Retrieving Field Values](#retrieving-field-values)
+  - [Using OptStack::getField()](#using-optstackgetfield-recommended)
+  - [Using OptStack::getData()](#using-optstackgetdata)
+  - [Using OptStack::updateField()](#using-optstackupdatefield)
+  - [Direct WordPress Functions](#direct-wordpress-functions-alternative)
+- [Best Practices](#best-practices)
+- [Related Documentation](#related-documentation)
 
 ---
 
@@ -223,7 +229,115 @@ See individual field documentation for field-specific attributes.
 
 ## Retrieving Field Values
 
-### For Options Pages
+### Using OptStack::getField() (Recommended)
+
+The `OptStack::getField()` method is the recommended way to retrieve single field values. It supports dot notation for nested fields and automatically binds the store for post/term/user contexts.
+
+```php
+// Basic syntax
+OptStack::getField(
+    string $stackId,    // Stack identifier
+    string $key,        // Field key (supports dot notation)
+    mixed $default,     // Default value if not found
+    ?int $objectId      // Object ID (required for post/term/user contexts)
+): mixed
+```
+
+#### For Options Pages
+
+```php
+// Simple field
+$site_name = OptStack::getField('site_settings', 'site_name', 'My Site');
+
+// Nested field in a group (dot notation)
+$logo = OptStack::getField('theme_options', 'identity.site_logo', '');
+$primary_color = OptStack::getField('theme_options', 'colors.primary', '#3b82f6');
+$sticky = OptStack::getField('theme_options', 'header_layout.sticky', true);
+
+// Deeply nested field
+$h1_size = OptStack::getField('theme_options', 'typography.heading_sizes.h1_size', 48);
+```
+
+#### For Post Meta
+
+```php
+// Simple field
+$price = OptStack::getField('product_data', 'price', 0, $post_id);
+
+// Nested field
+$meta_title = OptStack::getField('product_data', 'seo.meta_title', '', $post_id);
+
+// Multiple fields
+$regular_price = OptStack::getField('product_data', 'pricing.regular_price', 0, $post_id);
+$sale_price = OptStack::getField('product_data', 'pricing.sale_price', 0, $post_id);
+```
+
+#### For Term Meta
+
+```php
+// Simple field
+$icon = OptStack::getField('category_settings', 'icon', '', $term_id);
+
+// Nested field
+$display_mode = OptStack::getField('category_settings', 'display.mode', 'grid', $term_id);
+```
+
+#### For User Meta
+
+```php
+// Simple field
+$bio = OptStack::getField('user_profile', 'bio', '', $user_id);
+
+// Nested field
+$twitter = OptStack::getField('user_profile', 'social.twitter', '', $user_id);
+```
+
+---
+
+### Using OptStack::getData()
+
+Use `getData()` when you need multiple fields at once:
+
+```php
+// Get all data from a stack
+$data = OptStack::getData('theme_options');
+
+// Get specific key (simple, not dot notation)
+$value = OptStack::getData('theme_options', 'colors', []);
+
+// Access nested values from result
+$primary = $data['colors']['primary'] ?? '#3b82f6';
+$secondary = $data['colors']['secondary'] ?? '#8b5cf6';
+```
+
+---
+
+### Using OptStack::updateField()
+
+Update a single field value with automatic searchable field sync:
+
+```php
+// Basic syntax
+OptStack::updateField(
+    string $stackId,    // Stack identifier
+    string $key,        // Field key (supports dot notation)
+    mixed $value,       // New value
+    ?int $objectId      // Object ID (required for post/term/user contexts)
+): bool
+
+// Examples
+OptStack::updateField('product_data', 'price', 99.99, $post_id);
+OptStack::updateField('product_data', 'seo.meta_title', 'New Title', $post_id);
+OptStack::updateField('theme_options', 'colors.primary', '#3b82f6');
+```
+
+---
+
+### Direct WordPress Functions (Alternative)
+
+You can also use native WordPress functions directly:
+
+#### For Options Pages
 
 ```php
 // Get all options
@@ -236,7 +350,7 @@ $value = $options['field_id'] ?? 'default';
 $grouped_value = $options['group_id']['field_id'] ?? 'default';
 ```
 
-### Using Dot Notation Helper
+#### Custom Dot Notation Helper
 
 ```php
 function my_option(string $key, mixed $default = null): mixed
@@ -261,26 +375,36 @@ $logo = my_option('identity.site_logo');
 $sticky = my_option('header_layout.sticky', true);
 ```
 
-### For Post Meta
+#### For Post Meta
 
 ```php
 // Get post meta
 $value = get_post_meta($post_id, 'field_id', true);
 ```
 
-### For Term Meta
+#### For Term Meta
 
 ```php
 // Get term meta
 $value = get_term_meta($term_id, 'field_id', true);
 ```
 
-### For User Meta
+#### For User Meta
 
 ```php
 // Get user meta
 $value = get_user_meta($user_id, 'field_id', true);
 ```
+
+---
+
+### Method Comparison
+
+| Method | Best For | Dot Notation | Auto Store Binding |
+|--------|----------|--------------|-------------------|
+| `OptStack::getField()` | Single field retrieval | ✅ Yes | ✅ Yes |
+| `OptStack::updateField()` | Single field update | ✅ Yes | ✅ Yes |
+| `get_option()` / `get_post_meta()` | Direct WP access | ❌ No | N/A |
 
 ---
 
@@ -302,6 +426,9 @@ $value = get_user_meta($user_id, 'field_id', true);
 
 ## Related Documentation
 
+- [API-REFERENCE.md](./API-REFERENCE.md) - Complete OptStack API reference
+- [GET_FIELD_FEATURE.md](./GET_FIELD_FEATURE.md) - Detailed getField() documentation
+- [UPDATE_FIELD_FEATURE.md](./UPDATE_FIELD_FEATURE.md) - Detailed updateField() documentation
 - [Field Types Reference](./fields/) - Individual field documentation
 - [EXAM2_README.md](../examples/EXAM2_README.md) - Complete theme options example
 - [basic-usage.php](../examples/basic-usage.php) - Code examples
