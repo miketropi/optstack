@@ -51,7 +51,9 @@ export function TextField({ field, value, onChange, disabled, error }: FieldRend
             name={field.key}
             value={stringValue}
             onChange={handleChange}
-            disabled={disabled}
+            disabled={field.attributes?.disabled === true}
+            readOnly={field.attributes?.readOnly === true}
+            multiple={field.attributes?.multiple === true}
             className="os-input"
             placeholder={field.attributes?.placeholder as string}
             maxLength={maxLength}
