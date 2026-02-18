@@ -122,6 +122,49 @@ class StackBuilder
     }
 
     /**
+     * Configure for Gutenberg block storage.
+     * Data is stored in block attributes (post_content).
+     *
+     * @param string $blockType Block type name (e.g. 'optstack/hero' or 'mytheme/hero')
+     */
+    public function forBlockType(string $blockType): self
+    {
+        $this->stack->forBlockType($blockType);
+
+        return $this;
+    }
+
+    /**
+     * Set block title for inserter (block context).
+     */
+    public function blockTitle(string $title): self
+    {
+        $this->stack->blockTitle($title);
+
+        return $this;
+    }
+
+    /**
+     * Set block category for inserter (block context).
+     */
+    public function blockCategory(string $category): self
+    {
+        $this->stack->blockCategory($category);
+
+        return $this;
+    }
+
+    /**
+     * Set block icon (dashicon slug) for inserter (block context).
+     */
+    public function blockIcon(string $icon): self
+    {
+        $this->stack->blockIcon($icon);
+
+        return $this;
+    }
+
+    /**
      * Set menu parent for options pages (creates submenu).
      *
      * Common parent slugs:

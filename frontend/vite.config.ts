@@ -100,7 +100,7 @@ export default defineConfig(({ command, mode }) => {
     },
     build: {
       outDir: 'dist',
-      emptyOutDir: true,
+      emptyOutDir: false,
       lib: {
         entry: path.resolve(__dirname, 'src/main.tsx'),
         name: 'OptStackAdmin',
@@ -116,7 +116,13 @@ export default defineConfig(({ command, mode }) => {
           return false
         },
         output: {
-          globals: (id) => {
+          assetFileNames: (assetInfo) => {
+            if (assetInfo.name === 'style.css') {
+              return 'optstack-main.css'
+            }
+            return 'optstack-[name].[ext]'
+          },
+          globals: (id: string) => {
             if (id === 'react' || id.startsWith('react/')) return 'React'
             if (id === 'react-dom' || id.startsWith('react-dom/')) return 'ReactDOM'
             if (id === '@wordpress/element') return 'wp.element'
@@ -126,13 +132,8 @@ export default defineConfig(({ command, mode }) => {
             if (id === '@wordpress/data') return 'wp.data'
             if (id === '@wordpress/api-fetch') return 'wp.apiFetch'
             if (id === '@wordpress/i18n') return 'wp.i18n'
+            if (id === '@wordpress/blocks') return 'wp.blocks'
             return id
-          },
-          assetFileNames: (assetInfo) => {
-            if (assetInfo.name === 'style.css') {
-              return 'optstack-main.css'
-            }
-            return 'optstack-[name].[ext]'
           },
         },
       },

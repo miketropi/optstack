@@ -7,6 +7,8 @@ namespace OptStack\WordPress;
 use OptStack\Core\Stack\Stack;
 use OptStack\Core\Stack\StackRegistry;
 use OptStack\Support\Context;
+use OptStack\WordPress\Block\BlockAssetEnqueue;
+use OptStack\WordPress\Block\BlockRegistry;
 use OptStack\WordPress\Store\OptionsStore;
 use OptStack\WordPress\Store\PostStore;
 use OptStack\WordPress\Store\TermStore;
@@ -170,6 +172,9 @@ class Bootstrap
             Admin::init();
         }
 
+        // Enqueue block editor assets
+        add_action('enqueue_block_editor_assets', [$this, 'enqueueBlockAssets']);
+
         // Post meta hooks
         add_action('save_post', [$this, 'onSavePost'], 10, 2);
 
@@ -193,8 +198,19 @@ class Bootstrap
         // Bind stores to registered stacks
         $this->bindStores();
 
+        // Register Gutenberg blocks from block-context stacks
+        BlockRegistry::registerAll();
+
         // Fire event after stores are bound
         do_action('optstack_ready');
+    }
+
+    /**
+     * Enqueue block editor assets for OptStack blocks.
+     */
+    public function enqueueBlockAssets(): void
+    {
+        BlockAssetEnqueue::enqueue();
     }
 
     /**

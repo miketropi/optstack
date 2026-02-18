@@ -4555,3 +4555,141 @@
     min-height: 250px;
   }
 }
+
+/* ==========================================================================
+   Block Inspector - Compact layout for Gutenberg sidebar
+   ========================================================================== */
+
+.optstack-block-inspector {
+  border: none;
+  padding: 0;
+  background: transparent;
+}
+
+.optstack-block-inspector .os-stack-renderer {
+  border: none;
+  background: transparent;
+  padding: 0;
+}
+
+/* Vertical layout: label above field (saves horizontal space) */
+.optstack-block-inspector .os-field,
+.optstack-block-inspector .os-field-toggle-wrap {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 6px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--os-gray-100, #f3f4f6);
+}
+
+.optstack-block-inspector .os-field:last-child,
+.optstack-block-inspector .os-field-toggle-wrap:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.optstack-block-inspector .os-field:first-child,
+.optstack-block-inspector .os-field-toggle-wrap:first-child {
+  /* padding-top: 0; */
+  margin-bottom: .5em;
+}
+
+.optstack-block-inspector .os-label { 
+  flex: none;
+  width: 100%;
+  padding-top: 0;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.optstack-block-inspector .os-field-body {
+  flex: none;
+  width: 100%;
+  min-width: 0;
+}
+
+.optstack-block-inspector .os-field-footer {
+  margin-top: 4px;
+}
+
+.optstack-block-inspector .os-description {
+  font-size: 11px;
+  margin-top: 4px;
+  color: var(--os-gray-400, #9ca3af);
+}
+
+/* Compact inputs */
+.optstack-block-inspector .os-input {
+  min-height: 32px;
+  padding: 6px 10px;
+  font-size: 13px;
+}
+
+.optstack-block-inspector .os-textarea {
+  min-height: 60px;
+  padding: 8px 10px;
+  font-size: 13px;
+}
+
+.optstack-block-inspector .os-select-trigger {
+  min-height: 32px;
+  padding: 6px 10px;
+  font-size: 13px;
+}
+
+.optstack-block-inspector .os-toggle {
+  /* width: 36px;
+  height: 20px; */
+}
+
+.optstack-block-inspector .os-toggle-wrapper {
+  gap: 8px;
+}
+
+/* Compact groups */
+.optstack-block-inspector .os-group {
+  margin-top: 8px;
+}
+
+.optstack-block-inspector .os-group-inline .os-group-label {
+  padding: 8px 0;
+}
+
+.optstack-block-inspector .os-group-label-text {
+  font-size: 12px;
+}
+
+.optstack-block-inspector .os-group-inline-fields .os-field {
+  padding: 8px 0;
+}
+
+/* Compact tabs */
+.optstack-block-inspector .os-tab-button {
+  padding: 10px 14px;
+  font-size: 12px;
+}
+
+.optstack-block-inspector .os-tab-content {
+  padding-top: 12px;
+}
+
+/* Compact field wrapper (avoids double padding) */
+.optstack-block-inspector .os-field-wrapper {
+  margin: 0;
+}
+
+/* Media field: smaller preview */
+.optstack-block-inspector .os-media-preview {
+  /* max-height: 80px; */
+}
+
+.optstack-block-inspector .os-media-placeholder {
+  min-height: 60px;
+  padding: 12px;
+}
+
+/* Color field: compact swatch */
+.optstack-block-inspector .os-color-swatch {
+  width: 32px;
+  height: 32px;
+}

@@ -93,7 +93,7 @@ export interface TabSchema {
  */
 export interface StackSchema {
   id: string
-  context: 'options' | 'post' | 'post_type' | 'term' | 'taxonomy' | 'user'
+  context: 'options' | 'post' | 'post_type' | 'term' | 'taxonomy' | 'user' | 'block'
   label: string
   description?: string
   postType?: string

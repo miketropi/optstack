@@ -102,6 +102,31 @@ function optstack_init(): void
 add_action('plugins_loaded', 'optstack_init', 5);
 
 /**
+ * Compatibility: Fix block editor warnings when using block themes.
+ *
+ * 1. Ensure get_block_templates() returns a numerically indexed array so
+ *    $current_template[0] exists (core assumes key 0). Avoids "Undefined array key 0"
+ *    and "Attempt to read property 'content' on null".
+ *
+ * 2. Ensure each template's content is a string before parse_blocks() runs.
+ *    Avoids preg_match()/strlen() null deprecations in WP_Block_Parser.
+ *
+ * @see https://core.trac.wordpress.org/ticket/62407
+ */
+add_filter('get_block_templates', function ($templates, $query, $template_type) {
+    if (!is_array($templates)) {
+        return $templates;
+    }
+    $list = array_values($templates);
+    foreach ($list as $template) {
+        if (is_object($template) && property_exists($template, 'content') && $template->content === null) {
+            $template->content = '';
+        }
+    }
+    return $list;
+}, 10, 3);
+
+/**
  * Plugin activation hook.
  */
 function optstack_activate(): void
@@ -144,6 +169,7 @@ function optstack(): string
 // Load example usage (for testing - remove in production).
 // require_once OPTSTACK_DIR . 'examples/basic-usage.php';
 // require_once OPTSTACK_DIR . 'examples/exam2.php';
+require_once OPTSTACK_DIR . 'examples/block-example.php';
 
 // Debug listener for searchable fields (remove in production)
 add_action('optstack_indexed_meta_debug', function($debugInfo) {

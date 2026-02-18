@@ -2,6 +2,7 @@
  * OptStack Configuration
  *
  * Reads configuration from WordPress localized script data.
+ * Supports both admin (optstack) and block editor (optstackBlocks) contexts.
  */
 
 interface OptStackConfig {
@@ -12,13 +13,24 @@ interface OptStackConfig {
   version: string
 }
 
+interface WindowWithOptStack extends Window {
+  optstack?: Partial<OptStackConfig>
+  optstackBlocks?: {
+    restUrl?: string
+    nonce?: string
+    blockToStack?: Record<string, string>
+  }
+}
+
 // Get config from WordPress localized data
 function getConfig(): OptStackConfig {
-  const wpConfig = (window as unknown as { optstack?: Partial<OptStackConfig> }).optstack
+  const win = window as WindowWithOptStack
+  const wpConfig = win.optstack
+  const blocksConfig = win.optstackBlocks
 
   return {
-    nonce: wpConfig?.nonce || '',
-    restUrl: wpConfig?.restUrl || '/wp-json/optstack/v1/',
+    nonce: wpConfig?.nonce || blocksConfig?.nonce || '',
+    restUrl: wpConfig?.restUrl || blocksConfig?.restUrl || '/wp-json/optstack/v1/',
     adminUrl: wpConfig?.adminUrl || '/wp-admin/',
     currentStack: wpConfig?.currentStack || null,
     version: wpConfig?.version || '0.0.0',

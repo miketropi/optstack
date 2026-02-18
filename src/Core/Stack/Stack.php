@@ -400,6 +400,58 @@ class Stack
     }
 
     /**
+     * Configure for Gutenberg block storage.
+     * Data is stored in block attributes (post_content).
+     *
+     * @param string $blockType Block type name (e.g. 'optstack/hero' or 'mytheme/hero')
+     */
+    public function forBlockType(string $blockType): self
+    {
+        $this->context = 'block';
+        $this->config['block_type'] = $blockType;
+
+        return $this;
+    }
+
+    /**
+     * Get block type (for block context).
+     */
+    public function getBlockType(): ?string
+    {
+        return $this->config['block_type'] ?? null;
+    }
+
+    /**
+     * Set block title for inserter (block context).
+     */
+    public function blockTitle(string $title): self
+    {
+        $this->config['block_title'] = $title;
+
+        return $this;
+    }
+
+    /**
+     * Set block category for inserter (block context).
+     */
+    public function blockCategory(string $category): self
+    {
+        $this->config['block_category'] = $category;
+
+        return $this;
+    }
+
+    /**
+     * Set block icon (dashicon slug) for inserter (block context).
+     */
+    public function blockIcon(string $icon): self
+    {
+        $this->config['block_icon'] = $icon;
+
+        return $this;
+    }
+
+    /**
      * Add a field to the stack.
      *
      * @param string $key Field key
