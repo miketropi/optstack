@@ -3251,7 +3251,7 @@
   background: var(--os-bg-primary, #ffffff);
   border-radius: 8px;
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
-  max-width: 700px;
+  max-width: 860px;
   width: 100%;
   max-height: calc(100vh - 40px);
   display: flex;
@@ -4574,12 +4574,18 @@
 
 /* Vertical layout: label above field (saves horizontal space) */
 .optstack-block-inspector .os-field,
-.optstack-block-inspector .os-field-toggle-wrap {
+.optstack-block-inspector .os-field-toggle-wrap,
+.optstack-block-inspector .os-deferred-group {
   flex-direction: column;
   align-items: stretch;
   gap: 6px;
   padding: 12px 0;
   border-bottom: 1px solid var(--os-gray-100, #f3f4f6);
+}
+
+.optstack-block-inspector .os-deferred-group .os-deferred-group-label {
+  flex: none;
+  max-width: none;
 }
 
 .optstack-block-inspector .os-field:last-child,

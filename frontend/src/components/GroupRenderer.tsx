@@ -210,14 +210,22 @@ export function GroupRenderer({ group, data, onChange, onGroupApply, disabled, e
                     return null
                   }
 
+                  const nestedData = nestedGroup.repeatable
+                    ? (Array.isArray(data[key]) ? data[key] : [])
+                    : ((data[key] as Record<string, unknown>) || {})
+
                   return (
                     <GroupRenderer
                       key={key}
                       group={nestedGroup}
-                      data={(data[key] as Record<string, unknown>) || {}}
+                      data={nestedData as Record<string, unknown>}
                       onChange={(fieldKey, value) => {
-                        const nestedData = (data[key] as Record<string, unknown>) || {}
-                        onChange(key, { ...nestedData, [fieldKey]: value })
+                        if (nestedGroup.repeatable) {
+                          onChange(key, value)
+                        } else {
+                          const current = (data[key] as Record<string, unknown>) || {}
+                          onChange(key, { ...current, [fieldKey]: value })
+                        }
                       }}
                       disabled={disabled}
                       errors={errors}
@@ -295,14 +303,22 @@ export function GroupRenderer({ group, data, onChange, onGroupApply, disabled, e
                   return null
                 }
 
+                const nestedData = nestedGroup.repeatable
+                  ? (Array.isArray(data[key]) ? data[key] : [])
+                  : ((data[key] as Record<string, unknown>) || {})
+
                 return (
                   <GroupRenderer
                     key={key}
                     group={nestedGroup}
-                    data={(data[key] as Record<string, unknown>) || {}}
+                    data={nestedData as Record<string, unknown>}
                     onChange={(fieldKey, value) => {
-                      const nestedData = (data[key] as Record<string, unknown>) || {}
-                      onChange(key, { ...nestedData, [fieldKey]: value })
+                      if (nestedGroup.repeatable) {
+                        onChange(key, value)
+                      } else {
+                        const current = (data[key] as Record<string, unknown>) || {}
+                        onChange(key, { ...current, [fieldKey]: value })
+                      }
                     }}
                     disabled={disabled}
                     errors={errors}

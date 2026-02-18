@@ -206,14 +206,22 @@ export function DeferredGroupModal({ group, data, onChange, onGroupApply, disabl
               return null
             }
 
+            const nestedData = nestedGroup.repeatable
+              ? (Array.isArray(localData[key]) ? localData[key] : [])
+              : ((localData[key] as Record<string, unknown>) || {})
+
             return (
               <GroupRenderer
                 key={key}
                 group={nestedGroup}
-                data={(localData[key] as Record<string, unknown>) || {}}
+                data={nestedData as Record<string, unknown>}
                 onChange={(fieldKey, value) => {
-                  const nestedData = (localData[key] as Record<string, unknown>) || {}
-                  handleLocalChange(key, { ...nestedData, [fieldKey]: value })
+                  if (nestedGroup.repeatable) {
+                    handleLocalChange(key, value)
+                  } else {
+                    const current = (localData[key] as Record<string, unknown>) || {}
+                    handleLocalChange(key, { ...current, [fieldKey]: value })
+                  }
                 }}
                 disabled={disabled}
                 errors={errors}

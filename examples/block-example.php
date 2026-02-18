@@ -211,20 +211,20 @@ add_action('optstack_init', function (): void {
                 'default' => 'What people say',
             ]);
 
-            $stack->group('items', function ($group) {
-                $group->group('item', function ($group2) {
-                    $group2->repeatable(0, 10);
-                    $group2->field('testimonial', [
+            $stack->group('testimonials', function ($group) {
+                $group->group('items', function ($group_item) {
+                    $group_item->repeatable(0, 5);
+                    $group_item->field('testimonial', [
                         'type'    => 'textarea',
                         'label'   => 'Testimonial',
                         'default' => '',
                     ]);
-                    $group2->field('name', [
+                    $group_item->field('name', [
                         'type'    => 'text',
                         'label'   => 'Name',
                         'default' => '',
                     ]);
-                    $group2->field('role', [
+                    $group_item->field('role', [
                         'type'    => 'text',
                         'label'   => 'Role / Title',
                         'default' => '',
@@ -364,7 +364,10 @@ add_filter('optstack_render_block', function (string $html, string $stackId, arr
     }
 
     $sectionTitle = $attributes['section_title'] ?? 'What people say';
-    $items = $attributes['items'] ?? [];
+    $itemsData = $attributes['testimonials'] ?? [];
+    $items = (is_array($itemsData) && isset($itemsData['items']) && is_array($itemsData['items']))
+        ? $itemsData['items']
+        : (is_array($itemsData) && !isset($itemsData['items']) ? $itemsData : []);
 
     ob_start();
     ?>
@@ -373,10 +376,10 @@ add_filter('optstack_render_block', function (string $html, string $stackId, arr
             <h3 style="margin: 0 0 24px; font-size: 1.5rem;"><?php echo esc_html($sectionTitle); ?></h3>
         <?php endif; ?>
         <div style="display: grid; gap: 20px;">
-            <?php foreach (is_array($items) ? $items : [] as $item): ?>
+            <?php foreach ($items as $item): ?>
                 <?php
                 $name = $item['name'] ?? '';
-                $quote = $item['quote'] ?? '';
+                $quote = $item['testimonial'] ?? $item['quote'] ?? '';
                 $role = $item['role'] ?? '';
                 if (!$quote && !$name) {
                     continue;
