@@ -308,6 +308,27 @@ class Bootstrap
             'callback' => [$this, 'restSaveStackData'],
             'permission_callback' => [$this, 'restPermissionCheck'],
         ]);
+
+        // WordPress query (posts, terms, users) for select-wp-query field
+        register_rest_route($this->restNamespace, '/wp-query', [
+            'methods' => 'GET',
+            'callback' => [$this, 'restWpQuery'],
+            'permission_callback' => [$this, 'restPermissionCheck'],
+            'args' => [
+                'source' => [
+                    'required' => true,
+                    'type' => 'string',
+                    'enum' => ['post', 'term', 'user'],
+                ],
+                'search' => ['type' => 'string', 'default' => ''],
+                'id' => ['type' => 'integer', 'default' => 0],
+                'post_type' => ['type' => 'string', 'default' => 'post'],
+                'taxonomy' => ['type' => 'string', 'default' => 'category'],
+                'post_status' => ['type' => 'string', 'default' => 'publish'],
+                'page' => ['type' => 'integer', 'default' => 1],
+                'per_page' => ['type' => 'integer', 'default' => 20],
+            ],
+        ]);
     }
 
     /**
@@ -332,6 +353,154 @@ class Bootstrap
             'stacks_count' => StackRegistry::count(),
             'stacks_ids' => array_keys(StackRegistry::all()),
         ]);
+    }
+
+    /**
+     * REST: WordPress query for select-wp-query field (posts, terms, users).
+     *
+     * @param \WP_REST_Request $request
+     * @return \WP_REST_Response|\WP_Error
+     */
+    public function restWpQuery(\WP_REST_Request $request): \WP_REST_Response|\WP_Error
+    {
+        $source = $request->get_param('source');
+        $search = $request->get_param('search');
+        $singleId = (int) $request->get_param('id');
+        $page = (int) $request->get_param('page');
+        $perPage = (int) $request->get_param('per_page');
+        $perPage = $perPage >= 1 && $perPage <= 100 ? $perPage : 20;
+
+        $options = [];
+        $hasMore = false;
+
+        // Resolve single option by ID (for displaying initial value)
+        if ($singleId > 0) {
+            $single = $this->resolveWpQuerySingle($source, $singleId, $request);
+            if ($single !== null) {
+                return new \WP_REST_Response(['options' => [$single], 'hasMore' => false]);
+            }
+            return new \WP_REST_Response(['options' => [], 'hasMore' => false]);
+        }
+
+        if ($source === 'post') {
+            $postType = sanitize_key($request->get_param('post_type') ?: 'post');
+            $postStatus = $request->get_param('post_status') ?: 'publish';
+
+            $args = [
+                'post_type' => $postType,
+                'post_status' => $postStatus,
+                'posts_per_page' => $perPage + 1,
+                'paged' => $page,
+                'orderby' => 'title',
+                'order' => 'ASC',
+            ];
+            if ($search !== '') {
+                $args['s'] = $search;
+            }
+
+            $query = new \WP_Query($args);
+            $posts = $query->posts;
+            $hasMore = count($posts) > $perPage;
+            if ($hasMore) {
+                array_pop($posts);
+            }
+
+            foreach ($posts as $post) {
+                $options[] = [
+                    'value' => (int) $post->ID,
+                    'label' => $post->post_title ?: '(no title)',
+                ];
+            }
+        } elseif ($source === 'term') {
+            $taxonomy = sanitize_key($request->get_param('taxonomy') ?: 'category');
+
+            if (!taxonomy_exists($taxonomy)) {
+                return new \WP_Error('invalid_taxonomy', 'Taxonomy does not exist', ['status' => 400]);
+            }
+
+            $args = [
+                'taxonomy' => $taxonomy,
+                'number' => $perPage + 1,
+                'offset' => ($page - 1) * $perPage,
+                'hide_empty' => false,
+            ];
+            if ($search !== '') {
+                $args['search'] = $search;
+            }
+
+            $terms = get_terms($args);
+
+            if (is_wp_error($terms)) {
+                return new \WP_Error('term_query_failed', $terms->get_error_message(), ['status' => 500]);
+            }
+
+            $hasMore = count($terms) > $perPage;
+            $terms = array_slice($terms, 0, $perPage);
+
+            foreach ($terms as $term) {
+                $options[] = [
+                    'value' => (int) $term->term_id,
+                    'label' => $term->name,
+                ];
+            }
+        } elseif ($source === 'user') {
+            $args = [
+                'number' => $perPage + 1,
+                'paged' => $page,
+                'orderby' => 'display_name',
+                'order' => 'ASC',
+            ];
+            if ($search !== '') {
+                $args['search'] = '*' . $search . '*';
+                $args['search_columns'] = ['user_login', 'user_email', 'display_name'];
+            }
+
+            $userQuery = new \WP_User_Query($args);
+            $users = $userQuery->get_results();
+            $hasMore = count($users) > $perPage;
+            if ($hasMore) {
+                array_pop($users);
+            }
+
+            foreach ($users as $user) {
+                $options[] = [
+                    'value' => (int) $user->ID,
+                    'label' => $user->display_name ?: $user->user_login,
+                ];
+            }
+        }
+
+        return new \WP_REST_Response([
+            'options' => $options,
+            'hasMore' => $hasMore,
+        ]);
+    }
+
+    /**
+     * Resolve a single option by ID for select-wp-query initial value.
+     *
+     * @return array{value: int, label: string}|null
+     */
+    private function resolveWpQuerySingle(string $source, int $id, \WP_REST_Request $request): ?array
+    {
+        if ($source === 'post') {
+            $post = get_post($id);
+            if ($post && ($request->get_param('post_type') === '' || $post->post_type === $request->get_param('post_type'))) {
+                return ['value' => (int) $post->ID, 'label' => $post->post_title ?: '(no title)'];
+            }
+        } elseif ($source === 'term') {
+            $taxonomy = sanitize_key($request->get_param('taxonomy') ?: 'category');
+            $term = get_term($id, $taxonomy);
+            if ($term && !is_wp_error($term)) {
+                return ['value' => (int) $term->term_id, 'label' => $term->name];
+            }
+        } elseif ($source === 'user') {
+            $user = get_user_by('id', $id);
+            if ($user) {
+                return ['value' => (int) $user->ID, 'label' => $user->display_name ?: $user->user_login];
+            }
+        }
+        return null;
     }
 
     /**

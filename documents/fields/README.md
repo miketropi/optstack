@@ -12,6 +12,7 @@ This directory contains documentation for all OptStack field types.
 | [email](./email.md) | Email input | Contact emails |
 | [url](./url.md) | URL input | Links, social profiles |
 | [select](./select.md) | Dropdown menu | Single selection from list |
+| [select-wp-query](./select-wordpress-query.md) | Async dropdown | Search posts, terms, users (WordPress data) |
 | [radio](./radio.md) | Radio buttons | Visible single selection |
 | [radio-image](./radio-image.md) | Visual radio selection | Layout choices with previews |
 | [checkbox-group](./checkbox-group.md) | Multiple checkboxes | Multiple selections |

@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo, useRef, useEffect } from 'react'
+import { useState, useCallback, useMemo, useRef, useEffect, memo } from 'react'
 import Select, { StylesConfig, SingleValue, components, OptionProps, SingleValueProps } from 'react-select'
 import { SketchPicker, ColorResult } from 'react-color'
 import type { FieldRendererProps, OptStackConfig } from '../../schema/types'
@@ -6,6 +6,9 @@ import type { FieldRendererProps, OptStackConfig } from '../../schema/types'
 // Google Fonts API configuration
 const GOOGLE_FONTS_API_KEY = (window as unknown as { optstack?: Partial<OptStackConfig> }).optstack?.googleFontsApiKey
 const GOOGLE_FONTS_API_URL = `https://www.googleapis.com/webfonts/v1/webfonts?key=${GOOGLE_FONTS_API_KEY}&sort=popularity`
+
+// Cap Google fonts in the dropdown to avoid lag (API is sorted by popularity; search still filters this list)
+const MAX_GOOGLE_FONTS_IN_MENU = 150
 
 interface TypographyValue {
   fontFamily?: string
@@ -248,34 +251,31 @@ function loadGoogleFont(fontFamily: string, weights: string[] = ['400', '700']) 
   loadedFonts.add(fontFamily)
 }
 
-// Custom option component with font preview
-const FontOption = (props: OptionProps<FontOption, false>) => {
+// Custom option component: no Google font loading here to avoid lag (hundreds of fonts loading at once).
+// Only the selected value shows the real font (loaded once in parent). Option preview uses system font.
+const FontOption = memo((props: OptionProps<FontOption, false>) => {
   const { data } = props
-  
-  // Load Google Font when hovering/viewing option
-  useEffect(() => {
-    if (data.category === 'google' && data.variants) {
-      loadGoogleFont(data.value, data.variants)
-    }
-  }, [data])
-  
+  const isGoogle = data.category === 'google'
   return (
     <components.Option {...props}>
       <div className="os-font-option">
-        <span 
+        <span
           className="os-font-option-preview"
-          style={{ fontFamily: data.category === 'google' ? `"${data.value}", sans-serif` : data.value }}
+          style={{
+            fontFamily: isGoogle ? 'system-ui, sans-serif' : data.value,
+          }}
         >
           Aa
         </span>
         <span className="os-font-option-label">{data.label}</span>
-        {data.category === 'google' && (
+        {isGoogle && (
           <span className="os-font-option-badge">Google</span>
         )}
       </div>
     </components.Option>
   )
-}
+})
+FontOption.displayName = 'FontOption'
 
 // Custom single value component with font preview
 const FontSingleValue = (props: SingleValueProps<FontOption, false>) => {
@@ -318,15 +318,30 @@ export function TypographyField({ field, value, onChange, disabled, error }: Fie
     if (customFonts && customFonts.length > 0) {
       return customFonts
     }
-    
+
     // If Google fonts are disabled, return only system fonts
     if (disableGoogleFonts) {
       return SYSTEM_FONTS
     }
-    
-    // Combine system fonts with fetched Google fonts
-    return [...SYSTEM_FONTS, ...googleFonts]
-  }, [field.attributes?.fonts, disableGoogleFonts, googleFonts])
+
+    // Cap Google fonts to avoid rendering hundreds of options (API is sorted by popularity)
+    const cappedGoogle = googleFonts.slice(0, MAX_GOOGLE_FONTS_IN_MENU)
+    const combined = [...SYSTEM_FONTS, ...cappedGoogle]
+
+    // Ensure currently selected Google font is in the list if it was outside the cap
+    const currentFamily = (value as TypographyValue)?.fontFamily ?? (field.default as TypographyValue)?.fontFamily
+    if (currentFamily) {
+      const googleName = currentFamily.replace(/^["']|["'],.*$/g, '').trim()
+      const alreadyInList = combined.some((f) => f.value === googleName || (f.category === 'google' && currentFamily.includes(f.value)))
+      if (!alreadyInList) {
+        const selectedFont = googleFonts.find((f) => f.value === googleName || currentFamily.includes(f.value))
+        if (selectedFont) {
+          combined.push(selectedFont)
+        }
+      }
+    }
+    return combined
+  }, [field.attributes?.fonts, field.default, disableGoogleFonts, googleFonts, value])
 
   // Group fonts by category for the dropdown
   const groupedFonts = useMemo(() => {

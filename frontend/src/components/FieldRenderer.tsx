@@ -2,6 +2,7 @@ import type { FieldSchema, FieldRendererProps } from '../schema/types'
 import { TextField } from './fields/TextField'
 import { NumberField } from './fields/NumberField'
 import { SelectField } from './fields/SelectField'
+import { SelectWordPressQueryField } from './fields/SelectWordPressQueryField'
 import { ToggleField } from './fields/ToggleField'
 import { TextareaField } from './fields/TextareaField'
 import { ColorField } from './fields/ColorField'
@@ -36,6 +37,7 @@ const fieldComponents: Record<string, React.ComponentType<FieldRendererProps>> =
   // Selection types
   select: SelectField,
   dropdown: SelectField,
+  'select-wp-query': SelectWordPressQueryField,
   radio: RadioField,
   'radio-image': RadioImageField,
   'image-radio': RadioImageField,

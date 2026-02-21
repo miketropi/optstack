@@ -43,6 +43,7 @@ class SchemaToAttributes
         'typography'   => 'object',
         'visual-builder' => 'object',
         'checkbox-group' => 'array',
+        'select-wp-query' => 'number',
     ];
 
     /**
@@ -111,7 +112,11 @@ class SchemaToAttributes
      */
     private static function fieldToAttribute(Field $field, mixed $default): array
     {
-        $type = self::mapFieldType($field->getType());
+        $fieldType = $field->getType();
+        $type = self::mapFieldType($fieldType);
+        if ($fieldType === 'select-wp-query' && !empty($field->getAttributes()['multiple'])) {
+            $type = 'array';
+        }
         $def = ['type' => $type];
 
         if ($default !== null) {
