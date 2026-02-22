@@ -494,6 +494,80 @@
   color: var(--os-error);
 }
 
+/* Responsive field: field first, mode switcher at the end (compact) */
+.os-field-responsive {
+  position: relative;
+  /* display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 12px; */
+}
+
+.os-field-responsive:hover {
+  background-color: #e5e7ebc2;
+}
+
+.os-field-responsive:hover .os-responsive-modes {
+  visibility: visible;
+}
+
+.os-responsive-panel {
+  flex: 1;
+  min-width: 0;
+}
+
+.os-responsive-modes {
+  display: flex;
+  flex-shrink: 0;
+  gap: .3em;
+  padding: 14px 14px 14px 24px;
+  position: absolute;
+  visibility: hidden;
+  bottom: 100%;
+  background-color: #fafafa;
+  width: 100%;
+  background-color: #e5e7eb;
+  box-sizing: border-box;
+  /* background: var(--os-gray-100, #f3f4f6); */
+  /* border-radius: 6px; */
+}
+
+.os-responsive-mode {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 8px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--os-gray-600, #4b5563);
+  background: transparent;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background var(--os-transition-fast), color var(--os-transition-fast);
+}
+
+.os-responsive-mode:hover {
+  color: var(--os-gray-800, #1f2937);
+  background: var(--os-gray-200, #e5e7eb);
+}
+
+.os-responsive-mode-active {
+  color: var(--os-primary, #3b82f6);
+  background: #fff;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.os-responsive-mode-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.os-responsive-mode-icon svg {
+  flex-shrink: 0;
+}
+
 /* ==========================================================================
    Toggle - Modern Switch
    ========================================================================== */
@@ -2400,6 +2474,19 @@
   border: 1px solid var(--os-border);
   /* border-radius: var(--os-radius-md); */
   /* overflow: hidden; */
+}
+
+/* Responsive mode switcher for typography (Size, Line Height, Letter Spacing, Color) */
+.os-field-typography-responsive .os-typography-responsive-modes {
+  position: relative;
+  border-bottom: 1px solid var(--os-gray-100);
+}
+.os-field-typography-responsive .os-typography-responsive-modes .os-responsive-modes {
+  visibility: visible;
+  position: static;
+  padding: 10px 16px;
+  bottom: auto;
+  background-color: var(--os-gray-50);
 }
 
 .os-typography-preview {

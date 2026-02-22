@@ -77,6 +77,11 @@ class Field
     protected bool $searchable = false;
 
     /**
+     * Whether the field stores separate values per viewport (desktop, tablet, mobile).
+     */
+    protected bool $responsive = false;
+
+    /**
      * Allowed searchable field types.
      * Only scalar types can be searchable.
      */
@@ -116,7 +121,8 @@ class Field
         $this->label = $config['label'] ?? $this->generateLabel($key);
         $this->options = $config['options'] ?? [];
         $this->attributes = $config['attributes'] ?? [];
-        
+        $this->responsive = $config['responsive'] ?? $this->attributes['responsive'] ?? false;
+
         // Set searchable flag (with type validation)
         if (isset($config['searchable']) && $config['searchable'] === true) {
             $this->setSearchable(true);
@@ -222,6 +228,14 @@ class Field
     }
 
     /**
+     * Check if field is responsive (stores desktop/tablet/mobile values).
+     */
+    public function isResponsive(): bool
+    {
+        return $this->responsive;
+    }
+
+    /**
      * Check if field is searchable.
      */
     public function isSearchable(): bool
@@ -318,6 +332,10 @@ class Field
 
         if ($this->searchable) {
             $data['searchable'] = true;
+        }
+
+        if ($this->responsive) {
+            $data['responsive'] = true;
         }
 
         return $data;

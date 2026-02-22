@@ -117,6 +117,23 @@ class SchemaToAttributes
         if ($fieldType === 'select-wp-query' && !empty($field->getAttributes()['multiple'])) {
             $type = 'array';
         }
+        if ($field->isResponsive()) {
+            // Typography uses a single object with responsive sub-keys (fontSize, lineHeight, letterSpacing, color); do not wrap in desktop/tablet/mobile.
+            if ($fieldType === 'typography') {
+                $type = 'object';
+                $def = ['type' => $type];
+                $def['default'] = is_array($default) ? $default : [];
+                return $def;
+            }
+            $type = 'object';
+            $def = ['type' => $type];
+            $def['default'] = is_array($default) && isset($default['desktop']) ? $default : [
+                'desktop' => $default,
+                'tablet'  => $default,
+                'mobile'  => $default,
+            ];
+            return $def;
+        }
         $def = ['type' => $type];
 
         if ($default !== null) {

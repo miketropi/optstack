@@ -1032,7 +1032,7 @@ class Stack
 
         // Root-level fields
         foreach ($this->fields->all() as $field) {
-            $defaults[$field->getKey()] = $field->getDefault();
+            $defaults[$field->getKey()] = $this->getFieldDefaultValue($field);
         }
 
         // Groups
@@ -1043,7 +1043,7 @@ class Stack
         // Tab fields (tabs don't create nesting, fields are at root level)
         foreach ($this->tabs as $tab) {
             foreach ($tab->getFields()->all() as $field) {
-                $defaults[$field->getKey()] = $field->getDefault();
+                $defaults[$field->getKey()] = $this->getFieldDefaultValue($field);
             }
             foreach ($tab->getGroups() as $key => $group) {
                 $defaults[$key] = $this->getGroupDefaults($group);
@@ -1108,6 +1108,28 @@ class Stack
     }
 
     /**
+     * Get default value for a single field (scalar or responsive shape).
+     *
+     * @return mixed
+     */
+    protected function getFieldDefaultValue(Field $field): mixed
+    {
+        $def = $field->getDefault();
+        if (!$field->isResponsive()) {
+            return $def;
+        }
+        // Typography stores a single object; responsive sub-keys (fontSize, lineHeight, letterSpacing, color) are handled in the frontend.
+        if ($field->getType() === 'typography') {
+            return $def;
+        }
+        return [
+            'desktop' => $def,
+            'tablet'  => $def,
+            'mobile'  => $def,
+        ];
+    }
+
+    /**
      * Get defaults for a field group.
      *
      * @return array<string, mixed>
@@ -1117,7 +1139,7 @@ class Stack
         $defaults = [];
 
         foreach ($group->getFields()->all() as $field) {
-            $defaults[$field->getKey()] = $field->getDefault();
+            $defaults[$field->getKey()] = $this->getFieldDefaultValue($field);
         }
 
         foreach ($group->getGroups() as $key => $nestedGroup) {

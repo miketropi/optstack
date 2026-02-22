@@ -170,7 +170,7 @@ function optstack(): string
 // require_once OPTSTACK_DIR . 'examples/basic-usage.php';
 require_once OPTSTACK_DIR . 'examples/exam2.php';
 // require_once OPTSTACK_DIR . 'examples/block-example.php';
-// require_once OPTSTACK_DIR . 'examples/select-wp-query-example.php';
+require_once OPTSTACK_DIR . 'examples/select-wp-query-example.php';
 
 // Debug listener for searchable fields (remove in production)
 add_action('optstack_indexed_meta_debug', function($debugInfo) {

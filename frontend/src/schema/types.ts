@@ -36,6 +36,8 @@ export interface FieldSchema {
   options?: FieldOption[]
   attributes?: Record<string, unknown>
   conditions?: Condition[]
+  /** When true, value is { desktop, tablet, mobile } and UI shows a mode switcher */
+  responsive?: boolean
 }
 
 /**

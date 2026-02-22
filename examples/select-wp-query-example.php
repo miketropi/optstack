@@ -27,6 +27,8 @@ add_action('optstack_init', function (): void {
         ->label('Select WP Query Demo')
         ->description('Examples of select-wp-query: search posts, pages, terms, users')
         ->define(function ($stack) {
+            
+
             // -----------------------------------------------------------------
             // Single: Page
             // -----------------------------------------------------------------
@@ -39,6 +41,17 @@ add_action('optstack_init', function (): void {
                     'post_type'  => 'page',
                     'placeholder' => 'Search pages...',
                 ],
+            ]);
+
+            // -----------------------------------------------------------------
+            // Responsive number (desktop / tablet / mobile)
+            // -----------------------------------------------------------------
+            $stack->field('container_padding', [
+                'type'       => 'number',
+                'label'      => 'Container padding',
+                'default'    => 24,
+                'responsive' => true,
+                'description' => 'Different padding per viewport (Desktop, Tablet, Mobile).',
             ]);
 
             // -----------------------------------------------------------------
