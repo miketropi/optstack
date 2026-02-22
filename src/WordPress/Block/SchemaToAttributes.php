@@ -117,6 +117,16 @@ class SchemaToAttributes
         if ($fieldType === 'select-wp-query' && !empty($field->getAttributes()['multiple'])) {
             $type = 'array';
         }
+        if ($field->isResponsive()) {
+            $type = 'object';
+            $def = ['type' => $type];
+            $def['default'] = is_array($default) && isset($default['desktop']) ? $default : [
+                'desktop' => $default,
+                'tablet'  => $default,
+                'mobile'  => $default,
+            ];
+            return $def;
+        }
         $def = ['type' => $type];
 
         if ($default !== null) {

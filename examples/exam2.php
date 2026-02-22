@@ -563,6 +563,7 @@ add_action('optstack_init', function () {
                     $group->field('h1_size', [
                         'type' => 'number',
                         'label' => 'H1 Font Size',
+                        'description' => 'Set the font size for H1 headings.',
                         'default' => 48,
                         'attributes' => [
                             'min' => 24,
@@ -570,6 +571,7 @@ add_action('optstack_init', function () {
                             'step' => 2,
                             'suffix' => 'px',
                         ],
+                        'responsive' => true,
                     ]);
                     
                     $group->field('h2_size', [
@@ -582,6 +584,7 @@ add_action('optstack_init', function () {
                             'step' => 2,
                             'suffix' => 'px',
                         ],
+                        'responsive' => true,
                     ]);
                     
                     $group->field('h3_size', [
@@ -594,6 +597,7 @@ add_action('optstack_init', function () {
                             'step' => 2,
                             'suffix' => 'px',
                         ],
+                        'responsive' => true,
                     ]);
                     
                     $group->field('h4_size', [
@@ -606,6 +610,7 @@ add_action('optstack_init', function () {
                             'step' => 1,
                             'suffix' => 'px',
                         ],
+                        'responsive' => true,
                     ]);
                     
                     $group->field('h5_size', [
@@ -618,6 +623,7 @@ add_action('optstack_init', function () {
                             'step' => 1,
                             'suffix' => 'px',
                         ],
+                        'responsive' => true,
                     ]);
                     
                     $group->field('h6_size', [
@@ -630,6 +636,7 @@ add_action('optstack_init', function () {
                             'step' => 1,
                             'suffix' => 'px',
                         ],
+                        'responsive' => true,
                     ]);
                 }, [
                     'label' => 'Heading Sizes',
@@ -1338,37 +1345,37 @@ add_action('optstack_init', function () {
                 ]);
                 
                 // Import/Export
-                // $tab->group('import_export', function ($group) {
-                //     $group->field('info', [
-                //         'type' => 'text',
-                //         'label' => 'Backup & Restore',
-                //         'description' => 'Use WordPress Tools → Export/Import to backup theme options',
-                //         'attributes' => [
-                //             'readonly' => true,
-                //         ],
-                //     ]);
-                // }, [
-                //     'label' => 'Import / Export',
-                //     'description' => 'Backup and restore your theme settings',
-                //     'layout' => 'box',
-                //     'collapsible' => true,
-                // ]);
+                $tab->group('import_export', function ($group) {
+                    $group->field('info', [
+                        'type' => 'text',
+                        'label' => 'Backup & Restore',
+                        'description' => 'Use WordPress Tools → Export/Import to backup theme options',
+                        'attributes' => [
+                            'readonly' => true,
+                        ],
+                    ]);
+                }, [
+                    'label' => 'Import / Export',
+                    'description' => 'Backup and restore your theme settings',
+                    'layout' => 'box',
+                    'collapsible' => true,
+                ]);
                 
                 // Reset Options
-                // $tab->group('reset', function ($group) {
-                //     $group->field('warning', [
-                //         'type' => 'text',
-                //         'label' => 'Reset Theme Options',
-                //         'description' => '⚠️ This will delete all theme options and restore defaults. This action cannot be undone!',
-                //         'attributes' => [
-                //             'readonly' => true,
-                //         ],
-                //     ]);
-                // }, [
-                //     'label' => 'Reset Options',
-                //     'layout' => 'box',
-                //     'collapsible' => true,
-                // ]);
+                $tab->group('reset', function ($group) {
+                    $group->field('warning', [
+                        'type' => 'text',
+                        'label' => 'Reset Theme Options',
+                        'description' => '⚠️ This will delete all theme options and restore defaults. This action cannot be undone!',
+                        'attributes' => [
+                            'readonly' => true,
+                        ],
+                    ]);
+                }, [
+                    'label' => 'Reset Options',
+                    'layout' => 'box',
+                    'collapsible' => true,
+                ]);
             }, [
                 'label' => 'Advanced',
                 // 'icon' => 'dashicons-admin-tools',
@@ -1610,3 +1617,9 @@ function mytheme_show_maintenance_page(): void
     );
 }
 add_action('template_redirect', 'mytheme_show_maintenance_page', 1);
+
+// add_action( 'wp_head', function() {
+//     // get heading opts
+//     $heading_opts = mytheme_option('heading_sizes');
+//     var_dump( $heading_opts );
+// }, 20 );

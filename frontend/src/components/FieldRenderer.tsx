@@ -1,4 +1,5 @@
 import type { FieldSchema, FieldRendererProps } from '../schema/types'
+import { ResponsiveFieldWrapper } from './ResponsiveFieldWrapper'
 import { TextField } from './fields/TextField'
 import { NumberField } from './fields/NumberField'
 import { SelectField } from './fields/SelectField'
@@ -92,16 +93,33 @@ interface Props {
 
 export function FieldRenderer({ field, value, onChange, disabled, error }: Props) {
   const Component = fieldComponents[field.type] || TextField
+  const isResponsive = field.responsive === true || field.attributes?.responsive === true
+
+  const fieldEl = (
+    <Component
+      field={field}
+      value={value}
+      onChange={onChange}
+      disabled={disabled}
+      error={error}
+    />
+  )
 
   return (
     <div className="os-field-wrapper">
-      <Component
-        field={field}
-        value={value}
-        onChange={onChange}
-        disabled={disabled}
-        error={error}
-      />
+      {isResponsive ? (
+        <ResponsiveFieldWrapper
+          field={field}
+          value={value}
+          onChange={onChange}
+          disabled={disabled}
+          error={error}
+        >
+          {fieldEl}
+        </ResponsiveFieldWrapper>
+      ) : (
+        fieldEl
+      )}
     </div>
   )
 }
