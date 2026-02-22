@@ -543,6 +543,7 @@ add_action('optstack_init', function () {
                         'lineHeight' => 1.6,
                         'color' => '#374151',
                     ],
+                    'responsive' => true,
                 ]);
                 
                 // Heading Typography
@@ -556,6 +557,7 @@ add_action('optstack_init', function () {
                         'textTransform' => 'none',
                         'color' => '#111827',
                     ],
+                    'responsive' => true,
                 ]);
                 
                 // Individual Heading Sizes
@@ -658,6 +660,7 @@ add_action('optstack_init', function () {
                         'letterSpacing' => 0.5,
                         'letterSpacingUnit' => 'px',
                     ],
+                    'responsive' => true,
                 ]);
                 
                 // Button Typography
@@ -673,6 +676,7 @@ add_action('optstack_init', function () {
                         'letterSpacing' => 0.5,
                         'letterSpacingUnit' => 'px',
                     ],
+                    'responsive' => true,
                 ]);
             }, [
                 'label' => 'Typography',
@@ -1618,8 +1622,49 @@ function mytheme_show_maintenance_page(): void
 }
 add_action('template_redirect', 'mytheme_show_maintenance_page', 1);
 
-// add_action( 'wp_head', function() {
-//     // get heading opts
-//     $heading_opts = mytheme_option('heading_sizes');
-//     var_dump( $heading_opts );
-// }, 20 );
+/**
+ * Resolve typography value for a breakpoint (responsive typography support).
+ * When a typography field has responsive enabled, all sub-keys (fontFamily, fontSize, fontSizeUnit,
+ * fontWeight, fontStyle, lineHeight, lineHeightUnit, letterSpacing, letterSpacingUnit,
+ * textTransform, textDecoration, color) may be stored as arrays with 'desktop', 'tablet', 'mobile'.
+ * This returns a flat array with scalar values for the given breakpoint (fallback: desktop -> tablet -> mobile).
+ *
+ * @param array<string, mixed> $typography Typography settings (may contain responsive sub-keys).
+ * @param string               $breakpoint One of 'desktop', 'tablet', 'mobile'.
+ * @return array<string, mixed> Typography with scalar values for the breakpoint.
+ */
+function optstack_resolve_typography_for_breakpoint(array $typography, string $breakpoint = 'desktop'): array
+{
+    $resolved = $typography;
+    $keys = [
+        'fontFamily', 'fontSize', 'fontSizeUnit', 'fontWeight', 'fontStyle',
+        'lineHeight', 'lineHeightUnit', 'letterSpacing', 'letterSpacingUnit',
+        'textTransform', 'textDecoration', 'color',
+    ];
+    $order = $breakpoint === 'mobile' ? ['mobile', 'tablet', 'desktop'] : ($breakpoint === 'tablet' ? ['tablet', 'desktop', 'mobile'] : ['desktop', 'tablet', 'mobile']);
+    foreach ($keys as $key) {
+        if (!isset($resolved[$key])) {
+            continue;
+        }
+        $v = $resolved[$key];
+        if (!is_array($v) || (!isset($v['desktop']) && !isset($v['tablet']) && !isset($v['mobile']))) {
+            continue;
+        }
+        $val = null;
+        foreach ($order as $mode) {
+            if (isset($v[$mode])) {
+                $val = $v[$mode];
+                break;
+            }
+        }
+        $resolved[$key] = $val ?? $resolved[$key];
+    }
+    return $resolved;
+}
+
+add_action( 'wp_head', function() {
+    // get heading opts
+    $heading_opts = mytheme_option('button_font');
+    $resolved = optstack_resolve_typography_for_breakpoint($heading_opts, 'desktop');
+    var_dump( $heading_opts );
+}, 20 );

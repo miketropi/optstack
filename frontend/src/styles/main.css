@@ -2476,6 +2476,19 @@
   /* overflow: hidden; */
 }
 
+/* Responsive mode switcher for typography (Size, Line Height, Letter Spacing, Color) */
+.os-field-typography-responsive .os-typography-responsive-modes {
+  position: relative;
+  border-bottom: 1px solid var(--os-gray-100);
+}
+.os-field-typography-responsive .os-typography-responsive-modes .os-responsive-modes {
+  visibility: visible;
+  position: static;
+  padding: 10px 16px;
+  bottom: auto;
+  background-color: var(--os-gray-50);
+}
+
 .os-typography-preview {
   padding: 20px;
   background: var(--os-gray-50);

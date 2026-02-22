@@ -118,6 +118,13 @@ class SchemaToAttributes
             $type = 'array';
         }
         if ($field->isResponsive()) {
+            // Typography uses a single object with responsive sub-keys (fontSize, lineHeight, letterSpacing, color); do not wrap in desktop/tablet/mobile.
+            if ($fieldType === 'typography') {
+                $type = 'object';
+                $def = ['type' => $type];
+                $def['default'] = is_array($default) ? $default : [];
+                return $def;
+            }
             $type = 'object';
             $def = ['type' => $type];
             $def['default'] = is_array($default) && isset($default['desktop']) ? $default : [

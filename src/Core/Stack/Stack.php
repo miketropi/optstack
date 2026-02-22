@@ -1118,6 +1118,10 @@ class Stack
         if (!$field->isResponsive()) {
             return $def;
         }
+        // Typography stores a single object; responsive sub-keys (fontSize, lineHeight, letterSpacing, color) are handled in the frontend.
+        if ($field->getType() === 'typography') {
+            return $def;
+        }
         return [
             'desktop' => $def,
             'tablet'  => $def,

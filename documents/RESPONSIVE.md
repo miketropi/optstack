@@ -88,8 +88,36 @@ Responsive mode can be supported for any field that stores a single primitive or
 | `toggle`   | Show/hide per breakpoint  | boolean          |
 | `color`    | Accent per breakpoint     | string (hex)     |
 | `url`      | Link per breakpoint       | string           |
+| `typography` | All sub-fields per viewport (see below) | see below |
 
-Fields that already store an object (e.g. `media`, `typography`) can support responsive by nesting: e.g. `{ desktop: {...}, tablet: {...}, mobile: {...} }`, or by adding a top-level `responsive: true` and storing the same shape as above for each mode.
+### Typography (responsive)
+
+For **typography** fields, `'responsive' => true` makes **all** sub-fields per-viewport: fontFamily, fontSize, fontSizeUnit, fontWeight, fontStyle, lineHeight, lineHeightUnit, letterSpacing, letterSpacingUnit, textTransform, textDecoration, color. The stored value remains **one typography object**; each key may be a scalar or an object with `desktop`, `tablet`, `mobile`:
+
+```json
+{
+  "fontFamily": { "desktop": "Arial, sans-serif", "tablet": "Arial, sans-serif", "mobile": "Georgia, serif" },
+  "fontSize": { "desktop": 24, "tablet": 20, "mobile": 18 },
+  "fontSizeUnit": "px",
+  "fontWeight": { "desktop": "700", "tablet": "600", "mobile": "600" },
+  "fontStyle": "normal",
+  "lineHeight": { "desktop": 1.4, "tablet": 1.4, "mobile": 1.5 },
+  "lineHeightUnit": "",
+  "letterSpacing": { "desktop": 0, "tablet": 0, "mobile": 0.5 },
+  "letterSpacingUnit": "px",
+  "textTransform": "none",
+  "textDecoration": "none",
+  "color": { "desktop": "#111", "tablet": "#111", "mobile": "#333" }
+}
+```
+
+Use the helper to resolve a breakpoint when outputting CSS:
+
+```php
+$typo = get_option('my_stack')['body_font'] ?? [];
+$resolved = optstack_resolve_typography_for_breakpoint($typo, 'mobile');
+// $resolved has scalar values for all keys for mobile
+```
 
 ---
 
@@ -161,7 +189,7 @@ For blocks, the attribute type for a responsive field should be `object` (with o
 }
 ```
 
-Schema-to-attributes mapping should detect `responsive => true` and emit `type: 'object'` and a default object with `desktop`, `tablet`, and `mobile` keys (using the field’s default for each, or a single default applied to all three).
+Schema-to-attributes mapping detects `responsive => true` and emit `type: 'object'` and a default object with `desktop`, `tablet`, and `mobile` keys—except for **typography**, which keeps a single object default. Otherwise uses the field’s default for each, or a single default applied to all three).
 
 ---
 

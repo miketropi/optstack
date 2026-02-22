@@ -10,19 +10,51 @@ const GOOGLE_FONTS_API_URL = `https://www.googleapis.com/webfonts/v1/webfonts?ke
 // Cap Google fonts in the dropdown to avoid lag (API is sorted by popularity; search still filters this list)
 const MAX_GOOGLE_FONTS_IN_MENU = 150
 
+// When responsive: all typography sub-fields can be scalar or per-viewport
+type ResponsiveScalar = { desktop?: number | string; tablet?: number | string; mobile?: number | string }
+const RESPONSIVE_TYPO_KEYS = [
+  'fontFamily', 'fontSize', 'fontSizeUnit', 'fontWeight', 'fontStyle',
+  'lineHeight', 'lineHeightUnit', 'letterSpacing', 'letterSpacingUnit',
+  'textTransform', 'textDecoration', 'color',
+] as const
+type ResponsiveTypoKey = (typeof RESPONSIVE_TYPO_KEYS)[number]
+
+function isResponsiveScalar(v: unknown): v is ResponsiveScalar {
+  return (
+    typeof v === 'object' &&
+    v !== null &&
+    !Array.isArray(v) &&
+    ('desktop' in v || 'tablet' in v || 'mobile' in v)
+  )
+}
+
+function normalizeResponsiveTypoKey(
+  v: unknown,
+  fallback: number | string
+): ResponsiveScalar {
+  if (isResponsiveScalar(v)) {
+    const d: number | string = (v.desktop !== undefined ? v.desktop : fallback) as number | string
+    const t: number | string = (v.tablet !== undefined ? v.tablet : d) as number | string
+    const m: number | string = (v.mobile !== undefined ? v.mobile : t) as number | string
+    return { desktop: d, tablet: t, mobile: m }
+  }
+  const s: number | string = (v !== undefined && v !== null ? v : fallback) as number | string
+  return { desktop: s, tablet: s, mobile: s }
+}
+
 interface TypographyValue {
-  fontFamily?: string
-  fontSize?: number
-  fontSizeUnit?: string
-  fontWeight?: string
-  fontStyle?: string
-  lineHeight?: number
-  lineHeightUnit?: string
-  letterSpacing?: number
-  letterSpacingUnit?: string
-  textTransform?: string
-  textDecoration?: string
-  color?: string
+  fontFamily?: string | ResponsiveScalar
+  fontSize?: number | ResponsiveScalar
+  fontSizeUnit?: string | ResponsiveScalar
+  fontWeight?: string | ResponsiveScalar
+  fontStyle?: string | ResponsiveScalar
+  lineHeight?: number | ResponsiveScalar
+  lineHeightUnit?: string | ResponsiveScalar
+  letterSpacing?: number | ResponsiveScalar
+  letterSpacingUnit?: string | ResponsiveScalar
+  textTransform?: string | ResponsiveScalar
+  textDecoration?: string | ResponsiveScalar
+  color?: string | ResponsiveScalar
 }
 
 interface FontOption {
@@ -296,9 +328,19 @@ const FontSingleValue = (props: SingleValueProps<FontOption, false>) => {
   )
 }
 
+type ResponsiveMode = 'desktop' | 'tablet' | 'mobile'
+
+const RESPONSIVE_MODES: { id: ResponsiveMode; label: string; title: string }[] = [
+  { id: 'desktop', label: 'Desktop', title: 'Large screens (≥1024px)' },
+  { id: 'tablet', label: 'Tablet', title: 'Medium screens (768px–1023px)' },
+  { id: 'mobile', label: 'Mobile', title: 'Small screens (<768px)' },
+]
+
 export function TypographyField({ field, value, onChange, disabled, error }: FieldRendererProps) {
   const [showColorPicker, setShowColorPicker] = useState(false)
   const colorRef = useRef<HTMLDivElement>(null)
+  const isResponsive = field.responsive === true || field.attributes?.responsive === true
+  const [activeMode, setActiveMode] = useState<ResponsiveMode>('desktop')
 
   // Check if Google fonts are disabled via field attributes
   const disableGoogleFonts = field.attributes?.disableGoogleFonts === true
@@ -309,8 +351,16 @@ export function TypographyField({ field, value, onChange, disabled, error }: Fie
   const typoValue = useMemo(() => {
     const defaultVal = (field.default as TypographyValue) || {}
     const val = (value as TypographyValue) || {}
-    return { ...DEFAULT_VALUE, ...defaultVal, ...val }
-  }, [value, field.default])
+    const merged: TypographyValue = { ...DEFAULT_VALUE, ...defaultVal, ...val }
+    if (isResponsive) {
+      const defs = DEFAULT_VALUE as Record<ResponsiveTypoKey, number | string>
+      for (const key of RESPONSIVE_TYPO_KEYS) {
+        const fallback = defs[key] ?? (key === 'lineHeightUnit' ? '' : key === 'letterSpacing' || key === 'fontSize' ? 0 : '')
+        merged[key] = normalizeResponsiveTypoKey(merged[key], fallback) as TypographyValue[ResponsiveTypoKey]
+      }
+    }
+    return merged
+  }, [value, field.default, isResponsive])
 
   // Combine system and Google fonts, or use custom fonts from attributes
   const allFonts = useMemo((): FontOption[] => {
@@ -329,7 +379,8 @@ export function TypographyField({ field, value, onChange, disabled, error }: Fie
     const combined = [...SYSTEM_FONTS, ...cappedGoogle]
 
     // Ensure currently selected Google font is in the list if it was outside the cap
-    const currentFamily = (value as TypographyValue)?.fontFamily ?? (field.default as TypographyValue)?.fontFamily
+    const rawFamily = (value as TypographyValue)?.fontFamily ?? (field.default as TypographyValue)?.fontFamily
+    const currentFamily = typeof rawFamily === 'string' ? rawFamily : (rawFamily && typeof rawFamily === 'object' && 'desktop' in rawFamily ? String((rawFamily as ResponsiveScalar).desktop ?? (rawFamily as ResponsiveScalar).tablet ?? (rawFamily as ResponsiveScalar).mobile ?? '') : '')
     if (currentFamily) {
       const googleName = currentFamily.replace(/^["']|["'],.*$/g, '').trim()
       const alreadyInList = combined.some((f) => f.value === googleName || (f.category === 'google' && currentFamily.includes(f.value)))
@@ -354,18 +405,23 @@ export function TypographyField({ field, value, onChange, disabled, error }: Fie
     ]
   }, [allFonts])
 
+  // Resolve current font family for loading (scalar when responsive = per active mode)
+  const fontFamilyForLoad = useMemo(() => {
+    const v = typoValue.fontFamily
+    if (!isResponsive || !isResponsiveScalar(v)) return (v as string) ?? 'inherit'
+    const m = v[activeMode] ?? v.desktop ?? v.tablet ?? v.mobile
+    return String(m ?? 'inherit')
+  }, [typoValue.fontFamily, isResponsive, activeMode])
+
   // Load the currently selected Google font
   useEffect(() => {
     const selectedFont = allFonts.find(f => {
-      // Match by exact value or by font name (for Google fonts)
-      return f.value === typoValue.fontFamily || 
-             (f.category === 'google' && typoValue.fontFamily?.includes(f.value))
+      return f.value === fontFamilyForLoad || (f.category === 'google' && fontFamilyForLoad?.includes(f.value))
     })
-    
     if (selectedFont?.category === 'google' && selectedFont.variants) {
       loadGoogleFont(selectedFont.value, selectedFont.variants)
     }
-  }, [typoValue.fontFamily, allFonts])
+  }, [fontFamilyForLoad, allFonts])
 
   // Close color picker on outside click
   useEffect(() => {
@@ -381,6 +437,28 @@ export function TypographyField({ field, value, onChange, disabled, error }: Fie
   const updateValue = useCallback((key: keyof TypographyValue, val: unknown) => {
     onChange({ ...typoValue, [key]: val })
   }, [typoValue, onChange])
+
+  // For responsive keys: get scalar for current viewport
+  const getDisplayVal = useCallback(
+    (key: ResponsiveTypoKey): number | string => {
+      const v = typoValue[key]
+      if (!isResponsive || !isResponsiveScalar(v)) return (v as number | string) ?? (DEFAULT_VALUE[key] as number | string)
+      const m = v[activeMode]
+      return m !== undefined ? m : (v.desktop ?? (DEFAULT_VALUE[key] as number | string))
+    },
+    [typoValue, isResponsive, activeMode]
+  )
+
+  const updateResponsiveVal = useCallback(
+    (key: ResponsiveTypoKey, val: number | string) => {
+      const prev = typoValue[key]
+      const next = isResponsive && isResponsiveScalar(prev)
+        ? { ...prev, [activeMode]: val }
+        : { desktop: (prev as number | string) ?? (DEFAULT_VALUE[key] as number | string), tablet: (prev as number | string) ?? (DEFAULT_VALUE[key] as number | string), mobile: (prev as number | string) ?? (DEFAULT_VALUE[key] as number | string), [activeMode]: val }
+      onChange({ ...typoValue, [key]: next })
+    },
+    [typoValue, isResponsive, activeMode, onChange]
+  )
 
   const selectStyles: StylesConfig<SelectOption, false> = {
     control: (base, state) => ({
@@ -444,46 +522,54 @@ export function TypographyField({ field, value, onChange, disabled, error }: Fie
     dropdownIndicator: (base) => ({ ...base, padding: '0 4px' }),
   }
 
-  const handleColorChange = useCallback((color: ColorResult) => {
-    updateValue('color', color.hex.toUpperCase())
-  }, [updateValue])
-
   const handleFontChange = useCallback((opt: SingleValue<FontOption>) => {
     if (!opt) return
-    
-    // For Google fonts, store just the font name (will be wrapped in quotes for CSS)
-    // For system fonts, store the full font stack
     const fontValue = opt.category === 'google' ? `"${opt.value}", sans-serif` : opt.value
-    updateValue('fontFamily', fontValue)
-  }, [updateValue])
+    if (isResponsive) {
+      updateResponsiveVal('fontFamily', fontValue)
+    } else {
+      updateValue('fontFamily', fontValue)
+    }
+  }, [updateValue, updateResponsiveVal, isResponsive])
+
+  // Current font family for display (scalar for active mode when responsive)
+  const currentFontFamily = isResponsive ? String(getDisplayVal('fontFamily')) : (typoValue.fontFamily as string)
 
   // Find currently selected font
   const selectedFont = useMemo(() => {
     return allFonts.find(f => {
       if (f.category === 'google') {
-        return typoValue.fontFamily?.includes(f.value)
+        return currentFontFamily?.includes(f.value)
       }
-      return f.value === typoValue.fontFamily
+      return f.value === currentFontFamily
     }) || allFonts[0]
-  }, [allFonts, typoValue.fontFamily])
+  }, [allFonts, currentFontFamily])
 
-  // Preview text style
-  const previewStyle: React.CSSProperties = {
-    fontFamily: typoValue.fontFamily,
-    fontSize: `${typoValue.fontSize}${typoValue.fontSizeUnit}`,
-    fontWeight: typoValue.fontWeight as React.CSSProperties['fontWeight'],
-    fontStyle: typoValue.fontStyle as React.CSSProperties['fontStyle'],
-    lineHeight: typoValue.lineHeightUnit 
-      ? `${typoValue.lineHeight}${typoValue.lineHeightUnit}` 
-      : typoValue.lineHeight,
-    letterSpacing: `${typoValue.letterSpacing}${typoValue.letterSpacingUnit}`,
-    textTransform: typoValue.textTransform as React.CSSProperties['textTransform'],
-    textDecoration: typoValue.textDecoration,
-    color: typoValue.color,
-  }
+  // Preview text style (uses display values so responsive fields reflect active mode)
+  const previewStyle: React.CSSProperties = useMemo(() => {
+    const get = (key: ResponsiveTypoKey) => (isResponsive ? getDisplayVal(key) : (typoValue[key] as number | string))
+    const fontFamily = String(get('fontFamily') ?? 'inherit')
+    const fontSize = get('fontSize')
+    const fontSizeUnit = String(get('fontSizeUnit') ?? 'px')
+    const lineH = get('lineHeight')
+    const lineHeightUnit = String(get('lineHeightUnit') ?? '')
+    const letterS = get('letterSpacing')
+    const letterSpacingUnit = String(get('letterSpacingUnit') ?? 'px')
+    return {
+      fontFamily,
+      fontSize: `${fontSize}${fontSizeUnit}`,
+      fontWeight: String(get('fontWeight')) as React.CSSProperties['fontWeight'],
+      fontStyle: String(get('fontStyle')) as React.CSSProperties['fontStyle'],
+      lineHeight: lineHeightUnit ? `${lineH}${lineHeightUnit}` : lineH,
+      letterSpacing: `${letterS}${letterSpacingUnit}`,
+      textTransform: String(get('textTransform')) as React.CSSProperties['textTransform'],
+      textDecoration: String(get('textDecoration')),
+      color: String(get('color') ?? ''),
+    }
+  }, [typoValue, isResponsive, getDisplayVal])
 
   return (
-    <div className={`os-field os-field-typography ${error ? 'os-field-error' : ''}`}>
+    <div className={`os-field os-field-typography ${error ? 'os-field-error' : ''} ${isResponsive ? 'os-field-typography-responsive' : ''}`}>
       <label className="os-label">
         {field.label}
         {field.attributes?.required === true && <span className="os-required">*</span>}
@@ -497,6 +583,47 @@ export function TypographyField({ field, value, onChange, disabled, error }: Fie
               The quick brown fox jumps over the lazy dog
             </span>
           </div>
+
+          {isResponsive && (
+            <div className="os-field-responsive os-typography-responsive-modes">
+              <div className="os-responsive-modes" role="tablist" aria-label="Viewport mode">
+                {RESPONSIVE_MODES.map((mode) => (
+                  <button
+                    key={mode.id}
+                    type="button"
+                    role="tab"
+                    aria-selected={activeMode === mode.id}
+                    title={mode.title}
+                    className={`os-responsive-mode ${activeMode === mode.id ? 'os-responsive-mode-active' : ''}`}
+                    onClick={() => setActiveMode(mode.id)}
+                  >
+                    <span className="os-responsive-mode-icon" aria-hidden>
+                      {mode.id === 'desktop' && (
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <rect x="2" y="3" width="20" height="14" rx="2" />
+                          <line x1="8" y1="21" x2="16" y2="21" />
+                          <line x1="12" y1="17" x2="12" y2="21" />
+                        </svg>
+                      )}
+                      {mode.id === 'tablet' && (
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <rect x="4" y="2" width="16" height="20" rx="2" />
+                          <line x1="12" y1="18" x2="12.01" y2="18" />
+                        </svg>
+                      )}
+                      {mode.id === 'mobile' && (
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <rect x="5" y="2" width="14" height="20" rx="2" />
+                          <line x1="12" y1="18" x2="12.01" y2="18" />
+                        </svg>
+                      )}
+                    </span>
+                    <span className="os-responsive-mode-label">{mode.label}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Controls Grid */}
           <div className="os-typography-controls">
@@ -526,21 +653,27 @@ export function TypographyField({ field, value, onChange, disabled, error }: Fie
               </div>
             </div>
 
-            {/* Font Size */}
+            {/* Font Size (responsive when enabled) */}
             <div className="os-typography-row">
               <label className="os-typography-label">Size</label>
               <div className="os-typography-input os-typography-input-with-unit">
                 <input
                   type="number"
-                  value={typoValue.fontSize}
-                  onChange={(e) => updateValue('fontSize', e.target.value ? Number(e.target.value) : 0)}
+                  value={isResponsive ? getDisplayVal('fontSize') : (typoValue.fontSize as number)}
+                  onChange={(e) =>
+                    isResponsive
+                      ? updateResponsiveVal('fontSize', e.target.value ? Number(e.target.value) : 0)
+                      : updateValue('fontSize', e.target.value ? Number(e.target.value) : 0)
+                  }
                   disabled={disabled}
                   className="os-typography-number"
                   min={0}
                 />
                 <Select<SelectOption, false>
-                  value={SIZE_UNITS.find(u => u.value === typoValue.fontSizeUnit)}
-                  onChange={(opt: SingleValue<SelectOption>) => updateValue('fontSizeUnit', opt?.value || 'px')}
+                  value={SIZE_UNITS.find(u => u.value === (isResponsive ? String(getDisplayVal('fontSizeUnit')) : typoValue.fontSizeUnit))}
+                  onChange={(opt: SingleValue<SelectOption>) =>
+                    isResponsive ? updateResponsiveVal('fontSizeUnit', opt?.value || 'px') : updateValue('fontSizeUnit', opt?.value || 'px')
+                  }
                   options={SIZE_UNITS}
                   styles={smallSelectStyles}
                   isDisabled={disabled}
@@ -555,8 +688,10 @@ export function TypographyField({ field, value, onChange, disabled, error }: Fie
               <label className="os-typography-label">Weight</label>
               <div className="os-typography-input">
                 <Select<SelectOption, false>
-                  value={FONT_WEIGHTS.find(w => w.value === typoValue.fontWeight)}
-                  onChange={(opt: SingleValue<SelectOption>) => updateValue('fontWeight', opt?.value || '400')}
+                  value={FONT_WEIGHTS.find(w => w.value === (isResponsive ? String(getDisplayVal('fontWeight')) : typoValue.fontWeight))}
+                  onChange={(opt: SingleValue<SelectOption>) =>
+                    isResponsive ? updateResponsiveVal('fontWeight', opt?.value || '400') : updateValue('fontWeight', opt?.value || '400')
+                  }
                   options={FONT_WEIGHTS}
                   styles={selectStyles}
                   isDisabled={disabled}
@@ -571,8 +706,10 @@ export function TypographyField({ field, value, onChange, disabled, error }: Fie
               <label className="os-typography-label">Style</label>
               <div className="os-typography-input">
                 <Select<SelectOption, false>
-                  value={FONT_STYLES.find(s => s.value === typoValue.fontStyle)}
-                  onChange={(opt: SingleValue<SelectOption>) => updateValue('fontStyle', opt?.value || 'normal')}
+                  value={FONT_STYLES.find(s => s.value === (isResponsive ? String(getDisplayVal('fontStyle')) : typoValue.fontStyle))}
+                  onChange={(opt: SingleValue<SelectOption>) =>
+                    isResponsive ? updateResponsiveVal('fontStyle', opt?.value || 'normal') : updateValue('fontStyle', opt?.value || 'normal')
+                  }
                   options={FONT_STYLES}
                   styles={selectStyles}
                   isDisabled={disabled}
@@ -582,22 +719,28 @@ export function TypographyField({ field, value, onChange, disabled, error }: Fie
               </div>
             </div>
 
-            {/* Line Height */}
+            {/* Line Height (responsive when enabled) */}
             <div className="os-typography-row">
               <label className="os-typography-label">Line Height</label>
               <div className="os-typography-input os-typography-input-with-unit">
                 <input
                   type="number"
-                  value={typoValue.lineHeight}
-                  onChange={(e) => updateValue('lineHeight', e.target.value ? Number(e.target.value) : 0)}
+                  value={isResponsive ? getDisplayVal('lineHeight') : (typoValue.lineHeight as number)}
+                  onChange={(e) =>
+                    isResponsive
+                      ? updateResponsiveVal('lineHeight', e.target.value ? Number(e.target.value) : 0)
+                      : updateValue('lineHeight', e.target.value ? Number(e.target.value) : 0)
+                  }
                   disabled={disabled}
                   className="os-typography-number"
                   min={0}
                   step={0.1}
                 />
                 <Select<SelectOption, false>
-                  value={LINE_HEIGHT_UNITS.find(u => u.value === typoValue.lineHeightUnit)}
-                  onChange={(opt: SingleValue<SelectOption>) => updateValue('lineHeightUnit', opt?.value || '')}
+                  value={LINE_HEIGHT_UNITS.find(u => u.value === (isResponsive ? String(getDisplayVal('lineHeightUnit')) : typoValue.lineHeightUnit))}
+                  onChange={(opt: SingleValue<SelectOption>) =>
+                    isResponsive ? updateResponsiveVal('lineHeightUnit', opt?.value || '') : updateValue('lineHeightUnit', opt?.value || '')
+                  }
                   options={LINE_HEIGHT_UNITS}
                   styles={smallSelectStyles}
                   isDisabled={disabled}
@@ -607,21 +750,27 @@ export function TypographyField({ field, value, onChange, disabled, error }: Fie
               </div>
             </div>
 
-            {/* Letter Spacing */}
+            {/* Letter Spacing (responsive when enabled) */}
             <div className="os-typography-row">
               <label className="os-typography-label">Letter Spacing</label>
               <div className="os-typography-input os-typography-input-with-unit">
                 <input
                   type="number"
-                  value={typoValue.letterSpacing}
-                  onChange={(e) => updateValue('letterSpacing', e.target.value ? Number(e.target.value) : 0)}
+                  value={isResponsive ? getDisplayVal('letterSpacing') : (typoValue.letterSpacing as number)}
+                  onChange={(e) =>
+                    isResponsive
+                      ? updateResponsiveVal('letterSpacing', e.target.value ? Number(e.target.value) : 0)
+                      : updateValue('letterSpacing', e.target.value ? Number(e.target.value) : 0)
+                  }
                   disabled={disabled}
                   className="os-typography-number"
                   step={0.1}
                 />
                 <Select<SelectOption, false>
-                  value={SIZE_UNITS.find(u => u.value === typoValue.letterSpacingUnit)}
-                  onChange={(opt: SingleValue<SelectOption>) => updateValue('letterSpacingUnit', opt?.value || 'px')}
+                  value={SIZE_UNITS.find(u => u.value === (isResponsive ? String(getDisplayVal('letterSpacingUnit')) : typoValue.letterSpacingUnit))}
+                  onChange={(opt: SingleValue<SelectOption>) =>
+                    isResponsive ? updateResponsiveVal('letterSpacingUnit', opt?.value || 'px') : updateValue('letterSpacingUnit', opt?.value || 'px')
+                  }
                   options={SIZE_UNITS}
                   styles={smallSelectStyles}
                   isDisabled={disabled}
@@ -636,8 +785,10 @@ export function TypographyField({ field, value, onChange, disabled, error }: Fie
               <label className="os-typography-label">Transform</label>
               <div className="os-typography-input">
                 <Select<SelectOption, false>
-                  value={TEXT_TRANSFORMS.find(t => t.value === typoValue.textTransform)}
-                  onChange={(opt: SingleValue<SelectOption>) => updateValue('textTransform', opt?.value || 'none')}
+                  value={TEXT_TRANSFORMS.find(t => t.value === (isResponsive ? String(getDisplayVal('textTransform')) : typoValue.textTransform))}
+                  onChange={(opt: SingleValue<SelectOption>) =>
+                    isResponsive ? updateResponsiveVal('textTransform', opt?.value || 'none') : updateValue('textTransform', opt?.value || 'none')
+                  }
                   options={TEXT_TRANSFORMS}
                   styles={selectStyles}
                   isDisabled={disabled}
@@ -652,8 +803,10 @@ export function TypographyField({ field, value, onChange, disabled, error }: Fie
               <label className="os-typography-label">Decoration</label>
               <div className="os-typography-input">
                 <Select<SelectOption, false>
-                  value={TEXT_DECORATIONS.find(d => d.value === typoValue.textDecoration)}
-                  onChange={(opt: SingleValue<SelectOption>) => updateValue('textDecoration', opt?.value || 'none')}
+                  value={TEXT_DECORATIONS.find(d => d.value === (isResponsive ? String(getDisplayVal('textDecoration')) : typoValue.textDecoration))}
+                  onChange={(opt: SingleValue<SelectOption>) =>
+                    isResponsive ? updateResponsiveVal('textDecoration', opt?.value || 'none') : updateValue('textDecoration', opt?.value || 'none')
+                  }
                   options={TEXT_DECORATIONS}
                   styles={selectStyles}
                   isDisabled={disabled}
@@ -663,7 +816,7 @@ export function TypographyField({ field, value, onChange, disabled, error }: Fie
               </div>
             </div>
 
-            {/* Color */}
+            {/* Color (responsive when enabled) */}
             <div className="os-typography-row">
               <label className="os-typography-label">Color</label>
               <div className="os-typography-input" ref={colorRef}>
@@ -671,15 +824,17 @@ export function TypographyField({ field, value, onChange, disabled, error }: Fie
                   <button
                     type="button"
                     className="os-typography-color-swatch"
-                    style={{ backgroundColor: typoValue.color }}
+                    style={{ backgroundColor: isResponsive ? String(getDisplayVal('color')) : String(typoValue.color ?? '') }}
                     onClick={() => !disabled && setShowColorPicker(!showColorPicker)}
                     disabled={disabled}
                     aria-label="Select color"
                   />
                   <input
                     type="text"
-                    value={typoValue.color}
-                    onChange={(e) => updateValue('color', e.target.value)}
+                    value={isResponsive ? String(getDisplayVal('color')) : String(typoValue.color ?? '')}
+                    onChange={(e) =>
+                      isResponsive ? updateResponsiveVal('color', e.target.value) : updateValue('color', e.target.value)
+                    }
                     disabled={disabled}
                     className="os-typography-color-input"
                     placeholder="#000000"
@@ -688,9 +843,17 @@ export function TypographyField({ field, value, onChange, disabled, error }: Fie
                 {showColorPicker && (
                   <div className="os-typography-color-picker">
                     <SketchPicker
-                      color={typoValue.color}
-                      onChange={handleColorChange}
-                      onChangeComplete={handleColorChange}
+                      color={isResponsive ? String(getDisplayVal('color')) : String(typoValue.color ?? '')}
+                      onChange={(color: ColorResult) =>
+                        isResponsive
+                          ? updateResponsiveVal('color', color.hex.toUpperCase())
+                          : updateValue('color', color.hex.toUpperCase())
+                      }
+                      onChangeComplete={(color: ColorResult) =>
+                        isResponsive
+                          ? updateResponsiveVal('color', color.hex.toUpperCase())
+                          : updateValue('color', color.hex.toUpperCase())
+                      }
                       disableAlpha
                       width="220"
                     />

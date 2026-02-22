@@ -94,6 +94,8 @@ interface Props {
 export function FieldRenderer({ field, value, onChange, disabled, error }: Props) {
   const Component = fieldComponents[field.type] || TextField
   const isResponsive = field.responsive === true || field.attributes?.responsive === true
+  // Typography handles responsive internally (only Size, Line Height, Letter Spacing, Color per viewport)
+  const useResponsiveWrapper = isResponsive && field.type !== 'typography'
 
   const fieldEl = (
     <Component
@@ -107,7 +109,7 @@ export function FieldRenderer({ field, value, onChange, disabled, error }: Props
 
   return (
     <div className="os-field-wrapper">
-      {isResponsive ? (
+      {useResponsiveWrapper ? (
         <ResponsiveFieldWrapper
           field={field}
           value={value}
