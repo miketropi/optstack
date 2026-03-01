@@ -68,6 +68,19 @@ class StackBuilder
     }
 
     /**
+     * Configure for WordPress Customizer (Appearance → Customize).
+     * Storage can be 'theme_mod' (theme-specific) or 'option' (wp_options).
+     *
+     * @param string $storage 'theme_mod' or 'option'
+     */
+    public function forCustomizer(string $storage = 'theme_mod'): self
+    {
+        $this->stack->forCustomizer($storage);
+
+        return $this;
+    }
+
+    /**
      * Configure for post storage.
      */
     public function forPost(?int $postId = null): self

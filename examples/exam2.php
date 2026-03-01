@@ -1664,7 +1664,7 @@ function optstack_resolve_typography_for_breakpoint(array $typography, string $b
 
 add_action( 'wp_head', function() {
     // get heading opts
-    $heading_opts = mytheme_option('button_font');
-    $resolved = optstack_resolve_typography_for_breakpoint($heading_opts, 'desktop');
-    var_dump( $heading_opts );
+    // $heading_opts = mytheme_option('button_font');
+    // $resolved = optstack_resolve_typography_for_breakpoint($heading_opts, 'desktop');
+    // var_dump( $heading_opts );
 }, 20 );

@@ -49,6 +49,16 @@ interface TinyMCEEditor {
   initialized: boolean
 }
 
+interface WPCustomizeSetting {
+  get: () => unknown
+  set: (value: unknown) => void
+}
+
+interface WPCustomize {
+  (id: string): WPCustomizeSetting | undefined
+  (id: string, callback: (setting: WPCustomizeSetting) => void): void
+}
+
 declare global {
   interface Window {
     wp?: {
@@ -61,6 +71,7 @@ declare global {
       codeEditor?: {
         initialize: (element: HTMLTextAreaElement, settings: Record<string, unknown>) => WPCodeEditorInstance
       }
+      customize?: WPCustomize
     }
     tinymce?: {
       get: (id: string) => TinyMCEEditor | undefined

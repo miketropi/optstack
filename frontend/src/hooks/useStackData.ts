@@ -1,5 +1,5 @@
-import { useState, useEffect, useCallback } from 'react'
-import { apiFetch } from '../utils/config'
+import { useState, useEffect, useCallback, useRef } from 'react'
+import { apiFetch, config } from '../utils/config'
 import type { StackDataResponse } from '../schema/types'
 
 interface UseStackDataResult {
@@ -14,6 +14,23 @@ interface UseStackDataResult {
 }
 
 /**
+ * Sync data to the WordPress Customizer setting so "Publish" activates
+ * and the preview refreshes. Debounced to avoid excessive preview reloads.
+ */
+const CUSTOMIZER_SYNC_DELAY = 600
+
+function syncToCustomizer(settingId: string, data: Record<string, unknown>): void {
+  try {
+    const setting = window.wp?.customize?.(settingId)
+    if (setting) {
+      setting.set(JSON.stringify(data))
+    }
+  } catch {
+    // Customizer API may not be available
+  }
+}
+
+/**
  * Hook for managing stack data (fetch, update, save).
  * 
  * @param stackId - The stack identifier
@@ -25,6 +42,10 @@ export function useStackData(stackId: string, objectId?: number): UseStackDataRe
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
+  const customizerSyncTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  const isCustomizer = config.isCustomizer && !!config.customizerSettings?.[stackId]
+  const customizerSettingId = config.customizerSettings?.[stackId]
 
   // Compute dirty state
   const isDirty = JSON.stringify(data) !== JSON.stringify(originalData)
@@ -51,12 +72,26 @@ export function useStackData(stackId: string, objectId?: number): UseStackDataRe
     fetchData()
   }, [fetchData])
 
-  const updateField = useCallback((key: string, value: unknown) => {
-    setData((prev) => ({
-      ...prev,
-      [key]: value,
-    }))
+  useEffect(() => {
+    return () => {
+      if (customizerSyncTimer.current) clearTimeout(customizerSyncTimer.current)
+    }
   }, [])
+
+  const updateField = useCallback((key: string, value: unknown) => {
+    setData((prev) => {
+      const next = { ...prev, [key]: value }
+
+      if (isCustomizer && customizerSettingId) {
+        if (customizerSyncTimer.current) clearTimeout(customizerSyncTimer.current)
+        customizerSyncTimer.current = setTimeout(() => {
+          syncToCustomizer(customizerSettingId, next)
+        }, CUSTOMIZER_SYNC_DELAY)
+      }
+
+      return next
+    })
+  }, [isCustomizer, customizerSettingId])
 
   const save = useCallback(async (): Promise<boolean> => {
     setSaving(true)
@@ -77,6 +112,9 @@ export function useStackData(stackId: string, objectId?: number): UseStackDataRe
       if (result.success) {
         setOriginalData(result.data)
         setData(result.data)
+        if (isCustomizer && customizerSettingId) {
+          syncToCustomizer(customizerSettingId, result.data)
+        }
         return true
       } else {
         throw new Error(result.error || 'Failed to save')
@@ -87,11 +125,14 @@ export function useStackData(stackId: string, objectId?: number): UseStackDataRe
     } finally {
       setSaving(false)
     }
-  }, [stackId, data])
+  }, [stackId, objectId, data, isCustomizer, customizerSettingId])
 
   const reset = useCallback(() => {
     setData(originalData)
-  }, [originalData])
+    if (isCustomizer && customizerSettingId) {
+      syncToCustomizer(customizerSettingId, originalData)
+    }
+  }, [originalData, isCustomizer, customizerSettingId])
 
   return {
     data,

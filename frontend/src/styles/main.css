@@ -4786,3 +4786,201 @@
   width: 32px;
   height: 32px;
 }
+
+/* ==========================================================================
+   Customizer Layout
+   Compact stacked layout for the narrow (~300px) Customizer sidebar.
+   ========================================================================== */
+
+
+.optstack-customizer-mount .os-stack-renderer {
+  border: none;
+  background: transparent;
+}
+
+.optstack-customizer-mount .os-optstack-app {
+  font-size: 13px;
+}
+
+.optstack-customizer-mount .os-stack-header {
+  padding: 12px 0;
+}
+
+.optstack-customizer-mount .os-stack-title {
+  font-size: 15px;
+}
+
+.optstack-customizer-mount .os-stack-description {
+  font-size: 12px;
+}
+
+/* Tabs: compact horizontal scroll */
+.optstack-customizer-mount .os-tab-nav {
+  padding: 0;
+  gap: 0;
+}
+
+.optstack-customizer-mount .os-tab-button {
+  padding: 10px 12px;
+  font-size: 12px;
+}
+
+.optstack-customizer-mount .os-tab-content {
+  padding-top: 8px;
+}
+
+/* Fields: stacked vertically (label above input) */
+.optstack-customizer-mount .os-field {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 6px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--os-gray-100, #f3f4f6);
+}
+
+.optstack-customizer-mount .os-field:last-child {
+  border-bottom: none;
+}
+
+.optstack-customizer-mount .os-label {
+  flex: none;
+  width: 100%;
+  padding-top: 0;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.optstack-customizer-mount .os-label-text {
+  font-size: 12px;
+}
+
+.optstack-customizer-mount .os-field-body {
+  flex: none;
+  width: 100%;
+  min-width: 0;
+}
+
+.optstack-customizer-mount .os-description {
+  font-size: 11px;
+  margin-top: 4px;
+  color: var(--os-gray-400, #9ca3af);
+}
+
+.optstack-customizer-mount .os-field-footer {
+  margin-top: 4px;
+}
+
+/* Compact inputs */
+.optstack-customizer-mount .os-input {
+  max-width: 100%;
+  min-height: 32px;
+  padding: 6px 10px;
+  font-size: 13px;
+}
+
+.optstack-customizer-mount .os-textarea {
+  max-width: 100%;
+  min-height: 60px;
+  padding: 8px 10px;
+  font-size: 13px;
+}
+
+.optstack-customizer-mount .os-select-trigger {
+  min-height: 32px;
+  padding: 6px 10px;
+  font-size: 13px;
+}
+
+.optstack-customizer-mount .os-select-wrapper {
+  max-width: 100%;
+}
+
+.optstack-customizer-mount .os-number-wrapper {
+  width: 100%;
+}
+
+.optstack-customizer-mount .os-number-input {
+  width: 100%;
+  padding: 6px 10px;
+  font-size: 13px;
+}
+
+/* Groups: stacked vertically */
+.optstack-customizer-mount .os-group-inline {
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px 0;
+}
+
+.optstack-customizer-mount .os-group-label {
+  flex: none;
+  width: 100%;
+  padding-top: 0;
+}
+
+.optstack-customizer-mount .os-group-label-text {
+  font-size: 13px;
+}
+
+.optstack-customizer-mount .os-group-label-description {
+  font-size: 11px;
+}
+
+.optstack-customizer-mount .os-group-body {
+  width: 100%;
+}
+
+.optstack-customizer-mount .os-group-header {
+  padding: 10px 0;
+}
+
+.optstack-customizer-mount .os-group-inline-fields .os-field {
+  padding: 8px 0;
+}
+
+.optstack-customizer-mount .os-nested-groups {
+  padding: 12px;
+}
+
+/* Compact group box */
+.optstack-customizer-mount .os-group-box {
+  margin-bottom: 12px;
+}
+
+/* Toggle: compact */
+.optstack-customizer-mount .os-field-toggle-wrap {
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px 0;
+}
+
+.optstack-customizer-mount .os-field-toggle-wrap .os-label {
+  padding-top: 0;
+}
+
+/* Color field: full width swatch */
+.optstack-customizer-mount .os-color-swatch {
+  width: 100%;
+  height: 32px;
+}
+
+.optstack-customizer-mount .os-color-field-wrapper {
+  width: 100%;
+}
+
+/* Media field: compact */
+.optstack-customizer-mount .os-media-placeholder {
+  min-height: 60px;
+  padding: 12px;
+}
+
+/* Save bar: compact */
+.optstack-customizer-mount .os-save-bar {
+  padding: 10px 0;
+  gap: 8px;
+}
+
+.optstack-customizer-mount .os-save-bar button {
+  padding: 6px 14px;
+  font-size: 12px;
+}

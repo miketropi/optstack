@@ -701,6 +701,94 @@ class Admin
     }
 
     /**
+     * Enqueue admin assets for Customizer (when one or more stacks are shown in Appearance → Customize).
+     * Call from customize_controls_enqueue_scripts. Passes isCustomizer and customizerSettings to JS.
+     *
+     * @param array<string, Stack> $stacks Customizer stacks (from StackRegistry::byContext('customizer'))
+     */
+    public function enqueueAssetsForCustomizer(array $stacks): void
+    {
+        if (empty($stacks)) {
+            return;
+        }
+
+        $context = Bootstrap::context();
+        if (!$context) {
+            return;
+        }
+
+        $first = reset($stacks);
+        $customizerSettings = [];
+        foreach ($stacks as $stack) {
+            $customizerSettings[$stack->getId()] = $stack->getId();
+        }
+
+        wp_enqueue_style('wp-components');
+
+        $isDevMode = defined('OPTSTACK_DEV_MODE') && OPTSTACK_DEV_MODE;
+        $devServer = defined('OPTSTACK_DEV_SERVER') ? OPTSTACK_DEV_SERVER : 'http://localhost:5173';
+
+        wp_enqueue_style('os-google-fonts', 'https://fonts.googleapis.com/css2?family=Google+Sans+Code:ital,wght@0,300..800;1,300..800&family=Google+Sans+Flex:opsz,wght@6..144,1..1000&display=swap', [], $context->version);
+
+        $coreDeps = [
+            'wp-element',
+            'wp-components',
+            'wp-data',
+            'wp-api-fetch',
+            'wp-i18n',
+        ];
+
+        if ($isDevMode) {
+            wp_enqueue_script('vite-client', $devServer . '/@vite/client', [], null, false);
+
+            add_filter('script_loader_tag', function ($tag, $handle) {
+                if ($handle === 'vite-client' || $handle === 'optstack-admin') {
+                    return str_replace(' src', ' type="module" src', $tag);
+                }
+                return $tag;
+            }, 10, 2);
+
+            wp_enqueue_script(
+                'optstack-admin',
+                $devServer . '/src/main.tsx',
+                array_merge(['vite-client'], $coreDeps),
+                null,
+                true
+            );
+        } else {
+            $distPath = $context->path('frontend/dist/');
+            $distUrl = $context->url('frontend/dist/');
+            $jsFile = $distPath . 'optstack-admin.js';
+            $cssFile = $distPath . 'optstack-main.css';
+
+            if (!file_exists($jsFile)) {
+                return;
+            }
+
+            if (file_exists($cssFile)) {
+                wp_enqueue_style('optstack-admin', $distUrl . 'optstack-main.css', ['wp-components'], filemtime($cssFile));
+            }
+
+            wp_enqueue_script('optstack-admin', $distUrl . 'optstack-admin.js', $coreDeps, filemtime($jsFile), true);
+        }
+
+        $localizeData = [
+            'nonce'              => wp_create_nonce('wp_rest'),
+            'restUrl'            => rest_url('optstack/v1/'),
+            'adminUrl'           => admin_url(),
+            'stackId'            => $first->getId(),
+            'context'            => $first->getContext(),
+            'version'            => $context->version,
+            'devMode'            => $isDevMode,
+            'googleFontsApiKey'  => apply_filters('optstack_google_fonts_api_key', implode('_', ['AIzaSyAKSB4y-8D7', 'cA11fIh62EnHGay555BPb8'])),
+            'isCustomizer'       => true,
+            'customizerSettings' => $customizerSettings,
+        ];
+
+        wp_localize_script('optstack-admin', 'optstack', $localizeData);
+    }
+
+    /**
      * Enqueue admin assets.
      */
     private function enqueueAssets(Stack $stack, array $extraData = []): void

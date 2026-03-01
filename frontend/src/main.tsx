@@ -3,16 +3,16 @@ import ReactDOM from 'react-dom/client'
 import { StackApp } from './StackApp'
 import './styles/main.css'
 
+const mountedElements = new WeakSet<HTMLElement>()
+
 /**
  * Find all OptStack mount points and render React apps.
  * Each mount point has data attributes specifying the stack to render.
  */
 function mountOptStack(): void {
-  // Find all mount points
   const mountPoints = document.querySelectorAll<HTMLElement>('.optstack-mount')
 
   if (mountPoints.length === 0) {
-    // Fallback: try legacy mount point
     const legacyMount = document.getElementById('optstack-root')
     if (legacyMount) {
       mountSingle(legacyMount)
@@ -20,7 +20,6 @@ function mountOptStack(): void {
     return
   }
 
-  // Mount each stack
   mountPoints.forEach(mountSingle)
 }
 
@@ -28,6 +27,9 @@ function mountOptStack(): void {
  * Mount a single React app on an element.
  */
 function mountSingle(element: HTMLElement): void {
+  if (mountedElements.has(element)) return
+  mountedElements.add(element)
+
   const stackId = element.dataset.stack
   const context = element.dataset.context || 'options'
   const objectId = element.dataset.objectId ? parseInt(element.dataset.objectId, 10) : undefined
@@ -50,9 +52,36 @@ function mountSingle(element: HTMLElement): void {
   )
 }
 
-// Mount when DOM is ready
+/**
+ * Watch for dynamically added .optstack-mount elements (e.g. WordPress
+ * Customizer lazy-renders control HTML only when a section is expanded).
+ */
+function observeNewMountPoints(): void {
+  const observer = new MutationObserver((mutations) => {
+    for (const mutation of mutations) {
+      for (const node of mutation.addedNodes) {
+        if (!(node instanceof HTMLElement)) continue
+
+        if (node.matches('.optstack-mount')) {
+          mountSingle(node)
+        }
+
+        const nested = node.querySelectorAll<HTMLElement>('.optstack-mount')
+        nested.forEach(mountSingle)
+      }
+    }
+  })
+
+  observer.observe(document.body, { childList: true, subtree: true })
+}
+
+// Mount existing elements when DOM is ready, then observe for new ones
 if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', mountOptStack)
+  document.addEventListener('DOMContentLoaded', () => {
+    mountOptStack()
+    observeNewMountPoints()
+  })
 } else {
   mountOptStack()
+  observeNewMountPoints()
 }

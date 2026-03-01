@@ -53,10 +53,10 @@ OptStack uses a **Store Adapter pattern** to persist data to WordPress. Each sto
 │                     StoreInterface                           │
 │        (get, set, delete, all, has, setMany, etc.)          │
 └─────────────────────────────────────────────────────────────┘
-          │              │              │              │
-          ▼              ▼              ▼              ▼
-   OptionsStore    PostStore     TermStore      UserStore
-   (wp_options)   (wp_postmeta) (wp_termmeta)  (wp_usermeta)
+          │              │              │              │              │
+          ▼              ▼              ▼              ▼              ▼
+   OptionsStore  ThemeModStore   PostStore     TermStore      UserStore
+   (wp_options)  (theme_mod)   (wp_postmeta) (wp_termmeta)  (wp_usermeta)
 ```
 
 ---
@@ -104,6 +104,47 @@ new OptionsStore(string $optionName, bool $autoload = true)
 // Get the option name
 $store->getOptionName(): string
 ```
+
+---
+
+### ThemeModStore
+
+Stores data via WordPress theme mods (`get_theme_mod` / `set_theme_mod`). Used for theme-specific options, typically when the stack is shown in the **WordPress Customizer** (Appearance → Customize).
+
+**WordPress API:** `get_theme_mod()` / `set_theme_mod()`
+
+**Use Case:** Customizer-backed theme options, theme-specific settings
+
+**Stack Definition:**
+```php
+OptStack::make('theme_options')
+    ->forCustomizer('theme_mod')  // or ->forCustomizer('option') for wp_options
+    ->label('Theme Options')
+    ->define(function ($stack) {
+        $stack->field('primary_color', ['type' => 'color', 'default' => '#2271b1']);
+        $stack->field('site_tagline', ['type' => 'text']);
+    })
+    ->build();
+```
+
+**How Data is Stored:** One theme_mod key (the stack ID) holds the full serialized array, same shape as OptionsStore.
+
+**Constructor:**
+```php
+new ThemeModStore(string $key)
+```
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `$key` | string | The theme_mod key (e.g. stack ID) |
+
+**Unique Methods:**
+```php
+// Get the theme_mod key
+$store->getKey(): string
+```
+
+See [CUSTOMIZER.md](./CUSTOMIZER.md) for full Customizer usage.
 
 ---
 
@@ -343,6 +384,8 @@ a:2:{s:9:"site_name";s:7:"My Site";s:6:"colors";a:2:{s:7:"primary";s:7:"#3b82f6"
 | Context | WordPress Function | Database Table | Key Column |
 |---------|-------------------|----------------|------------|
 | Options | `get_option()` | `wp_options` | `option_name` |
+| Customizer (theme_mod) | `get_theme_mod()` | theme mods | key (stack ID) |
+| Customizer (option) | `get_option()` | `wp_options` | `option_name` |
 | Post Meta | `get_post_meta()` | `wp_postmeta` | `meta_key` |
 | Term Meta | `get_term_meta()` | `wp_termmeta` | `meta_key` |
 | User Meta | `get_user_meta()` | `wp_usermeta` | `meta_key` |
@@ -362,6 +405,24 @@ OptStack::make('theme_options')
 ```
 
 Store is bound immediately during `optstack_init`.
+
+### For Customizer
+
+```php
+OptStack::make('theme_options')
+    ->forCustomizer('theme_mod')  // ← ThemeModStore (theme-specific)
+    ->label('Theme Options')
+    ->define(function ($stack) { ... })
+    ->build();
+
+// Or use wp_options in the Customizer:
+OptStack::make('plugin_settings')
+    ->forCustomizer('option')  // ← OptionsStore
+    ->define(function ($stack) { ... })
+    ->build();
+```
+
+Store is bound during `optstack_init`. The stack appears in **Appearance → Customize** as a panel. See [CUSTOMIZER.md](./CUSTOMIZER.md).
 
 ### For Post Types
 

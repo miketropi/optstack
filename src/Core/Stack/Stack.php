@@ -244,6 +244,32 @@ class Stack
     }
 
     /**
+     * Configure for WordPress Customizer (Appearance → Customize).
+     * Storage can be 'theme_mod' (theme-specific) or 'option' (wp_options).
+     *
+     * @param string $storage 'theme_mod' or 'option'
+     */
+    public function forCustomizer(string $storage = 'theme_mod'): self
+    {
+        $this->context = 'customizer';
+        $this->postType = null;
+        $this->taxonomy = null;
+        $this->config['customize_storage'] = $storage === 'option' ? 'option' : 'theme_mod';
+
+        return $this;
+    }
+
+    /**
+     * Get Customizer storage type when context is 'customizer'.
+     *
+     * @return string 'theme_mod' or 'option'
+     */
+    public function getCustomizeStorage(): string
+    {
+        return $this->config['customize_storage'] ?? 'theme_mod';
+    }
+
+    /**
      * Set menu parent for options pages (creates submenu).
      *
      * Common parent slugs:

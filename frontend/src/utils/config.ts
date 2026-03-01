@@ -11,6 +11,10 @@ interface OptStackConfig {
   adminUrl: string
   currentStack: string | null
   version: string
+  /** When true, the app is running inside WordPress Customizer (Appearance → Customize) */
+  isCustomizer?: boolean
+  /** Map stackId -> Customizer setting id so we can sync api.set() on save */
+  customizerSettings?: Record<string, string>
 }
 
 interface WindowWithOptStack extends Window {
@@ -34,6 +38,8 @@ function getConfig(): OptStackConfig {
     adminUrl: wpConfig?.adminUrl || '/wp-admin/',
     currentStack: wpConfig?.currentStack || null,
     version: wpConfig?.version || '0.0.0',
+    isCustomizer: wpConfig?.isCustomizer ?? false,
+    customizerSettings: wpConfig?.customizerSettings ?? {},
   }
 }
 

@@ -9,9 +9,11 @@ use OptStack\Core\Stack\StackRegistry;
 use OptStack\Support\Context;
 use OptStack\WordPress\Block\BlockAssetEnqueue;
 use OptStack\WordPress\Block\BlockRegistry;
+use OptStack\WordPress\Customizer\CustomizerRegistration;
 use OptStack\WordPress\Store\OptionsStore;
 use OptStack\WordPress\Store\PostStore;
 use OptStack\WordPress\Store\TermStore;
+use OptStack\WordPress\Store\ThemeModStore;
 use OptStack\WordPress\Store\UserStore;
 use OptStack\WordPress\Index\IndexedMetaManager;
 
@@ -172,6 +174,9 @@ class Bootstrap
             Admin::init();
         }
 
+        // Register Customizer after stacks are ready (optstack_ready runs after optstack_init and bindStores)
+        add_action('optstack_ready', [CustomizerRegistration::class, 'register'], 10);
+
         // Enqueue block editor assets
         add_action('enqueue_block_editor_assets', [$this, 'enqueueBlockAssets']);
 
@@ -236,6 +241,14 @@ class Bootstrap
         switch ($stack->getContext()) {
             case 'options':
                 $stack->setStore(new OptionsStore($stack->getId()));
+                break;
+
+            case 'customizer':
+                if ($stack->getCustomizeStorage() === 'option') {
+                    $stack->setStore(new OptionsStore($stack->getId()));
+                } else {
+                    $stack->setStore(new ThemeModStore($stack->getId()));
+                }
                 break;
 
             case 'post':
@@ -641,11 +654,22 @@ class Bootstrap
         $context = $stack->getContext();
         $objectId = $request->get_param('object_id');
 
-        // Options context doesn't need object_id
+        // Options and customizer contexts don't need object_id
         if ($context === 'options') {
             // Ensure store is bound
             if ($stack->getStore() === null) {
                 $stack->setStore(new Store\OptionsStore($stack->getId()));
+            }
+            return true;
+        }
+
+        if ($context === 'customizer') {
+            if ($stack->getStore() === null) {
+                if ($stack->getCustomizeStorage() === 'option') {
+                    $stack->setStore(new Store\OptionsStore($stack->getId()));
+                } else {
+                    $stack->setStore(new Store\ThemeModStore($stack->getId()));
+                }
             }
             return true;
         }
