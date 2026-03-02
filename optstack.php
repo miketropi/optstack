@@ -1,11 +1,11 @@
 <?php
 /**
  * Plugin Name: OptStack
- * Plugin URI: https://github.com/optstack/optstack
+ * Plugin URI: https://optstack-doc.beplus-agency.cloud/
  * Description: WordPress Data Stack Framework - A PHP framework for defining, storing, and managing structured data in WordPress using a unified, extensible stack-based model.
- * Version: 0.1.7
- * Author: OptStack Team
- * Author URI: https://optstack.dev
+ * Version: 0.1.9
+ * Author: Beplus
+ * Author URI: https://optstack-doc.beplus-agency.cloud/
  * License: MIT
  * License URI: https://opensource.org/licenses/MIT
  * Text Domain: optstack
@@ -22,7 +22,7 @@ if (!defined('ABSPATH')) {
 }
 
 // Plugin constants
-define('OPTSTACK_VERSION', '0.1.7');
+define('OPTSTACK_VERSION', '0.1.9');
 define('OPTSTACK_FILE', __FILE__);
 define('OPTSTACK_DIR', plugin_dir_path(__FILE__));
 define('OPTSTACK_URL', plugin_dir_url(__FILE__));
@@ -171,7 +171,7 @@ function optstack(): string
 // require_once OPTSTACK_DIR . 'examples/exam2.php';
 // require_once OPTSTACK_DIR . 'examples/block-example.php';
 // require_once OPTSTACK_DIR . 'examples/select-wp-query-example.php';
-// require_once OPTSTACK_DIR . 'examples/customizer-example.php';
+require_once OPTSTACK_DIR . 'examples/customizer-example.php';
 
 // Debug listener for searchable fields (remove in production)
 add_action('optstack_indexed_meta_debug', function($debugInfo) {
