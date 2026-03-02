@@ -10,6 +10,7 @@ use OptStack\Support\Context;
 use OptStack\WordPress\Block\BlockAssetEnqueue;
 use OptStack\WordPress\Block\BlockRegistry;
 use OptStack\WordPress\Customizer\CustomizerRegistration;
+use OptStack\WordPress\DesignPreset\DesignPresetManager;
 use OptStack\WordPress\Store\OptionsStore;
 use OptStack\WordPress\Store\PostStore;
 use OptStack\WordPress\Store\TermStore;
@@ -206,6 +207,9 @@ class Bootstrap
         // Register Gutenberg blocks from block-context stacks
         BlockRegistry::registerAll();
 
+        // Initialize design preset output (CSS variables on wp_head)
+        DesignPresetManager::init();
+
         // Fire event after stores are bound
         do_action('optstack_ready');
     }
@@ -319,6 +323,13 @@ class Bootstrap
         register_rest_route($this->restNamespace, '/stacks/(?P<id>[a-zA-Z0-9_-]+)/data', [
             'methods' => 'POST',
             'callback' => [$this, 'restSaveStackData'],
+            'permission_callback' => [$this, 'restPermissionCheck'],
+        ]);
+
+        // Design preset system data (groups + presets)
+        register_rest_route($this->restNamespace, '/design-presets', [
+            'methods' => 'GET',
+            'callback' => [$this, 'restGetDesignPresets'],
             'permission_callback' => [$this, 'restPermissionCheck'],
         ]);
 
@@ -514,6 +525,14 @@ class Bootstrap
             }
         }
         return null;
+    }
+
+    /**
+     * REST: Get design preset system data (groups + available presets).
+     */
+    public function restGetDesignPresets(): \WP_REST_Response
+    {
+        return new \WP_REST_Response(DesignPresetManager::getRestData());
     }
 
     /**

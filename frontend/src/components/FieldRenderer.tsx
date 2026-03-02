@@ -17,6 +17,7 @@ import { CodeField } from './fields/CodeField'
 import { TypographyField } from './fields/TypographyField'
 import { RadioImageField } from './fields/RadioImageField'
 import { VisualBuilderField } from './fields/VisualBuilderField'
+import { DesignPresetField } from './fields/design-preset'
 
 /**
  * Map of field types to components.
@@ -81,6 +82,10 @@ const fieldComponents: Record<string, React.ComponentType<FieldRendererProps>> =
   visual_builder: VisualBuilderField,
   'visual-builder': VisualBuilderField,
   visualbuilder: VisualBuilderField,
+
+  // Design Preset
+  design_preset: DesignPresetField,
+  'design-preset': DesignPresetField,
 }
 
 interface Props {

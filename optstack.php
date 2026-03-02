@@ -166,12 +166,45 @@ function optstack(): string
 }
 
 
+/**
+ * Register a custom design group.
+ *
+ * @param string $id Group identifier (snake_case)
+ * @param array $config Group configuration
+ */
+function optstack_register_design_group(string $id, array $config): void
+{
+    \OptStack\Core\DesignPreset\DesignGroupRegistry::register($id, $config);
+}
+
+/**
+ * Register a custom design preset.
+ *
+ * @param array $preset Preset with 'id', 'label', and 'tokens' keys
+ */
+function optstack_register_design_preset(array $preset): void
+{
+    \OptStack\Core\DesignPreset\DesignPresetRegistry::register($preset);
+}
+
+/**
+ * Register a custom design preset output adapter.
+ *
+ * @param string $key Adapter identifier
+ * @param \OptStack\Core\Contract\DesignPresetAdapterInterface $adapter Adapter instance
+ */
+function optstack_register_design_adapter(string $key, \OptStack\Core\Contract\DesignPresetAdapterInterface $adapter): void
+{
+    \OptStack\WordPress\DesignPreset\DesignPresetManager::registerAdapter($key, $adapter);
+}
+
 // Load example usage (for testing - remove in production).
 // require_once OPTSTACK_DIR . 'examples/basic-usage.php';
 // require_once OPTSTACK_DIR . 'examples/exam2.php';
 // require_once OPTSTACK_DIR . 'examples/block-example.php';
 // require_once OPTSTACK_DIR . 'examples/select-wp-query-example.php';
-require_once OPTSTACK_DIR . 'examples/customizer-example.php';
+// require_once OPTSTACK_DIR . 'examples/customizer-example.php';
+require_once OPTSTACK_DIR . 'examples/design-preset-example.php';
 
 // Debug listener for searchable fields (remove in production)
 add_action('optstack_indexed_meta_debug', function($debugInfo) {
