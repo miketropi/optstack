@@ -1,5 +1,5 @@
 import { useState, useMemo, useCallback, useRef, useEffect } from 'react'
-import { GroupSpecimen } from './GroupSpecimen.tsx'
+import { GroupSpecimen } from './GroupSpecimen'
 import type {
   DesignGroupSchema,
   DesignPresetData,
@@ -60,7 +60,6 @@ export function PresetEditor({ value, groups, presets, allowedGroups, allowCusto
 
     const merged: Record<string, unknown> = { ...(base ?? {}) }
 
-    // For groups with no base tokens, seed from overrides so custom groups work
     Object.entries(overrides).forEach(([path, val]) => {
       const parts = path.split('.')
       if (parts[0] === activeGroupId && parts[1]) {
@@ -77,7 +76,7 @@ export function PresetEditor({ value, groups, presets, allowedGroups, allowCusto
     })
 
     return merged as DesignGroupValue
-  }, [activePreset, activeGroupId, groups, value.overrides])
+  }, [activePreset, activeGroupId, value.overrides])
 
   const overrideCount = useMemo(() => Object.keys(value.overrides ?? {}).length, [value.overrides])
 

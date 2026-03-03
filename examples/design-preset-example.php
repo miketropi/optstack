@@ -61,9 +61,10 @@ add_action('optstack_init', function (): void {
                     'overrides' => [],
                 ],
                 'attributes' => [
-                    'default_preset' => 'modern',
-                    'allow_custom'   => true,
-                    'allowed_groups' => [
+                    'default_preset'  => 'modern',
+                    'allow_custom'    => true,
+                    'allowed_presets' => ['modern', 'classic', 'minimal'],
+                    'allowed_groups'  => [
                         'heading',
                         'body_text',
                         'button',

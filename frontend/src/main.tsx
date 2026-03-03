@@ -1,7 +1,17 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 import { StackApp } from './StackApp'
+import { registerGroupSpecimen, unregisterGroupSpecimen, hasGroupSpecimen } from './components/fields/design-preset'
 import './styles/main.css'
+
+// Expose design preset specimen registration on window.optstack
+const win = window as Window & { optstack?: Record<string, unknown> }
+win.optstack = {
+  ...(win.optstack ?? {}),
+  registerGroupSpecimen,
+  unregisterGroupSpecimen,
+  hasGroupSpecimen,
+}
 
 const mountedElements = new WeakSet<HTMLElement>()
 

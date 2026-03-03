@@ -8,8 +8,22 @@ export function DesignPresetField({ field, value, onChange, disabled, error }: F
   const [editorOpen, setEditorOpen] = useState(false)
   const { data: systemData, loading, error: fetchError } = useDesignPresetData()
 
+  const allowedPresets = field.attributes?.allowed_presets as string[] | undefined
+
+  const allPresets = useMemo(() => {
+    const all = systemData?.presets ?? []
+    if (allowedPresets?.length) {
+      return all.filter((p) => allowedPresets.includes(p.id))
+    }
+    return all
+  }, [systemData, allowedPresets])
+
   const fieldValue = useMemo((): DesignPresetFieldValue => {
-    const defaultPreset = (field.attributes?.default_preset as string) || 'modern'
+    const configuredDefault = (field.attributes?.default_preset as string) || 'modern'
+    const defaultPreset = allPresets.find((p) => p.id === configuredDefault)
+      ? configuredDefault
+      : (allPresets[0]?.id ?? configuredDefault)
+
     if (value && typeof value === 'object' && !Array.isArray(value)) {
       return {
         active_preset: (value as Record<string, unknown>).active_preset as string || defaultPreset,
@@ -18,11 +32,7 @@ export function DesignPresetField({ field, value, onChange, disabled, error }: F
       }
     }
     return { active_preset: defaultPreset, overrides: {} }
-  }, [value, field.attributes?.default_preset])
-
-  const allPresets = useMemo(() => {
-    return systemData?.presets ?? []
-  }, [systemData])
+  }, [value, field.attributes?.default_preset, allPresets])
 
   const activePreset = useMemo(() => {
     const customMatch = fieldValue.presets?.find((p) => p.id === fieldValue.active_preset)
@@ -39,20 +49,12 @@ export function DesignPresetField({ field, value, onChange, disabled, error }: F
   const presetColors = useMemo(() => {
     if (!activePreset?.tokens) return []
     const colors: string[] = []
-    const btn = activePreset.tokens.button
-    if (Array.isArray(btn)) {
-      btn.forEach((v) => {
-        if (v.background && typeof v.background === 'string') colors.push(v.background)
-      })
-    }
-    const heading = activePreset.tokens.heading
-    if (heading && typeof heading === 'object' && !Array.isArray(heading)) {
-      if (heading.color && typeof heading.color === 'string') colors.push(heading.color)
-    }
-    const bodyText = activePreset.tokens.body_text
-    if (bodyText && typeof bodyText === 'object' && !Array.isArray(bodyText)) {
-      if (bodyText.color && typeof bodyText.color === 'string') colors.push(bodyText.color)
-    }
+    const btn = activePreset.tokens.button as Record<string, unknown> | undefined
+    if (btn?.background && typeof btn.background === 'string') colors.push(btn.background)
+    const heading = activePreset.tokens.heading as Record<string, unknown> | undefined
+    if (heading?.color && typeof heading.color === 'string') colors.push(heading.color)
+    const bodyText = activePreset.tokens.body_text as Record<string, unknown> | undefined
+    if (bodyText?.color && typeof bodyText.color === 'string') colors.push(bodyText.color)
     return colors.slice(0, 5)
   }, [activePreset])
 

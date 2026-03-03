@@ -18,7 +18,11 @@ interface OptStackConfig {
 }
 
 interface WindowWithOptStack extends Window {
-  optstack?: Partial<OptStackConfig>
+  optstack?: Partial<OptStackConfig> & {
+    registerGroupSpecimen?: (...args: unknown[]) => void
+    unregisterGroupSpecimen?: (...args: unknown[]) => unknown
+    hasGroupSpecimen?: (...args: unknown[]) => boolean
+  }
   optstackBlocks?: {
     restUrl?: string
     nonce?: string

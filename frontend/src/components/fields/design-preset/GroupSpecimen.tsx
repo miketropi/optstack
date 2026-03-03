@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { TokenControl } from './TokenControl'
+import { getGroupSpecimen } from './specimenRegistry'
 import type {
   DesignGroupSchema,
   DesignGroupValue,
@@ -21,6 +22,12 @@ export function GroupSpecimen({ group, tokens, onTokenChange }: Props) {
   const isVariant = group.variant && Array.isArray(tokens)
   const variants = isVariant ? (tokens as DesignPresetVariant[]) : null
   const flat = !isVariant ? (tokens as Record<string, unknown>) : null
+
+  // Check external registry first — allows custom group specimens
+  const CustomSpecimen = getGroupSpecimen(group.id)
+  if (CustomSpecimen) {
+    return <CustomSpecimen group={group} tokens={tokens} onTokenChange={onTokenChange} />
+  }
 
   switch (group.id) {
     case 'heading':
