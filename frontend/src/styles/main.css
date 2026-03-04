@@ -5822,7 +5822,7 @@
   transition: max-width 0.3s ease;
   margin: 0 auto;
 }
-.os-dp-viewport-desktop .os-dp-viewport-frame {
+/* .os-dp-viewport-desktop .os-dp-viewport-frame {
   max-width: 100%;
 }
 .os-dp-viewport-tablet .os-dp-viewport-frame {
@@ -5830,7 +5830,7 @@
 }
 .os-dp-viewport-mobile .os-dp-viewport-frame {
   max-width: 375px;
-}
+} */
 .os-dp-viewport-tablet,
 .os-dp-viewport-mobile {
   background:
