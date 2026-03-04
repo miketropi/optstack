@@ -1,11 +1,13 @@
 import { useState, useMemo, useCallback, useRef, useEffect } from 'react'
 import { GroupSpecimen } from './GroupSpecimen'
 import type {
+  Breakpoint,
   DesignGroupSchema,
   DesignPresetData,
   DesignPresetFieldValue,
   DesignGroupValue,
 } from './types'
+import { BREAKPOINTS, isResponsiveValue, resolveBreakpointValue } from './types'
 
 interface Props {
   value: DesignPresetFieldValue
@@ -17,6 +19,21 @@ interface Props {
   onClose: () => void
 }
 
+const BREAKPOINT_ICONS: Record<Breakpoint, { svg: string; label: string }> = {
+  desktop: {
+    svg: '<rect x="2" y="3" width="20" height="14" rx="2" /><line x1="8" y1="21" x2="16" y2="21" /><line x1="12" y1="17" x2="12" y2="21" />',
+    label: 'Desktop',
+  },
+  tablet: {
+    svg: '<rect x="4" y="2" width="16" height="20" rx="2" /><line x1="12" y1="18" x2="12" y2="18" />',
+    label: 'Tablet',
+  },
+  mobile: {
+    svg: '<rect x="5" y="2" width="14" height="20" rx="2" /><line x1="12" y1="18" x2="12" y2="18" />',
+    label: 'Mobile',
+  },
+}
+
 export function PresetEditor({ value, groups, presets, allowedGroups, allowCustom = true, onChange, onClose }: Props) {
   const filteredGroupIds = useMemo(() => {
     const ids = Object.keys(groups)
@@ -24,6 +41,7 @@ export function PresetEditor({ value, groups, presets, allowedGroups, allowCusto
   }, [groups, allowedGroups])
 
   const [activeGroupId, setActiveGroupId] = useState<string>(filteredGroupIds[0] ?? '')
+  const [activeBreakpoint, setActiveBreakpoint] = useState<Breakpoint>('desktop')
   const [renaming, setRenaming] = useState(false)
   const renameInputRef = useRef<HTMLInputElement>(null)
 
@@ -51,7 +69,16 @@ export function PresetEditor({ value, groups, presets, allowedGroups, allowCusto
         Object.entries(overrides).forEach(([path, val]) => {
           const parts = path.split('.')
           if (parts[0] === activeGroupId && parts[1] === variant.id && parts[2]) {
-            merged[parts[2]] = val
+            if (parts[3]) {
+              const cur = merged[parts[2]]
+              if (typeof cur === 'object' && cur !== null) {
+                merged[parts[2]] = { ...(cur as Record<string, unknown>), [parts[3]]: val }
+              } else {
+                merged[parts[2]] = { [parts[3]]: val }
+              }
+            } else {
+              merged[parts[2]] = val
+            }
           }
         })
         return merged
@@ -78,6 +105,33 @@ export function PresetEditor({ value, groups, presets, allowedGroups, allowCusto
     return merged as DesignGroupValue
   }, [activePreset, activeGroupId, value.overrides])
 
+  const resolvedForPreview = useMemo((): DesignGroupValue => {
+    if (!activeGroupId) return {}
+    const group = groups[activeGroupId]
+    if (!group) return resolvedGroupTokens
+
+    if (Array.isArray(resolvedGroupTokens)) {
+      return resolvedGroupTokens.map((variant) => {
+        const resolved = { ...variant }
+        Object.entries(group.tokens).forEach(([key, def]) => {
+          if (def.responsive && isResponsiveValue(resolved[key])) {
+            resolved[key] = resolveBreakpointValue(resolved[key], activeBreakpoint)
+          }
+        })
+        return resolved
+      })
+    }
+
+    const flat = resolvedGroupTokens as Record<string, unknown>
+    const resolved: Record<string, unknown> = { ...flat }
+    Object.entries(group.tokens).forEach(([key, def]) => {
+      if (def.responsive && isResponsiveValue(resolved[key])) {
+        resolved[key] = resolveBreakpointValue(resolved[key], activeBreakpoint)
+      }
+    })
+    return resolved
+  }, [resolvedGroupTokens, groups, activeGroupId, activeBreakpoint])
+
   const overrideCount = useMemo(() => Object.keys(value.overrides ?? {}).length, [value.overrides])
 
   const handlePresetChange = useCallback((presetId: string) => {
@@ -90,6 +144,21 @@ export function PresetEditor({ value, groups, presets, allowedGroups, allowCusto
       ? `${activeGroupId}.${variantId}.${tokenKey}`
       : `${activeGroupId}.${tokenKey}`
     onChange({ ...value, overrides: { ...(value.overrides ?? {}), [path]: tokenValue as string | number } })
+  }, [value, onChange, activeGroupId])
+
+  const handleBatchTokenChange = useCallback((changes: Record<string, unknown>, variantId?: string) => {
+    const newOverrides = { ...(value.overrides ?? {}) }
+    for (const [tokenKey, tokenValue] of Object.entries(changes)) {
+      const path = variantId
+        ? `${activeGroupId}.${variantId}.${tokenKey}`
+        : `${activeGroupId}.${tokenKey}`
+      if (tokenValue === undefined) {
+        delete newOverrides[path]
+      } else {
+        newOverrides[path] = tokenValue as string | number
+      }
+    }
+    onChange({ ...value, overrides: newOverrides })
   }, [value, onChange, activeGroupId])
 
   const handleResetOverrides = useCallback(() => {
@@ -148,9 +217,9 @@ export function PresetEditor({ value, groups, presets, allowedGroups, allowCusto
   const activeGroup = groups[activeGroupId]
 
   const groupIcons: Record<string, string> = {
-    heading: 'Aa', body_text: 'Tt', inline_text: 'a_', button: '▢', link: '🔗',
-    form_field: '▭', form_choice: '☑', form_meta: '✎', container: '⊞', card: '▫',
-    navigation: '≡', alert: '!', loading: '◌', media: '▣', utility: '◈',
+    heading: 'Aa', body_text: 'Tt', button: '▢', link: '🔗',
+    form_field: '▭', form_meta: '✎', container: '⊞',
+    table: '▦', list: '☰',
   }
 
   return (
@@ -200,6 +269,22 @@ export function PresetEditor({ value, groups, presets, allowedGroups, allowCusto
               )}
             </div>
           </div>
+
+          {/* Breakpoint switcher */}
+          <div className="os-dp-breakpoint-bar">
+            {BREAKPOINTS.map((bp) => (
+              <button
+                key={bp}
+                type="button"
+                className={`os-dp-breakpoint-btn ${bp === activeBreakpoint ? 'is-active' : ''}`}
+                onClick={() => setActiveBreakpoint(bp)}
+                title={BREAKPOINT_ICONS[bp].label}
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" dangerouslySetInnerHTML={{ __html: BREAKPOINT_ICONS[bp].svg }} />
+              </button>
+            ))}
+          </div>
+
           <button type="button" className="os-dp-header-close" onClick={onClose}>
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
           </button>
@@ -242,14 +327,25 @@ export function PresetEditor({ value, groups, presets, allowedGroups, allowCusto
           </nav>
 
           {/* Main content: specimen + controls */}
-          <main className="os-dp-main">
-            {activeGroup && (
-              <GroupSpecimen
-                group={activeGroup}
-                tokens={resolvedGroupTokens}
-                onTokenChange={handleTokenChange}
-              />
+          <main className={`os-dp-main os-dp-viewport-${activeBreakpoint}`}>
+            {activeBreakpoint !== 'desktop' && (
+              <div className="os-dp-viewport-label">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" dangerouslySetInnerHTML={{ __html: BREAKPOINT_ICONS[activeBreakpoint].svg }} />
+                <span>{BREAKPOINT_ICONS[activeBreakpoint].label} Preview</span>
+              </div>
             )}
+            <div className="os-dp-viewport-frame">
+              {activeGroup && (
+                <GroupSpecimen
+                  group={activeGroup}
+                  tokens={resolvedForPreview}
+                  rawTokens={resolvedGroupTokens}
+                  activeBreakpoint={activeBreakpoint}
+                  onTokenChange={handleTokenChange}
+                  onBatchTokenChange={handleBatchTokenChange}
+                />
+              )}
+            </div>
           </main>
         </div>
       </div>

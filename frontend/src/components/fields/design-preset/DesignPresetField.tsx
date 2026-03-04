@@ -49,12 +49,16 @@ export function DesignPresetField({ field, value, onChange, disabled, error }: F
   const presetColors = useMemo(() => {
     if (!activePreset?.tokens) return []
     const colors: string[] = []
-    const btn = activePreset.tokens.button as Record<string, unknown> | undefined
-    if (btn?.background && typeof btn.background === 'string') colors.push(btn.background)
+    const btn = activePreset.tokens.button
+    if (Array.isArray(btn) && btn[0]?.background && typeof btn[0].background === 'string') {
+      colors.push(btn[0].background)
+    }
     const heading = activePreset.tokens.heading as Record<string, unknown> | undefined
     if (heading?.color && typeof heading.color === 'string') colors.push(heading.color)
     const bodyText = activePreset.tokens.body_text as Record<string, unknown> | undefined
     if (bodyText?.color && typeof bodyText.color === 'string') colors.push(bodyText.color)
+    const link = activePreset.tokens.link as Record<string, unknown> | undefined
+    if (link?.color && typeof link.color === 'string') colors.push(link.color)
     return colors.slice(0, 5)
   }, [activePreset])
 

@@ -1,12 +1,34 @@
+export type Breakpoint = 'desktop' | 'tablet' | 'mobile'
+
+export const BREAKPOINTS: Breakpoint[] = ['desktop', 'tablet', 'mobile']
+
+export interface ResponsiveValue {
+  desktop?: unknown
+  tablet?: unknown
+  mobile?: unknown
+}
+
 export interface TokenDefinition {
   type: 'string' | 'number' | 'object'
   control: string
+  responsive?: boolean
   units?: string[]
   options?: (string | number)[]
   min?: number
   max?: number
   step?: number
   keys?: string[]
+}
+
+export function isResponsiveValue(val: unknown): val is ResponsiveValue {
+  if (typeof val !== 'object' || val === null || Array.isArray(val)) return false
+  const keys = Object.keys(val)
+  return keys.some((k) => k === 'desktop' || k === 'tablet' || k === 'mobile')
+}
+
+export function resolveBreakpointValue(val: unknown, breakpoint: Breakpoint): unknown {
+  if (!isResponsiveValue(val)) return val
+  return val[breakpoint] ?? val.desktop ?? val.tablet ?? val.mobile
 }
 
 export interface DesignGroupSchema {

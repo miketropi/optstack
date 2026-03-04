@@ -5717,3 +5717,137 @@
   text-align: center;
   font-variant-numeric: tabular-nums;
 }
+
+/* ── Breakpoint Switcher ────────────────────────────────────────────────────── */
+.os-dp-breakpoint-bar {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 2px;
+  background: #f3f4f6;
+  border-radius: 8px;
+  margin-left: auto;
+  margin-right: 8px;
+}
+.os-dp-breakpoint-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 28px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: #9ca3af;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.os-dp-breakpoint-btn:hover {
+  color: #374151;
+  background: rgba(255,255,255,0.5);
+}
+.os-dp-breakpoint-btn.is-active {
+  background: #fff;
+  color: #2563eb;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+}
+
+/* ── Responsive Token Toggle ────────────────────────────────────────────────── */
+.os-dp-field-responsive-wrap {
+  display: flex;
+  align-items: flex-start;
+  gap: 4px;
+}
+.os-dp-field-responsive-wrap > .os-dp-field,
+.os-dp-field-responsive-wrap > .os-dp-field-scale-wrap {
+  flex: 1;
+  min-width: 0;
+}
+.os-dp-responsive-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  margin-top: 22px;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  color: #d1d5db;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.os-dp-responsive-toggle:hover {
+  background: #f3f4f6;
+  color: #6b7280;
+}
+.os-dp-responsive-toggle.is-responsive {
+  color: #2563eb;
+  background: #eff6ff;
+}
+.os-dp-responsive-toggle.is-responsive:hover {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+/* Locked (non-responsive) token on tablet/mobile */
+.os-dp-field-responsive-wrap.is-locked {
+  opacity: 0.45;
+  pointer-events: none;
+  position: relative;
+}
+.os-dp-field-responsive-wrap.is-locked .os-dp-input,
+.os-dp-field-responsive-wrap.is-locked .os-dp-select,
+.os-dp-field-responsive-wrap.is-locked .os-dp-range,
+.os-dp-field-responsive-wrap.is-locked .os-dp-color-swatch {
+  cursor: not-allowed;
+}
+.os-dp-locked-indicator {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  margin-top: 22px;
+  color: #d1d5db;
+  pointer-events: auto;
+  cursor: help;
+}
+
+/* ── Viewport Simulation ────────────────────────────────────────────────────── */
+.os-dp-viewport-frame {
+  width: 100%;
+  transition: max-width 0.3s ease;
+  margin: 0 auto;
+}
+.os-dp-viewport-desktop .os-dp-viewport-frame {
+  max-width: 100%;
+}
+.os-dp-viewport-tablet .os-dp-viewport-frame {
+  max-width: 768px;
+}
+.os-dp-viewport-mobile .os-dp-viewport-frame {
+  max-width: 375px;
+}
+.os-dp-viewport-tablet,
+.os-dp-viewport-mobile {
+  background:
+    linear-gradient(90deg, #f9fafb 0%, transparent 2%, transparent 98%, #f9fafb 100%);
+}
+.os-dp-viewport-label {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 6px 0;
+  font-size: 11px;
+  font-weight: 500;
+  color: #6b7280;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+.os-dp-viewport-label svg {
+  opacity: 0.6;
+}

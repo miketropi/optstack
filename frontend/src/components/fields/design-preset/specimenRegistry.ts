@@ -1,9 +1,12 @@
-import type { DesignGroupSchema, DesignGroupValue } from './types'
+import type { Breakpoint, DesignGroupSchema, DesignGroupValue } from './types'
 
 export interface GroupSpecimenProps {
   group: DesignGroupSchema
   tokens: DesignGroupValue
+  rawTokens?: DesignGroupValue
+  activeBreakpoint?: Breakpoint
   onTokenChange: (tokenKey: string, value: unknown, variantId?: string) => void
+  onBatchTokenChange?: (changes: Record<string, unknown>, variantId?: string) => void
 }
 
 export type GroupSpecimenComponent = React.ComponentType<GroupSpecimenProps>
