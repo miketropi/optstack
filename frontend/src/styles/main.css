@@ -5086,10 +5086,11 @@
   z-index: 100000;
   background: rgba(0, 0, 0, 0.5);
   display: flex;
-  align-items: center;
+  /* align-items: center; */
   justify-content: center;
-  padding: 24px;
+  padding: 0 24px;
   animation: osDpFadeIn 0.15s ease;
+  overflow: auto;
 }
 @keyframes osDpFadeIn {
   from { opacity: 0; }
@@ -5098,14 +5099,14 @@
 
 .os-dp-modal {
   background: #fff;
-  border-radius: 14px;
-  box-shadow: 0 24px 80px rgba(0,0,0,0.22), 0 0 0 1px rgba(0,0,0,0.05);
+  /* border-radius: 14px; */
+  /* box-shadow: 0 24px 80px rgba(0,0,0,0.22), 0 0 0 1px rgba(0,0,0,0.05); */
   width: 100%;
   max-width: 1080px;
-  max-height: 90vh;
+  /* max-height: 90vh; */
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  /* overflow: hidden; */
   animation: osDpSlideUp 0.2s ease;
 }
 @keyframes osDpSlideUp {
@@ -5122,6 +5123,8 @@
   border-bottom: 1px solid #f0f0f0;
   flex-shrink: 0;
   background: #fafafa;
+  position: sticky;
+  top: 0;
 }
 .os-dp-header-left {
   display: flex;
@@ -5249,7 +5252,7 @@
   display: grid;
   grid-template-columns: 200px 1fr;
   flex: 1;
-  overflow: hidden;
+  /* overflow: hidden; */
   min-height: 0;
 }
 
@@ -5312,14 +5315,14 @@
 
 /* ── Main content area ──────────────────────────────────────────────────────── */
 .os-dp-main {
-  overflow-y: auto;
-  padding: 32px 40px;
+  /* overflow-y: auto; */
+  padding: 28px;
   background: #fff;
 }
 
 /* ── Specimen base ──────────────────────────────────────────────────────────── */
 .os-dp-specimen {
-  max-width: 760px;
+  /* max-width: 760px; */
 }
 .os-dp-divider {
   height: 1px;
@@ -5647,9 +5650,10 @@
 .os-dp-color-popover {
   position: absolute;
   z-index: 10;
-  top: 100%;
-  left: 0;
+  bottom: 0;
+  left: -210px;
   margin-top: 4px;
+  width: 200px;
 }
 .os-dp-field-color .os-dp-input {
   flex: 1;
@@ -5833,8 +5837,7 @@
 } */
 .os-dp-viewport-tablet,
 .os-dp-viewport-mobile {
-  background:
-    linear-gradient(90deg, #f9fafb 0%, transparent 2%, transparent 98%, #f9fafb 100%);
+  /* background: linear-gradient(90deg, #f9fafb 0%, transparent 2%, transparent 98%, #f9fafb 100%); */
 }
 .os-dp-viewport-label {
   display: flex;

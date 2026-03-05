@@ -652,10 +652,15 @@ function VariantSpecimen({ group, variants, rawTokens, activeBreakpoint, onToken
 }
 
 function renderButtonVariant(variant: DesignPresetVariant) {
+  const [hoveredVariantId, setHoveredVariantId] = useState<string | null>(null)
+  const isHovered = hoveredVariantId === variant.id
+
   return (
     <div className="os-dp-inline-preview">
       <button
         type="button"
+        onMouseEnter={() => setHoveredVariantId(variant.id)}
+        onMouseLeave={() => setHoveredVariantId(null)}
         style={{
           fontFamily: String(variant.fontFamily ?? 'inherit'),
           fontSize: String(variant.fontSize ?? '14px'),
@@ -663,8 +668,8 @@ function renderButtonVariant(variant: DesignPresetVariant) {
           padding: String(variant.padding ?? '10px 20px'),
           borderRadius: String(variant.borderRadius ?? '6px'),
           border: `${variant.borderWidth ?? '0'} solid ${variant.borderColor ?? 'transparent'}`,
-          background: String(variant.background ?? '#2563EB'),
-          color: String(variant.color ?? '#fff'),
+          background: isHovered ? String(variant.hoverBackground ?? '#2563EB') : String(variant.background ?? '#2563EB'),
+          color: isHovered ? String(variant.hoverColor ?? '#fff') : String(variant.color ?? '#fff'),
           cursor: 'default',
           display: 'inline-block',
         }}
