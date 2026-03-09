@@ -168,26 +168,73 @@ export function PresetEditor({ value, groups, presets, allowedGroups, allowCusto
   const handleClonePreset = useCallback(() => {
     if (!activePreset) return
     const newId = `custom-${Date.now()}`
-    const newPreset: DesignPresetData = {
-      id: newId,
-      label: `${activePreset.label} (Copy)`,
-      base: activePreset.id,
-      tokens: {},
-    }
-    const applyOverrides = value.overrides ?? {}
-    if (Object.keys(applyOverrides).length > 0) {
-      for (const [path, val] of Object.entries(applyOverrides)) {
-        const parts = path.split('.')
-        const groupId = parts[0]
-        if (!newPreset.tokens[groupId]) newPreset.tokens[groupId] = {}
+    const baseId = isCustomPreset && activePreset.base
+      ? activePreset.base
+      : activePreset.id
+
+    // Deep-clone ALL tokens from the active preset as the starting point
+    const clonedTokens: Record<string, DesignGroupValue> = JSON.parse(
+      JSON.stringify(activePreset.tokens ?? {}),
+    )
+
+    // Layer overrides on top of the cloned tokens
+    const overrides = value.overrides ?? {}
+    for (const [path, val] of Object.entries(overrides)) {
+      const parts = path.split('.')
+      const groupId = parts[0]
+      const group = groups[groupId]
+      if (!group) continue
+
+      if (group.variant) {
+        if (parts.length < 3) continue
+        const variantId = parts[1]
+        const tokenKey = parts[2]
+
+        if (!Array.isArray(clonedTokens[groupId])) {
+          clonedTokens[groupId] = []
+        }
+        const variants = clonedTokens[groupId] as Record<string, unknown>[]
+        let variant = variants.find((v) => v.id === variantId)
+        if (!variant) {
+          variant = { id: variantId }
+          variants.push(variant)
+        }
+
+        if (parts.length === 4) {
+          if (typeof variant[tokenKey] !== 'object' || variant[tokenKey] === null) {
+            variant[tokenKey] = {}
+          }
+          (variant[tokenKey] as Record<string, unknown>)[parts[3]] = val
+        } else {
+          variant[tokenKey] = val
+        }
+      } else {
+        if (!clonedTokens[groupId] || Array.isArray(clonedTokens[groupId])) {
+          clonedTokens[groupId] = {}
+        }
+        const groupTokens = clonedTokens[groupId] as Record<string, unknown>
+
         if (parts.length === 2) {
-          (newPreset.tokens[groupId] as Record<string, unknown>)[parts[1]] = val
+          groupTokens[parts[1]] = val
+        } else if (parts.length === 3) {
+          if (typeof groupTokens[parts[1]] !== 'object' || groupTokens[parts[1]] === null) {
+            groupTokens[parts[1]] = {}
+          }
+          (groupTokens[parts[1]] as Record<string, unknown>)[parts[2]] = val
         }
       }
     }
+
+    const newPreset: DesignPresetData = {
+      id: newId,
+      label: `${activePreset.label} (Copy)`,
+      base: baseId,
+      tokens: clonedTokens,
+    }
+
     setRenaming(false)
     onChange({ active_preset: newId, overrides: {}, presets: [...(value.presets ?? []), newPreset] })
-  }, [activePreset, value, onChange])
+  }, [activePreset, isCustomPreset, value, onChange, groups])
 
   const handleRenamePreset = useCallback((newLabel: string) => {
     const trimmed = newLabel.trim()
