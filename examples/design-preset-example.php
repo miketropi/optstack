@@ -43,42 +43,42 @@ if (!defined('ABSPATH')) {
 //     ...
 //   }
 
-add_action('optstack_init', function (): void {
+// add_action('optstack_init', function (): void {
 
-    OptStack::make('theme_design')
-        ->forOptions()
-        ->menuParent('themes.php')
-        ->label(__('Design System', 'optstack'))
-        ->description(__('Manage your site design tokens. Changes are output as CSS variables.', 'optstack'))
-        ->define(function ($stack): void {
+//     OptStack::make('theme_design')
+//         ->forOptions()
+//         ->menuParent('themes.php')
+//         ->label(__('Design System', 'optstack'))
+//         ->description(__('Manage your site design tokens. Changes are output as CSS variables.', 'optstack'))
+//         ->define(function ($stack): void {
 
-            $stack->field('global_design', [
-                'type'  => 'design_preset',
-                'label' => __('Design Presets', 'optstack'),
-                'description' => __('Choose a preset and customize design tokens. Tokens are output as CSS custom properties.', 'optstack'),
-                'default' => [
-                    'active_preset' => 'modern',
-                    'overrides' => [],
-                ],
-                'attributes' => [
-                    'default_preset'  => 'modern',
-                    'allow_custom'    => true,
-                    'allowed_presets' => ['modern', 'classic', 'minimal'],
-                    'allowed_groups'  => [
-                        'heading',
-                        'body_text',
-                        'button',
-                        'card',
-                        'form_field',
-                        'navigation',
-                        'pricing_table',
-                    ],
-                ],
-            ]);
+//             $stack->field('global_design', [
+//                 'type'  => 'design_preset',
+//                 'label' => __('Design Presets', 'optstack'),
+//                 'description' => __('Choose a preset and customize design tokens. Tokens are output as CSS custom properties.', 'optstack'),
+//                 'default' => [
+//                     'active_preset' => 'modern',
+//                     'overrides' => [],
+//                 ],
+//                 'attributes' => [
+//                     'default_preset'  => 'modern',
+//                     'allow_custom'    => true,
+//                     'allowed_presets' => ['modern', 'classic', 'minimal'],
+//                     'allowed_groups'  => [
+//                         'body_text',
+//                         'heading',                        
+//                         'button',
+//                         'card',
+//                         'form_field',
+//                         'navigation',
+//                         'pricing_table',
+//                     ],
+//                 ],
+//             ]);
 
-        })
-        ->build();
-});
+//         })
+//         ->build();
+// });
 
 
 // =============================================================================
@@ -124,24 +124,24 @@ add_action('optstack_init', function (): void {
 // Add a custom semantic group for a plugin-specific UI component.
 // The group will appear in the preset editor when allowed.
 
-add_action('optstack_init', function (): void {
+// add_action('optstack_init', function (): void {
 
-    optstack_register_design_group('pricing_table', [
-        'label'      => __('Pricing Table', 'optstack'),
-        'applies_to' => ['pricing_card', 'pricing_header', 'pricing_feature'],
-        'supports'   => ['typography', 'spacing', 'border', 'color'],
-        'variant'    => true,
-        'tokens'     => [
-            'headerBackground' => ['type' => 'string', 'control' => 'color'],
-            'headerColor'      => ['type' => 'string', 'control' => 'color'],
-            'priceSize'        => ['type' => 'string', 'control' => 'size', 'units' => ['px', 'rem']],
-            'priceFontWeight'  => ['type' => 'number', 'control' => 'select', 'options' => [400, 600, 700, 800]],
-            'featureColor'     => ['type' => 'string', 'control' => 'color'],
-            'borderRadius'     => ['type' => 'string', 'control' => 'size', 'units' => ['px']],
-            'shadow'           => ['type' => 'string', 'control' => 'shadow'],
-        ],
-    ]);
-});
+//     optstack_register_design_group('pricing_table', [
+//         'label'      => __('Pricing Table', 'optstack'),
+//         'applies_to' => ['pricing_card', 'pricing_header', 'pricing_feature'],
+//         'supports'   => ['typography', 'spacing', 'border', 'color'],
+//         'variant'    => true,
+//         'tokens'     => [
+//             'headerBackground' => ['type' => 'string', 'control' => 'color'],
+//             'headerColor'      => ['type' => 'string', 'control' => 'color'],
+//             'priceSize'        => ['type' => 'string', 'control' => 'size', 'units' => ['px', 'rem']],
+//             'priceFontWeight'  => ['type' => 'number', 'control' => 'select', 'options' => [400, 600, 700, 800]],
+//             'featureColor'     => ['type' => 'string', 'control' => 'color'],
+//             'borderRadius'     => ['type' => 'string', 'control' => 'size', 'units' => ['px']],
+//             'shadow'           => ['type' => 'string', 'control' => 'shadow'],
+//         ],
+//     ]);
+// });
 
 
 // =============================================================================
@@ -151,96 +151,96 @@ add_action('optstack_init', function (): void {
 // Add a brand-specific preset that extends built-in token coverage.
 // Users can select it alongside the 6 built-in presets.
 
-add_action('optstack_init', function (): void {
+// add_action('optstack_init', function (): void {
 
-    optstack_register_design_preset([
-        'id'    => 'brand_corporate',
-        'label' => __('Corporate', 'optstack'),
-        'tokens' => [
-            'heading' => [
-                'fontFamily'    => 'Merriweather, Georgia, serif',
-                'fontWeight'    => 700,
-                'lineHeight'    => 1.3,
-                'letterSpacing' => '0',
-                'color'         => '#0F172A',
-                'sizeScale'     => [
-                    'h1' => '2.75rem',
-                    'h2' => '2.25rem',
-                    'h3' => '1.75rem',
-                    'h4' => '1.5rem',
-                    'h5' => '1.25rem',
-                    'h6' => '1rem',
-                ],
-            ],
-            'body_text' => [
-                'fontFamily' => 'Open Sans, sans-serif',
-                'fontSize'   => '16px',
-                'fontWeight' => 400,
-                'lineHeight' => 1.7,
-                'color'      => '#334155',
-            ],
-            'button' => [
-                [
-                    'id'              => 'primary',
-                    'label'           => 'Primary',
-                    'fontFamily'      => 'Open Sans, sans-serif',
-                    'fontSize'        => '14px',
-                    'fontWeight'      => 600,
-                    'padding'         => '12px 28px',
-                    'borderRadius'    => '4px',
-                    'borderWidth'     => '0',
-                    'background'      => '#0F4C75',
-                    'color'           => '#FFFFFF',
-                    'hoverBackground' => '#1B6DA8',
-                    'hoverColor'      => '#FFFFFF',
-                ],
-                [
-                    'id'              => 'secondary',
-                    'label'           => 'Secondary',
-                    'fontFamily'      => 'Open Sans, sans-serif',
-                    'fontSize'        => '14px',
-                    'fontWeight'      => 600,
-                    'padding'         => '12px 28px',
-                    'borderRadius'    => '4px',
-                    'borderWidth'     => '2px',
-                    'borderColor'     => '#0F4C75',
-                    'background'      => 'transparent',
-                    'color'           => '#0F4C75',
-                    'hoverBackground' => '#0F4C75',
-                    'hoverColor'      => '#FFFFFF',
-                ],
-            ],
-            'card' => [
-                'background'   => '#FFFFFF',
-                'borderRadius' => '4px',
-                'borderWidth'  => '1px',
-                'borderColor'  => '#E2E8F0',
-                'padding'      => '28px',
-                'shadow'       => '0 1px 4px rgba(0,0,0,0.06)',
-            ],
-            'navigation' => [
-                'fontFamily'  => 'Open Sans, sans-serif',
-                'fontSize'    => '14px',
-                'fontWeight'  => 600,
-                'color'       => '#334155',
-                'activeColor' => '#0F4C75',
-                'hoverColor'  => '#0F4C75',
-                'padding'     => '10px 18px',
-            ],
-            'form_field' => [
-                'background'       => '#FFFFFF',
-                'borderColor'      => '#CBD5E1',
-                'borderWidth'      => '1px',
-                'borderRadius'     => '4px',
-                'padding'          => '10px 14px',
-                'fontSize'         => '14px',
-                'color'            => '#0F172A',
-                'focusBorderColor' => '#0F4C75',
-                'errorBorderColor' => '#DC2626',
-            ],
-        ],
-    ]);
-});
+//     optstack_register_design_preset([
+//         'id'    => 'brand_corporate',
+//         'label' => __('Corporate', 'optstack'),
+//         'tokens' => [
+//             'heading' => [
+//                 'fontFamily'    => 'Merriweather, Georgia, serif',
+//                 'fontWeight'    => 700,
+//                 'lineHeight'    => 1.3,
+//                 'letterSpacing' => '0',
+//                 'color'         => '#0F172A',
+//                 'sizeScale'     => [
+//                     'h1' => '2.75rem',
+//                     'h2' => '2.25rem',
+//                     'h3' => '1.75rem',
+//                     'h4' => '1.5rem',
+//                     'h5' => '1.25rem',
+//                     'h6' => '1rem',
+//                 ],
+//             ],
+//             'body_text' => [
+//                 'fontFamily' => 'Open Sans, sans-serif',
+//                 'fontSize'   => '16px',
+//                 'fontWeight' => 400,
+//                 'lineHeight' => 1.7,
+//                 'color'      => '#334155',
+//             ],
+//             'button' => [
+//                 [
+//                     'id'              => 'primary',
+//                     'label'           => 'Primary',
+//                     'fontFamily'      => 'Open Sans, sans-serif',
+//                     'fontSize'        => '14px',
+//                     'fontWeight'      => 600,
+//                     'padding'         => '12px 28px',
+//                     'borderRadius'    => '4px',
+//                     'borderWidth'     => '0',
+//                     'background'      => '#0F4C75',
+//                     'color'           => '#FFFFFF',
+//                     'hoverBackground' => '#1B6DA8',
+//                     'hoverColor'      => '#FFFFFF',
+//                 ],
+//                 [
+//                     'id'              => 'secondary',
+//                     'label'           => 'Secondary',
+//                     'fontFamily'      => 'Open Sans, sans-serif',
+//                     'fontSize'        => '14px',
+//                     'fontWeight'      => 600,
+//                     'padding'         => '12px 28px',
+//                     'borderRadius'    => '4px',
+//                     'borderWidth'     => '2px',
+//                     'borderColor'     => '#0F4C75',
+//                     'background'      => 'transparent',
+//                     'color'           => '#0F4C75',
+//                     'hoverBackground' => '#0F4C75',
+//                     'hoverColor'      => '#FFFFFF',
+//                 ],
+//             ],
+//             'card' => [
+//                 'background'   => '#FFFFFF',
+//                 'borderRadius' => '4px',
+//                 'borderWidth'  => '1px',
+//                 'borderColor'  => '#E2E8F0',
+//                 'padding'      => '28px',
+//                 'shadow'       => '0 1px 4px rgba(0,0,0,0.06)',
+//             ],
+//             'navigation' => [
+//                 'fontFamily'  => 'Open Sans, sans-serif',
+//                 'fontSize'    => '14px',
+//                 'fontWeight'  => 600,
+//                 'color'       => '#334155',
+//                 'activeColor' => '#0F4C75',
+//                 'hoverColor'  => '#0F4C75',
+//                 'padding'     => '10px 18px',
+//             ],
+//             'form_field' => [
+//                 'background'       => '#FFFFFF',
+//                 'borderColor'      => '#CBD5E1',
+//                 'borderWidth'      => '1px',
+//                 'borderRadius'     => '4px',
+//                 'padding'          => '10px 14px',
+//                 'fontSize'         => '14px',
+//                 'color'            => '#0F172A',
+//                 'focusBorderColor' => '#0F4C75',
+//                 'errorBorderColor' => '#DC2626',
+//             ],
+//         ],
+//     ]);
+// });
 
 
 // =============================================================================

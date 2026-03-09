@@ -1,6 +1,188 @@
-import { useState, useRef, useEffect, useCallback } from 'react'
+import { useState, useRef, useEffect, useCallback, useMemo, memo } from 'react'
 import { SketchPicker, type ColorResult } from 'react-color'
+import Select, { type StylesConfig, type SingleValue, components, type OptionProps, type SingleValueProps } from 'react-select'
 import type { TokenDefinition } from './types'
+import type { OptStackConfig } from '../../../schema/types'
+
+// ---------------------------------------------------------------------------
+// Google Fonts API integration (mirrors TypographyField approach)
+// ---------------------------------------------------------------------------
+const GOOGLE_FONTS_API_KEY = (window as unknown as { optstack?: Partial<OptStackConfig> }).optstack?.googleFontsApiKey
+const GOOGLE_FONTS_API_URL = `https://www.googleapis.com/webfonts/v1/webfonts?key=${GOOGLE_FONTS_API_KEY}&sort=popularity`
+const MAX_GOOGLE_FONTS = 150
+
+interface FontOption {
+  value: string
+  label: string
+  category?: 'system' | 'google'
+  variants?: string[]
+}
+
+interface GoogleFontItem {
+  family: string
+  variants: string[]
+}
+
+const SYSTEM_FONTS: FontOption[] = [
+  { value: 'inherit', label: 'Default (Inherit)', category: 'system' },
+  { value: 'system-ui, -apple-system, sans-serif', label: 'System UI', category: 'system' },
+  { value: 'Arial, sans-serif', label: 'Arial', category: 'system' },
+  { value: 'Helvetica Neue, Helvetica, sans-serif', label: 'Helvetica', category: 'system' },
+  { value: 'Georgia, serif', label: 'Georgia', category: 'system' },
+  { value: 'Times New Roman, serif', label: 'Times New Roman', category: 'system' },
+  { value: 'Verdana, sans-serif', label: 'Verdana', category: 'system' },
+  { value: 'ui-monospace, SFMono-Regular, monospace', label: 'Monospace', category: 'system' },
+]
+
+let googleFontsCache: FontOption[] | null = null
+let googleFontsFetchPromise: Promise<FontOption[]> | null = null
+
+function parseVariantToWeight(variant: string): string | null {
+  if (variant === 'regular' || variant === 'italic') return '400'
+  const match = variant.match(/^(\d+)/)
+  return match ? match[1] : null
+}
+
+async function fetchGoogleFonts(): Promise<FontOption[]> {
+  if (googleFontsCache) return googleFontsCache
+  if (googleFontsFetchPromise) return googleFontsFetchPromise
+
+  googleFontsFetchPromise = (async () => {
+    try {
+      const response = await fetch(GOOGLE_FONTS_API_URL)
+      if (!response.ok) throw new Error(`Google Fonts API error: ${response.status}`)
+      const data = await response.json()
+      const fonts: FontOption[] = (data.items as GoogleFontItem[]).map((font) => {
+        const weights = new Set<string>()
+        font.variants.forEach((v) => { const w = parseVariantToWeight(v); if (w) weights.add(w) })
+        return {
+          value: font.family,
+          label: font.family,
+          category: 'google' as const,
+          variants: Array.from(weights).sort((a, b) => parseInt(a) - parseInt(b)),
+        }
+      })
+      googleFontsCache = fonts
+      return fonts
+    } catch (error) {
+      console.error('Failed to fetch Google Fonts:', error)
+      return []
+    } finally {
+      googleFontsFetchPromise = null
+    }
+  })()
+
+  return googleFontsFetchPromise
+}
+
+function useGoogleFonts() {
+  const disabled = !GOOGLE_FONTS_API_KEY
+  const [fonts, setFonts] = useState<FontOption[]>(googleFontsCache || [])
+  const [loading, setLoading] = useState(!googleFontsCache && !disabled)
+
+  useEffect(() => {
+    if (disabled) { setLoading(false); return }
+    if (googleFontsCache) { setFonts(googleFontsCache); setLoading(false); return }
+    setLoading(true)
+    fetchGoogleFonts()
+      .then((f) => setFonts(f))
+      .finally(() => setLoading(false))
+  }, [disabled])
+
+  return { fonts, loading }
+}
+
+const loadedFonts = new Set<string>()
+
+function loadGoogleFont(name: string, weights: string[] = ['400', '700']) {
+  if (loadedFonts.has(name)) return
+  loadedFonts.add(name)
+  const fontName = name.replace(/ /g, '+')
+  const link = document.createElement('link')
+  link.rel = 'stylesheet'
+  link.href = `https://fonts.googleapis.com/css2?family=${fontName}:wght@${weights.join(';')}&display=swap`
+  document.head.appendChild(link)
+}
+
+const DpFontOption = memo((props: OptionProps<FontOption, false>) => {
+  const { data } = props
+  return (
+    <components.Option {...props}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+        <span style={{
+          fontFamily: data.category === 'google' ? `"${data.value}", sans-serif` : data.value,
+          fontSize: '14px', width: '24px', textAlign: 'center', flexShrink: 0, color: '#9ca3af',
+        }}>Aa</span>
+        <span style={{ flex: 1 }}>{data.label}</span>
+        {data.category === 'google' && (
+          <span style={{ fontSize: '9px', fontWeight: 600, color: '#9ca3af', textTransform: 'uppercase', letterSpacing: '0.04em' }}>G</span>
+        )}
+      </div>
+    </components.Option>
+  )
+})
+DpFontOption.displayName = 'DpFontOption'
+
+const DpFontSingleValue = (props: SingleValueProps<FontOption, false>) => {
+  const { data } = props
+  return (
+    <components.SingleValue {...props}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+        <span style={{
+          fontFamily: data.category === 'google' ? `"${data.value}", sans-serif` : data.value,
+          fontSize: '13px', color: '#9ca3af',
+        }}>Aa</span>
+        <span>{data.label}</span>
+      </div>
+    </components.SingleValue>
+  )
+}
+
+// ---------------------------------------------------------------------------
+// Shared react-select styles for design-preset controls
+// ---------------------------------------------------------------------------
+interface SimpleOption { value: string; label: string }
+
+const dpSelectStyles: StylesConfig<SimpleOption, false> = {
+  control: (base, state) => ({
+    ...base,
+    minHeight: '34px',
+    borderColor: state.isFocused ? '#93c5fd' : '#e5e7eb',
+    borderRadius: '6px',
+    boxShadow: state.isFocused ? '0 0 0 3px rgba(59,130,246,0.08)' : 'none',
+    fontSize: '13px',
+    '&:hover': { borderColor: '#d1d5db' },
+  }),
+  valueContainer: (base) => ({ ...base, padding: '0 8px' }),
+  singleValue: (base) => ({ ...base, fontSize: '13px', color: '#374151' }),
+  placeholder: (base) => ({ ...base, fontSize: '13px', color: '#9ca3af' }),
+  indicatorSeparator: () => ({ display: 'none' }),
+  dropdownIndicator: (base) => ({ ...base, padding: '0 6px', color: '#9ca3af' }),
+  menu: (base) => ({ ...base, zIndex: 50, fontSize: '13px', borderRadius: '8px', boxShadow: '0 12px 36px rgba(0,0,0,0.12), 0 0 0 1px rgba(0,0,0,0.04)' }),
+  menuList: (base) => ({ ...base, maxHeight: '300px' }),
+  option: (base, state) => ({
+    ...base,
+    fontSize: '13px',
+    padding: '6px 10px',
+    backgroundColor: state.isSelected ? '#eff6ff' : state.isFocused ? '#f3f4f6' : 'white',
+    color: state.isSelected ? '#2563eb' : '#374151',
+    cursor: 'pointer',
+  }),
+}
+
+const dpFontSelectStyles: StylesConfig<FontOption, false> = {
+  ...dpSelectStyles as StylesConfig<FontOption, false>,
+  group: (base) => ({ ...base, paddingTop: 6, paddingBottom: 0 }),
+  groupHeading: (base) => ({
+    ...base,
+    fontSize: '10px',
+    fontWeight: 700,
+    textTransform: 'uppercase' as const,
+    letterSpacing: '0.05em',
+    color: '#9ca3af',
+    marginBottom: 2,
+  }),
+}
 
 interface Props {
   tokenKey: string
@@ -84,17 +266,79 @@ function ColorControl({ label, value, onChange, disabled }: { label: string; val
 }
 
 function FontFamilyControl({ label, value, onChange, disabled }: { label: string; value: unknown; onChange: (v: unknown) => void; disabled?: boolean }) {
+  const { fonts: googleFonts, loading: fontsLoading } = useGoogleFonts()
+  const [searchInput, setSearchInput] = useState('')
+  const currentFont = String(value || '')
+
+  const visibleFonts = useMemo((): FontOption[] => {
+    const lowerSearch = searchInput.toLowerCase()
+    const googlePool = lowerSearch
+      ? googleFonts.filter((f) => f.label.toLowerCase().includes(lowerSearch))
+      : googleFonts.slice(0, MAX_GOOGLE_FONTS)
+    const systemPool = lowerSearch
+      ? SYSTEM_FONTS.filter((f) => f.label.toLowerCase().includes(lowerSearch))
+      : SYSTEM_FONTS
+    const combined = [...systemPool, ...googlePool]
+    const fontName = currentFont.split(',')[0].replace(/['"]/g, '').trim()
+    if (fontName && !combined.some((f) => f.value === fontName || currentFont.includes(f.value))) {
+      const match = googleFonts.find((f) => f.value === fontName || currentFont.includes(f.value))
+      if (match) combined.push(match)
+    }
+    return combined
+  }, [googleFonts, currentFont, searchInput])
+
+  const groupedFonts = useMemo(() => {
+    const system = visibleFonts.filter((f) => f.category === 'system' || !f.category)
+    const google = visibleFonts.filter((f) => f.category === 'google')
+    if (!google.length) return visibleFonts
+    return [
+      { label: 'System Fonts', options: system },
+      { label: `Google Fonts${searchInput ? '' : ` (top ${MAX_GOOGLE_FONTS})`}`, options: google },
+    ]
+  }, [visibleFonts, searchInput])
+
+  const selectedFont = useMemo(() => {
+    const fromVisible = visibleFonts.find((f) => {
+      if (f.category === 'google') return currentFont.includes(f.value)
+      return f.value === currentFont
+    })
+    if (fromVisible) return fromVisible
+    const fromAll = googleFonts.find((f) => currentFont.includes(f.value))
+    return fromAll || SYSTEM_FONTS[0]
+  }, [visibleFonts, googleFonts, currentFont])
+
+  useEffect(() => {
+    if (selectedFont?.category === 'google' && selectedFont.variants) {
+      loadGoogleFont(selectedFont.value, selectedFont.variants)
+    }
+  }, [selectedFont])
+
+  const handleFontChange = useCallback((opt: SingleValue<FontOption>) => {
+    if (!opt) return
+    const fontValue = opt.category === 'google' ? `"${opt.value}", sans-serif` : opt.value
+    onChange(fontValue)
+  }, [onChange])
+
+  const handleInputChange = useCallback((input: string) => {
+    setSearchInput(input)
+  }, [])
+
   return (
     <div className="os-dp-field">
       <label className="os-dp-field-label">{label}</label>
-      <input
-        type="text"
-        className="os-dp-input"
-        value={String(value || '')}
-        onChange={(e) => onChange(e.target.value)}
-        disabled={disabled}
-        placeholder="Inter, sans-serif"
-        style={{ fontFamily: String(value || 'inherit') }}
+      <Select<FontOption, false>
+        value={selectedFont}
+        onChange={handleFontChange}
+        onInputChange={handleInputChange}
+        options={groupedFonts as FontOption[]}
+        styles={dpFontSelectStyles}
+        isDisabled={disabled}
+        isLoading={fontsLoading}
+        isSearchable
+        filterOption={null}
+        menuPlacement="auto"
+        components={{ Option: DpFontOption, SingleValue: DpFontSingleValue }}
+        placeholder={fontsLoading ? 'Loading fonts…' : 'Select font…'}
       />
     </div>
   )
@@ -145,22 +389,28 @@ function RangeControl({ label, value, onChange, disabled, min = 0, max = 10, ste
 }
 
 function SelectControl({ label, value, onChange, disabled, options }: { label: string; value: unknown; onChange: (v: unknown) => void; disabled?: boolean; options: (string | number)[] }) {
+  const hasNumbers = options.some((o) => typeof o === 'number')
+  const selectOptions = useMemo(
+    () => options.map((opt) => ({ value: String(opt), label: String(opt) })),
+    [options],
+  )
+  const selected = selectOptions.find((o) => o.value === String(value ?? '')) || null
+
   return (
     <div className="os-dp-field">
       <label className="os-dp-field-label">{label}</label>
-      <select
-        className="os-dp-select"
-        value={String(value ?? '')}
-        onChange={(e) => {
-          const v = e.target.value
-          onChange(options.some((o) => typeof o === 'number') ? Number(v) : v)
+      <Select<SimpleOption, false>
+        value={selected}
+        onChange={(opt: SingleValue<SimpleOption>) => {
+          if (!opt) return
+          onChange(hasNumbers ? Number(opt.value) : opt.value)
         }}
-        disabled={disabled}
-      >
-        {options.map((opt) => (
-          <option key={String(opt)} value={String(opt)}>{String(opt)}</option>
-        ))}
-      </select>
+        options={selectOptions}
+        styles={dpSelectStyles}
+        isDisabled={disabled}
+        isSearchable={false}
+        menuPlacement="auto"
+      />
     </div>
   )
 }

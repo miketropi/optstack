@@ -147,8 +147,8 @@ function BodyTextSpecimen({ group, tokens, rawTokens, activeBreakpoint, onTokenC
   const weightLabel = WEIGHT_LABELS[fontWeight] ?? String(fontWeight)
 
   const levels = [
-    { label: 'Body 1', size: fontSize, weight: fontWeight, lh: lineHeight },
-    { label: 'Body 2', size: `calc(${fontSize} * 0.875)`, weight: fontWeight, lh: lineHeight },
+    { label: 'Body', size: fontSize, weight: fontWeight, lh: lineHeight },
+    // { label: 'Body 2', size: `calc(${fontSize} * 0.875)`, weight: fontWeight, lh: lineHeight },
   ]
 
   return (
