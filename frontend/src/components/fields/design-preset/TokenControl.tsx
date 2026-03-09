@@ -220,7 +220,7 @@ export function TokenControl({ tokenKey, definition, value, onChange, disabled }
 function ColorControl({ label, value, onChange, disabled }: { label: string; value: unknown; onChange: (v: unknown) => void; disabled?: boolean }) {
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
-  const colorVal = String(value || '#000000')
+  const colorVal = String(value || '')
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
